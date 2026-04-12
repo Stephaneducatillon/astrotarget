@@ -343,12 +343,30 @@ def get_altitude(ra_deg, dec_deg, lat, lng, dt):
 
 # ─── 5. MAGNITUDE LIMITE ──────────────────────────────────────────────────────
 def mag_limite(diametre_mm):
+    """Magnitude limite théorique de l'instrument seul."""
     if diametre_mm <= 0:
         return 6.0
     return round(2.1 + 5 * np.log10(diametre_mm), 1)
 
+def mag_limite_reelle(diametre_mm, bortle):
+    """
+    Magnitude limite réelle = min(instrument, ciel).
+    Formule calibrée sur valeurs Bortle reconnues :
+    Bortle 3 (Prisches) → ciel 13.5 → instrument 114mm = 12.6 → limite 12.6
+    Bortle 5            → ciel 12.1 → instrument 114mm = 12.6 → limite 12.1
+    Bortle 7            → ciel 10.7 → instrument 114mm = 12.6 → limite 10.7
+    Bortle 8 (Lille)    → ciel 10.0 → instrument 114mm = 12.6 → limite 10.0
+    Bortle 9            → ciel  9.3 → instrument 114mm = 12.6 → limite  9.3
+    """
+    mag_instrument = mag_limite(diametre_mm)
+    mag_ciel = round(13.5 - (bortle - 3) * 0.7, 1)
+    return min(mag_instrument, mag_ciel)
+
 # ─── 6. SCORE 0-100 ───────────────────────────────────────────────────────────
-def calcule_score(altitude, magnitude, moon, bortle, mag_lim, meteo):
+def calcule_score(altitude, magnitude, moon, bortle, diametre, meteo):
+    """Score 0-100 avec magnitude limite réelle (instrument + ciel)."""
+    mag_lim = mag_limite_reelle(diametre, bortle)
+
     if altitude < 5:
         return 0
     if magnitude > mag_lim:
@@ -585,6 +603,16 @@ with col3:
             col_v2.metric('Pouvoir séparateur', str(pouv_sep) + '"')
             col_v1.metric("Magnitude limite",  f"{mag_lim}")
 
+            # Affichage impact Bortle sur magnitude limite
+            mag_reelle = mag_limite_reelle(diametre, bortle)
+            if mag_reelle < mag_lim:
+                st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
+                           f"mag. accessible réduite à **{mag_reelle}** "
+                           f"(au lieu de {mag_lim} en ciel noir)")
+            else:
+                st.success(f"✅ Ciel non limitant (Bortle {bortle}) : "
+                           f"mag. limite = {mag_lim}")
+
         # ── MODE ASTROPHOTO ───────────────────────────────────
         if mode_astrophoto:
             st.markdown("**📷 Astrophoto**")
@@ -731,7 +759,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         for _, row in catalogue_actif.iterrows():
             alt   = get_altitude(row["ra"], row["dec"], lat, lng, dt)
             score = calcule_score(alt, row["magnitude"],
-                                  moon, bortle, mag_lim, meteo)
+                                  moon, bortle, diametre, meteo)
             resultats.append({
                 "Objet":        row["nom"],
                 "Type":         row["type"],
