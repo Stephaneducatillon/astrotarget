@@ -460,12 +460,14 @@ with col_cat2:
 with col_cat3:
     use_ngc      = st.checkbox("NGC / IC",       value=False)
 with col_cat4:
-    if use_ngc:
-        ngc_data = charger_ngc()
-        if ngc_data.empty:
-            st.error("⚠️ NGC.csv introuvable dans le dossier du projet")
-        else:
-            st.success(f"✅ {len(ngc_data)} objets chargés")
+    use_planetes = st.checkbox("🪐 Planètes",    value=True)
+
+if use_ngc:
+    ngc_data = charger_ngc()
+    if ngc_data.empty:
+        st.warning("⚠️ NGC.csv introuvable dans le dossier du projet")
+    else:
+        st.caption(f"✅ {len(ngc_data)} objets NGC/IC chargés")
 
 st.divider()
 
@@ -745,11 +747,25 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     if use_ngc:
         ngc_data = charger_ngc()
         if not ngc_data.empty:
-            # Filtre automatique par magnitude limite instrument
             ngc_filtre = ngc_data[ngc_data["magnitude"] <= mag_lim + 0.5]
             catalogue_actif = pd.concat([catalogue_actif, ngc_filtre], ignore_index=True)
 
-    if catalogue_actif.empty:
+    # Ajout des planètes si cochées
+    if use_planetes:
+        df_planetes = get_planetes(lat, lng, dt)
+        planetes_df = pd.DataFrame({
+            "nom":       df_planetes["nom"],
+            "type":      df_planetes["type"],
+            "ra":        0.0,
+            "dec":       0.0,
+            "magnitude": df_planetes["magnitude"],
+            "altitude":  df_planetes["altitude"],
+            "est_planete": True
+        })
+    else:
+        planetes_df = pd.DataFrame()
+
+    if catalogue_actif.empty and not use_planetes:
         st.warning("⚠️ Sélectionne au moins un catalogue.")
         st.stop()
 
@@ -757,63 +773,94 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     with st.spinner(f"Calcul des scores pour {nb_objets} objets en cours..."):
         resultats = []
         for _, row in catalogue_actif.iterrows():
-            alt   = get_altitude(row["ra"], row["dec"], lat, lng, dt)
-            score = calcule_score(alt, row["magnitude"],
-                                  moon, bortle, diametre, meteo)
+            # Altitude pré-calculée pour les planètes, calculée pour les autres
+            if "altitude" in row and row.get("est_planete", False):
+                alt = row["altitude"]
+            else:
+                alt = get_altitude(row["ra"], row["dec"], lat, lng, dt)
+
+            # Score planète simplifié (pas de mag limite instrument)
+            if row.get("est_planete", False):
+                if alt < 5 or meteo["nuages"] > 90:
+                    score = 0
+                else:
+                    score_alt  = np.clip((alt - 5) / 25, 0, 1) * 100
+                    score_nuit = 100 - meteo["nuages"]
+                    score_lune_p = 100 - moon if row["nom"] != "Lune" else 100
+                    score = round(score_alt * 0.60 +
+                                  score_nuit * 0.25 +
+                                  score_lune_p * 0.15, 1)
+            else:
+                score = calcule_score(alt, row["magnitude"],
+                                      moon, bortle, diametre, meteo)
+
             resultats.append({
                 "Objet":        row["nom"],
                 "Type":         row["type"],
                 "Score":        score,
                 "Altitude (°)": round(alt, 1),
                 "Magnitude":    row["magnitude"],
-                "Mag. limite":  mag_lim,
                 "Observable":   "✅" if score > 0 else "❌"
             })
 
-    df    = pd.DataFrame(resultats).sort_values("Score", ascending=False)
-    top10 = df[df["Observable"] == "✅"].head(10)
+        # Ajout planètes si cochées
+        if use_planetes and not planetes_df.empty:
+            for _, p in planetes_df.iterrows():
+                alt = p["altitude"]
+                if alt < 5 or meteo["nuages"] > 90:
+                    score_p = 0
+                else:
+                    score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
+                    score_nuit   = 100 - meteo["nuages"]
+                    score_lune_p = 100 - moon if p["nom"] != "Lune" else 100
+                    score_p      = round(score_alt * 0.60 +
+                                         score_nuit * 0.25 +
+                                         score_lune_p * 0.15, 1)
+                resultats.append({
+                    "Objet":        p["nom"],
+                    "Type":         "🪐 Planète",
+                    "Score":        score_p,
+                    "Altitude (°)": round(alt, 1),
+                    "Magnitude":    p["magnitude"],
+                    "Observable":   "✅" if score_p > 0 else "❌"
+                })
 
-    st.subheader("🏆 Top 10 objets ce soir")
-    st.dataframe(top10, use_container_width=True, hide_index=True)
+    df = pd.DataFrame(resultats).sort_values("Score", ascending=False)
+    df_obs = df[df["Observable"] == "✅"].reset_index(drop=True)
+
+    # ── Top dynamique ──────────────────────────────────────────
+    st.subheader("🏆 Meilleurs objets ce soir")
 
     col_a, col_b, col_c = st.columns(3)
-    col_a.metric("Objets observables", len(df[df["Observable"] == "✅"]))
-    col_b.metric("Meilleur score",     f"{df['Score'].max()}/100")
-    col_c.metric("Meilleur objet",     df.iloc[0]["Objet"])
+    col_a.metric("Objets observables", len(df_obs))
+    col_b.metric("Meilleur score",     f"{df_obs['Score'].max():.1f}/100" if len(df_obs) > 0 else "—")
+    col_c.metric("Meilleur objet",     df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
+
+    # Initialisation compteur affichage
+    if "nb_affiche" not in st.session_state:
+        st.session_state.nb_affiche = 10
+
+    nb = min(st.session_state.nb_affiche, len(df_obs))
+    st.dataframe(df_obs.head(nb), use_container_width=True, hide_index=True)
+    st.caption(f"Affichage : {nb} / {len(df_obs)} objets observables")
+
+    # Boutons + / -
+    col_plus, col_moins, _ = st.columns([1, 1, 6])
+    with col_plus:
+        if nb < len(df_obs):
+            if st.button("➕ 10 de plus"):
+                st.session_state.nb_affiche += 10
+                st.rerun()
+    with col_moins:
+        if st.session_state.nb_affiche > 10:
+            if st.button("➖ 10 de moins"):
+                st.session_state.nb_affiche = max(10, st.session_state.nb_affiche - 10)
+                st.rerun()
 
     st.divider()
 
-    # ── Planètes ce soir ──────────────────────────────────────
-    st.subheader("🪐 Planètes ce soir")
-    df_planetes     = get_planetes(lat, lng, dt)
-    planetes_scored = []
-    for _, p in df_planetes.iterrows():
-        alt = p["altitude"]
-        if alt < 5 or meteo["nuages"] > 90:
-            score_p = 0
-        else:
-            score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
-            score_nuit   = 100 - meteo["nuages"]
-            score_lune_p = 100 - moon if p["nom"] != "Lune" else 100
-            score_p      = round(score_alt    * 0.60 +
-                                 score_nuit   * 0.25 +
-                                 score_lune_p * 0.15, 1)
-        planetes_scored.append({
-            "Planète":      p["nom"],
-            "Score":        score_p,
-            "Altitude (°)": p["altitude"],
-            "Magnitude":    p["magnitude"],
-            "Observable":   "✅" if score_p > 0 else "❌"
-        })
-
-    df_p = pd.DataFrame(planetes_scored).sort_values(
-        "Score", ascending=False)
-    st.dataframe(df_p, use_container_width=True, hide_index=True)
-
-    st.divider()
-
-    # ── Catalogue complet Messier ─────────────────────────────
-    st.subheader("📋 Catalogue complet Messier")
+    # ── Tous les objets du ciel ───────────────────────────────
+    st.subheader("📋 Objets du ciel")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
     st.divider()
