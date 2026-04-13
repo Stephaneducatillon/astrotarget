@@ -528,7 +528,7 @@ with col2:
     date_obs     = st.date_input("Date d'observation",
                                  value=datetime.now().date())
     heure_saisie = st.text_input(
-        "Heure locale FR (HH:MM)",
+        "Heure locale France — Paris (HH:MM)",
         value=datetime.now().strftime("%H:%M"),
         max_chars=5,
         placeholder="ex: 21:30"
@@ -543,9 +543,9 @@ with col2:
                           else -tmod.altzone // 3600
             heure_utc_h = (heure - decalage) % 24
             heure_obs   = dtime(heure_utc_h, minute)
-            st.caption(f"🕐 Locale : {heure:02d}h{minute:02d} "
-                       f"→ UTC : {heure_utc_h:02d}h{minute:02d} "
-                       f"(UTC+{decalage})")
+            st.caption(f"🕐 Tu saisis l'heure de Paris/Douai : {heure:02d}h{minute:02d} "
+                       f"— converti automatiquement en UTC : {heure_utc_h:02d}h{minute:02d} "
+                       f"(décalage UTC+{decalage})")
         else:
             st.error("Heure invalide — ex: 21:30")
             st.stop()
