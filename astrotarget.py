@@ -881,21 +881,8 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         st.session_state.nb_affiche = 10
 
     nb = min(st.session_state.nb_affiche, len(df_obs))
-    st.dataframe(df_obs.head(nb), use_container_width=True, hide_index=True)
-    st.caption(f"Affichage : {nb} / {len(df_obs)} objets observables")
-
-    # Boutons + / -
-    col_plus, col_moins, _ = st.columns([1, 1, 6])
-    with col_plus:
-        if nb < len(df_obs):
-            if st.button("➕ 10 de plus"):
-                st.session_state.nb_affiche += 10
-                st.rerun()
-    with col_moins:
-        if st.session_state.nb_affiche > 10:
-            if st.button("➖ 10 de moins"):
-                st.session_state.nb_affiche = max(10, st.session_state.nb_affiche - 10)
-                st.rerun()
+    st.dataframe(df_obs, use_container_width=True, hide_index=True)
+    st.caption(f"{len(df_obs)} objets observables ce soir")
 
     st.divider()
 
