@@ -536,14 +536,25 @@ with col2:
 
     heure_valide = bool(re.match(r"^\d{2}:\d{2}$", heure_saisie))
     if heure_valide:
-        heure  = int(heure_saisie.split(":")[0])
+        heure = int(heure_saisie.split(":")[0])
         minute = int(heure_saisie.split(":")[1])
         if 0 <= heure <= 23 and 0 <= minute <= 59:
-            decalage    = -tmod.timezone // 3600 if not tmod.daylight \
-                          else -tmod.altzone // 3600
-            heure_utc_h = (heure - decalage) % 24
-            heure_obs   = dtime(heure_utc_h, minute)
-            st.caption(f"🕐 Tu saisis l'heure de Paris/Douai : {heure:02d}h{minute:02d} ")
+            # Conversion heure locale France → UTC via pytz
+            import pytz
+            from datetime import datetime as dt_class
+
+            tz_france = pytz.timezone("Europe/Paris")
+            dt_local = tz_france.localize(
+                dt_class(date_obs.year, date_obs.month, date_obs.day,
+                         heure, minute, 0))
+            dt_utc = dt_local.astimezone(pytz.utc)
+            heure_obs = dt_utc.time()
+            decalage = int(dt_local.utcoffset().total_seconds() // 3600)
+            st.caption(f"🕐 Tu saisis l'heure de Paris/Douai : "
+                       f"{heure:02d}h{minute:02d} "
+                       f"— converti automatiquement en UTC : "
+                       f"{dt_utc.hour:02d}h{dt_utc.minute:02d} "
+                       f"(décalage UTC+{decalage})")
         else:
             st.error("Heure invalide — ex: 21:30")
             st.stop()
