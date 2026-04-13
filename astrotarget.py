@@ -10,6 +10,7 @@ from astropy.time import Time
 import astropy.units as u
 import ephem
 from datetime import datetime, timezone, time as dtime
+import pytz
 
 # ─── 1. CATALOGUE MESSIER COMPLET (110 objets) ───────────────────────────────
 CATALOGUE = pd.DataFrame([
@@ -528,7 +529,7 @@ with col2:
     date_obs     = st.date_input("Date d'observation",
                                  value=datetime.now().date())
     heure_saisie = st.text_input(
-        "Heure locale France — Paris (HH:MM)",
+        "Heure locale FR (HH:MM)",
         value=datetime.now().strftime("%H:%M"),
         max_chars=5,
         placeholder="ex: 21:30"
@@ -536,28 +537,24 @@ with col2:
 
     heure_valide = bool(re.match(r"^\d{2}:\d{2}$", heure_saisie))
     if heure_valide:
-        heure = int(heure_saisie.split(":")[0])
+        heure  = int(heure_saisie.split(":")[0])
         minute = int(heure_saisie.split(":")[1])
         if 0 <= heure <= 23 and 0 <= minute <= 59:
-            # Conversion heure locale France → UTC via pytz
-            import pytz
-            from datetime import datetime as dt_class
-
             tz_france = pytz.timezone("Europe/Paris")
-            dt_local = tz_france.localize(
-                dt_class(date_obs.year, date_obs.month, date_obs.day,
+            dt_local  = tz_france.localize(
+                datetime(date_obs.year, date_obs.month, date_obs.day,
                          heure, minute, 0))
-            dt_utc = dt_local.astimezone(pytz.utc)
+            dt_utc    = dt_local.astimezone(pytz.utc)
             heure_obs = dt_utc.time()
-            decalage = int(dt_local.utcoffset().total_seconds() // 3600)
+            decalage  = int(dt_local.utcoffset().total_seconds() // 3600)
             st.caption(f"🕐 Tu saisis l'heure de Paris/Douai : "
                        f"{heure:02d}h{minute:02d} "
-                       f"— converti automatiquement en UTC : "
-                       f"{dt_utc.hour:02d}h{dt_utc.minute:02d} "
-                       f"(décalage UTC+{decalage})")
+                       f"— UTC : {dt_utc.hour:02d}h{dt_utc.minute:02d} "
+                       f"(UTC+{decalage})")
         else:
             st.error("Heure invalide — ex: 21:30")
             st.stop()
+
     else:
         st.warning("Format attendu : HH:MM — ex: 21:30")
         st.stop()
@@ -569,14 +566,14 @@ with col3:
     # Mode visuel ou astrophoto
     col_mode1, col_mode2 = st.columns(2)
     with col_mode1:
-        mode_visuel    = st.checkbox("👁️ Visuel",      value=True)
+        mode_visuel     = st.checkbox("👁️ Visuel",      value=True)
     with col_mode2:
-        mode_astrophoto = st.checkbox("📷 Astrophoto", value=False)
+        mode_astrophoto = st.checkbox("📷 Astrophoto",  value=False)
 
     type_instrument = st.selectbox("Type d'instrument",
-                                   ["Télescope", "Jumelles", "Lunette"])
+                                   ["Télescope", "Jumelles",
+                                    "Lunette",   "Oeil nu"])
 
-    # Diamètre + Focale communs
     if type_instrument in ["Télescope", "Lunette"]:
         diametre = st.number_input("Diamètre (mm)",
                                    min_value=30, max_value=600,
@@ -584,37 +581,36 @@ with col3:
         focale   = st.number_input("Focale (mm)",
                                    min_value=300, max_value=3000,
                                    value=900, step=50)
-
-        # Barlow — commun visuel et astrophoto
-        barlow_choix = st.selectbox("Barlow",
-                                    ["Sans Barlow", "Barlow ×2",
-                                     "Barlow ×3",   "Barlow ×5"])
-        barlow_map   = {"Sans Barlow": 1, "Barlow ×2": 2,
-                        "Barlow ×3": 3,   "Barlow ×5": 5}
-        barlow_val   = barlow_map[barlow_choix]
-        focale_eff   = focale * barlow_val
-        fd_eff       = focale_eff / diametre
-        mag_lim      = mag_limite(diametre)
+        mag_lim  = mag_limite(diametre)
 
         # ── MODE VISUEL ───────────────────────────────────────
         if mode_visuel:
             st.markdown("**👁️ Visuel**")
+            barlow_choix_v = st.selectbox("Barlow visuel",
+                                          ["Sans Barlow", "Barlow ×2",
+                                           "Barlow ×3",   "Barlow ×5"],
+                                          key="barlow_visuel")
+            barlow_map   = {"Sans Barlow": 1, "Barlow ×2": 2,
+                            "Barlow ×3": 3,   "Barlow ×5": 5}
+            barlow_val_v = barlow_map[barlow_choix_v]
+            focale_eff_v = focale * barlow_val_v
+            fd_eff_v     = focale_eff_v / diametre
+
             oculaire      = st.number_input("Oculaire (mm)",
                                             min_value=4, max_value=40,
                                             value=25, step=1)
-            grossissement = round(focale_eff / oculaire, 0)
+            grossissement = round(focale_eff_v / oculaire, 0)
             gros_mini     = round(diametre / 7, 0)
             gros_maxi     = round(diametre * 1.5, 0)
             pouv_sep      = round(116 / diametre, 2)
 
             col_v1, col_v2 = st.columns(2)
             col_v1.metric("Grossissement",     f"×{int(grossissement)}")
-            col_v2.metric("F/D effectif",      f"f/{fd_eff:.1f}")
+            col_v2.metric("F/D effectif",       f"f/{fd_eff_v:.1f}")
             col_v1.metric("Gros. mini/maxi",   f"×{int(gros_mini)} / ×{int(gros_maxi)}")
-            col_v2.metric('Pouvoir séparateur', str(pouv_sep) + '"')
-            col_v1.metric("Magnitude limite",  f"{mag_lim}")
+            col_v2.metric("Pouvoir séparateur", str(pouv_sep) + '"')
+            col_v1.metric("Magnitude limite",   f"{mag_lim}")
 
-            # Affichage impact Bortle sur magnitude limite
             mag_reelle = mag_limite_reelle(diametre, bortle)
             if mag_reelle < mag_lim:
                 st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
@@ -623,38 +619,53 @@ with col3:
             else:
                 st.success(f"✅ Ciel non limitant (Bortle {bortle}) : "
                            f"mag. limite = {mag_lim}")
+        else:
+            grossissement = 0
+            focale_eff_v  = focale
+            barlow_val_v  = 1
 
         # ── MODE ASTROPHOTO ───────────────────────────────────
         if mode_astrophoto:
             st.markdown("**📷 Astrophoto**")
+
+            # Barlow astrophoto indépendante
+            barlow_choix_a = st.selectbox("Barlow astrophoto",
+                                          ["Sans Barlow", "Barlow ×2",
+                                           "Barlow ×3",   "Barlow ×5"],
+                                          key="barlow_astro")
+            barlow_map_a  = {"Sans Barlow": 1, "Barlow ×2": 2,
+                             "Barlow ×3": 3,   "Barlow ×5": 5}
+            barlow_val_a  = barlow_map_a[barlow_choix_a]
+            focale_eff_a  = focale * barlow_val_a
+            fd_eff_a      = focale_eff_a / diametre
+
             taille_pixel = st.number_input("Taille pixel (µm)",
                                            min_value=1.0, max_value=20.0,
                                            value=2.9, step=0.1,
                                            format="%.1f")
 
-            # ── Planétaire ────────────────────────────────────
+            # Planétaire
             st.markdown("*Planétaire (Shannon)*")
             fd_mini  = round(taille_pixel * 3.5, 1)
             fd_ideal = round(taille_pixel * 5.0, 1)
             fd_maxi  = round(taille_pixel * 8.0, 1)
 
             col_p1, col_p2 = st.columns(2)
-            col_p1.metric("F/D réel",    f"f/{fd_eff:.1f}")
+            col_p1.metric("F/D réel",    f"f/{fd_eff_a:.1f}")
             col_p2.metric("F/D minimal", f"f/{fd_mini}")
             col_p1.metric("F/D idéal",   f"f/{fd_ideal}")
             col_p2.metric("F/D maximal", f"f/{fd_maxi}")
 
-            # Diagnostic F/D
-            if fd_eff < fd_mini:
+            if fd_eff_a < fd_mini:
                 st.error("⚠️ F/D trop court — sous-échantillonnage.")
-            elif fd_eff <= fd_ideal:
+            elif fd_eff_a <= fd_ideal:
                 st.success("✅ F/D dans la plage optimale")
-            elif fd_eff <= fd_maxi:
+            elif fd_eff_a <= fd_maxi:
                 st.info("🔵 F/D dans la plage acceptable")
             else:
                 st.warning("⚠️ F/D trop long — sur-échantillonnage")
 
-            # ── Ciel profond ──────────────────────────────────
+            # Ciel profond
             st.markdown("*Ciel profond*")
             col_cp1, col_cp2 = st.columns(2)
             with col_cp1:
@@ -666,33 +677,27 @@ with col3:
                                              min_value=100, max_value=10000,
                                              value=3000, step=100)
 
-            # Calculs ciel profond
-            # Échantillonnage : (taille_pixel_µm / focale_mm) * 206.265
             echantillonnage = round(
-                (taille_pixel / focale_eff) * 206.265, 2)
-
-            # Champ réel en arcmin
+                (taille_pixel / focale_eff_a) * 206.265, 2)
             champ_larg = round(
-                (px_largeur * taille_pixel / 1000 / focale_eff)
+                (px_largeur * taille_pixel / 1000 / focale_eff_a)
                 * (180 / 3.14159) * 60, 1)
             champ_haut = round(
-                (px_hauteur * taille_pixel / 1000 / focale_eff)
+                (px_hauteur * taille_pixel / 1000 / focale_eff_a)
                 * (180 / 3.14159) * 60, 1)
-
-            # Taille capteur mm
             capteur_larg = round(px_largeur * taille_pixel / 1000, 1)
             capteur_haut = round(px_hauteur * taille_pixel / 1000, 1)
 
             col_r1, col_r2 = st.columns(2)
             col_r1.metric("Capteur",
                           f"{capteur_larg}×{capteur_haut} mm")
-            col_r2.metric('Échantillonnage', f'{echantillonnage}"/px')
+            col_r2.metric("Échantillonnage",
+                          str(echantillonnage) + '"/px')
             col_r1.metric("Champ réel",
-                          f"{champ_larg}'×{champ_haut}'")
+                          str(champ_larg) + "'×" + str(champ_haut) + "'")
             col_r2.metric("Focale effective",
-                          f"{focale_eff} mm")
+                          f"{focale_eff_a} mm")
 
-            # Diagnostic échantillonnage
             if echantillonnage < 0.5:
                 st.warning('⚠️ Sur-échantillonnage (< 0.5"/px)')
             elif echantillonnage <= 2.0:
@@ -700,17 +705,43 @@ with col3:
             else:
                 st.info(f'🔵 Sous-échantillonnage — acceptable pour grands champs ({echantillonnage}"/px)')
 
+            mag_reelle_a = mag_limite_reelle(diametre, bortle)
+            if mag_reelle_a < mag_lim:
+                st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
+                           f"mag. accessible réduite à **{mag_reelle_a}**")
 
-    else:
-        # Jumelles
+    elif type_instrument == "Jumelles":
         diametre      = st.number_input("Diamètre objectif (mm)",
                                         min_value=30, max_value=100,
                                         value=50, step=5)
-        focale_eff    = 0
+        focale        = 0
         grossissement = 0
-        barlow_val    = 1
+        barlow_val_v  = 1
         mag_lim       = mag_limite(diametre)
+
+        mag_reelle = mag_limite_reelle(diametre, bortle)
+        if mag_reelle < mag_lim:
+            st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
+                       f"mag. accessible réduite à **{mag_reelle}** "
+                       f"(au lieu de {mag_lim} en ciel noir)")
+        else:
+            st.success(f"✅ Ciel non limitant : mag. limite = {mag_lim}")
         st.metric("Magnitude limite", f"{mag_lim}")
+
+    else:
+        # Oeil nu
+        diametre      = 7
+        focale        = 0
+        grossissement = 0
+        barlow_val_v  = 1
+        mag_lim       = 6.0
+        st.metric("Magnitude limite", "6.0")
+        mag_reelle = mag_limite_reelle(diametre, bortle)
+        if mag_reelle < mag_lim:
+            st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
+                       f"mag. accessible réduite à **{mag_reelle}**")
+        else:
+            st.success(f"✅ Ciel non limitant : mag. limite = {mag_lim}")
 
 st.divider()
 
@@ -846,8 +877,26 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     col_c.metric("Meilleur objet",     df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
 
     # Initialisation compteur affichage
-    st.dataframe(df_obs, use_container_width=True, hide_index=True)
-    st.caption(f"{len(df_obs)} objets observables ce soir")
+    if "nb_affiche" not in st.session_state:
+        st.session_state.nb_affiche = 10
+
+    nb = min(st.session_state.nb_affiche, len(df_obs))
+    st.dataframe(df_obs.head(nb), use_container_width=True, hide_index=True)
+    st.caption(f"Affichage : {nb} / {len(df_obs)} objets observables")
+
+    # Boutons + / -
+    col_plus, col_moins, _ = st.columns([1, 1, 6])
+    with col_plus:
+        if nb < len(df_obs):
+            if st.button("➕ 10 de plus"):
+                st.session_state.nb_affiche += 10
+                st.rerun()
+    with col_moins:
+        if st.session_state.nb_affiche > 10:
+            if st.button("➖ 10 de moins"):
+                st.session_state.nb_affiche = max(10, st.session_state.nb_affiche - 10)
+                st.rerun()
+
     st.divider()
 
     # ── Tous les objets du ciel ───────────────────────────────
