@@ -320,7 +320,7 @@ def get_meteo(lat, lng, dt):
         url = (
             f"https://api.open-meteo.com/v1/forecast?"
             f"latitude={lat}&longitude={lng}"
-            f"&hourly=cloudcover,relativehumidity_2m,visibility"
+            f"&hourly=cloudcover,relativehumidity_2m,visibility,windspeed_10m"
             f"&start_date={date_str}&end_date={date_str}"
             f"&timezone=UTC"
         )
@@ -329,11 +329,21 @@ def get_meteo(lat, lng, dt):
         nuages     = data["hourly"]["cloudcover"][heure_utc]
         humidite   = data["hourly"]["relativehumidity_2m"][heure_utc]
         visibilite = data["hourly"]["visibility"][heure_utc] / 1000
+        vent       = data["hourly"]["windspeed_10m"][heure_utc]
+        # Seeing proxy : vent faible = bon seeing (index 1-5)
+        # < 5 km/h → 5, 5-15 → 4, 15-25 → 3, 25-40 → 2, > 40 → 1
+        if   vent <  5: seeing = 5
+        elif vent < 15: seeing = 4
+        elif vent < 25: seeing = 3
+        elif vent < 40: seeing = 2
+        else:           seeing = 1
         return {"nuages": nuages, "humidite": humidite,
-                "visibilite": visibilite, "ok": True}
+                "visibilite": visibilite, "seeing": seeing,
+                "vent": vent, "ok": True}
     except Exception:
         return {"nuages": 50, "humidite": 70,
-                "visibilite": 20, "ok": False}
+                "visibilite": 20, "seeing": 3,
+                "vent": 0, "ok": False}
 
 # ─── 4. ALTITUDE ──────────────────────────────────────────────────────────────
 def get_altitude(ra_deg, dec_deg, lat, lng, dt):
@@ -341,6 +351,23 @@ def get_altitude(ra_deg, dec_deg, lat, lng, dt):
     objet    = SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg)
     frame    = AltAz(obstime=Time(dt), location=location)
     return float(objet.transform_to(frame).alt.deg)
+
+def get_fenetre_visibilite(ra_deg, dec_deg, lat, lng, dt):
+    """
+    Calcule la durée en minutes pendant laquelle l'objet
+    reste au-dessus de 30° d'altitude sur les 12 prochaines heures.
+    """
+    location = EarthLocation(lat=lat * u.deg, lon=lng * u.deg)
+    objet    = SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg)
+    minutes_visibles = 0
+    for delta_min in range(0, 720, 10):  # 12h par pas de 10 min
+        t    = Time(dt) + delta_min * u.minute
+        frame = AltAz(obstime=t, location=location)
+        alt  = float(objet.transform_to(frame).alt.deg)
+        if alt >= 30:
+            minutes_visibles += 10
+    return minutes_visibles
+
 
 # ─── 5. MAGNITUDE LIMITE ──────────────────────────────────────────────────────
 def mag_limite(diametre_mm):
@@ -364,10 +391,16 @@ def mag_limite_reelle(diametre_mm, bortle):
     return min(mag_instrument, mag_ciel)
 
 # ─── 6. SCORE 0-100 ───────────────────────────────────────────────────────────
-def calcule_score(altitude, magnitude, moon, bortle, diametre, meteo):
-    """Score 0-100 avec magnitude limite réelle (instrument + ciel)."""
+def calcule_score(altitude, magnitude, moon, bortle,
+                  diametre, meteo, fenetre_minutes=120,
+                  dist_lune_deg=90):
+    """
+    Score v2 — formule hybride proto + CDC.
+    Intègre fenêtre de visibilité, seeing et distance angulaire lune.
+    """
     mag_lim = mag_limite_reelle(diametre, bortle)
 
+    # Éliminatoires
     if altitude < 5:
         return 0
     if magnitude > mag_lim:
@@ -375,22 +408,35 @@ def calcule_score(altitude, magnitude, moon, bortle, diametre, meteo):
     if meteo["nuages"] > 90:
         return 0
 
-    score_altitude  = np.clip((altitude - 5) / 25, 0, 1) * 100
-    marge           = mag_lim - magnitude
-    score_magnitude = np.clip(marge / 5, 0, 1) * 100
-    score_nuages    = 100 - meteo["nuages"]
-    score_visi      = np.clip(meteo["visibilite"] / 40, 0, 1) * 100
-    score_meteo     = score_nuages * 0.7 + score_visi * 0.3
-    score_bortle    = (9 - bortle) / 8 * 100
-    score_lune      = 100 - moon
+    # 1. Altitude (30%)
+    score_alt = np.clip((altitude - 5) / 25, 0, 1) * 100
+
+    # 2. Fenêtre de visibilité (20%) — max référence = 4h (240 min)
+    score_fenetre = min(fenetre_minutes / 240, 1) * 100
+
+    # 3. Seeing (20%) — index 1-5 via proxy vent Open-Meteo
+    seeing = meteo.get("seeing", 3)
+    score_seeing = (seeing - 1) / 4 * 100
+
+    # 4. Transparence atmosphérique (15%)
+    score_transp = 100 - meteo["nuages"]
+
+    # 5. Bortle — pollution lumineuse (10%)
+    score_bortle = (9 - bortle) / 8 * 100
+
+    # 6. Lune (5%) — phase + distance angulaire
+    # Plus la lune est pleine ET proche, plus elle dégrade
+    score_lune = (1 - (moon / 100) * (1 - dist_lune_deg / 180)) * 100
 
     return round(
-        score_altitude  * 0.35 +
-        score_magnitude * 0.25 +
-        score_meteo     * 0.20 +
-        score_bortle    * 0.10 +
-        score_lune      * 0.10, 1
+        score_alt     * 0.30 +
+        score_fenetre * 0.20 +
+        score_seeing  * 0.20 +
+        score_transp  * 0.15 +
+        score_bortle  * 0.10 +
+        score_lune    * 0.05, 1
     )
+
 
 # ─── 7. PLANÈTES (PyEphem temps réel) ────────────────────────────────────────
 def get_planetes(lat, lng, dt):
@@ -758,12 +804,15 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     # ── Conditions du soir ────────────────────────────────────
     st.subheader("🌤️ Conditions du soir")
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    col_m1.metric("🌙 Lune",       f"{moon}%")
-    col_m2.metric("☁️ Nuages",     f"{meteo['nuages']}%"
+    seeing_labels = {1: "⭐ Très mauvais", 2: "⭐⭐ Mauvais",
+                     3: "⭐⭐⭐ Correct", 4: "⭐⭐⭐⭐ Bon",
+                     5: "⭐⭐⭐⭐⭐ Excellent"}
+    col_m1.metric("🌙 Lune",        f"{moon}%")
+    col_m2.metric("☁️ Nuages",      f"{meteo['nuages']}%"
                   if meteo["ok"] else "N/A")
-    col_m3.metric("💧 Humidité",   f"{meteo['humidite']}%"
+    col_m3.metric("🌬️ Seeing",      seeing_labels.get(meteo.get("seeing", 3), "N/A")
                   if meteo["ok"] else "N/A")
-    col_m4.metric("👁️ Visibilité", f"{meteo['visibilite']:.0f} km"
+    col_m4.metric("👁️ Visibilité",  f"{meteo['visibilite']:.0f} km"
                   if meteo["ok"] else "N/A")
 
     if not meteo["ok"]:
@@ -824,15 +873,31 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 if alt < 5 or meteo["nuages"] > 90:
                     score = 0
                 else:
-                    score_alt  = np.clip((alt - 5) / 25, 0, 1) * 100
-                    score_nuit = 100 - meteo["nuages"]
+                    score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
+                    score_nuit   = 100 - meteo["nuages"]
                     score_lune_p = 100 - moon if row["nom"] != "Lune" else 100
                     score = round(score_alt * 0.60 +
                                   score_nuit * 0.25 +
                                   score_lune_p * 0.15, 1)
             else:
-                score = calcule_score(alt, row["magnitude"],
-                                      moon, bortle, diametre, meteo)
+                # Calcul fenêtre de visibilité pour score v2
+                fenetre = get_fenetre_visibilite(
+                    row["ra"], row["dec"], lat, lng, dt)
+                # Distance angulaire lune
+                lune_ephem = ephem.Moon()
+                lune_ephem.compute(dt.strftime("%Y/%m/%d %H:%M:%S"))
+                lune_ra  = float(lune_ephem.ra) * 180 / 3.14159
+                lune_dec = float(lune_ephem.dec) * 180 / 3.14159
+                dist_lune = float(np.sqrt(
+                    (row["ra"] - lune_ra)**2 +
+                    (row["dec"] - lune_dec)**2))
+                dist_lune = min(dist_lune, 180)
+
+                score = calcule_score(
+                    alt, row["magnitude"], moon, bortle,
+                    diametre, meteo,
+                    fenetre_minutes=fenetre,
+                    dist_lune_deg=dist_lune)
 
             resultats.append({
                 "Objet":        row["nom"],
@@ -881,8 +946,21 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         st.session_state.nb_affiche = 10
 
     nb = min(st.session_state.nb_affiche, len(df_obs))
-    st.dataframe(df_obs, use_container_width=True, hide_index=True)
-    st.caption(f"{len(df_obs)} objets observables ce soir")
+    st.dataframe(df_obs.head(nb), use_container_width=True, hide_index=True)
+    st.caption(f"Affichage : {nb} / {len(df_obs)} objets observables")
+
+    # Boutons + / -
+    col_plus, col_moins, _ = st.columns([1, 1, 6])
+    with col_plus:
+        if nb < len(df_obs):
+            if st.button("➕ 10 de plus"):
+                st.session_state.nb_affiche += 10
+                st.rerun()
+    with col_moins:
+        if st.session_state.nb_affiche > 10:
+            if st.button("➖ 10 de moins"):
+                st.session_state.nb_affiche = max(10, st.session_state.nb_affiche - 10)
+                st.rerun()
 
     st.divider()
 
