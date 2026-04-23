@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import requests
@@ -933,7 +934,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     df = pd.DataFrame(resultats).sort_values("Score", ascending=False)
     df_obs = df[df["Observable"] == "✅"].reset_index(drop=True)
 
-    # ── Top dynamique ──────────────────────────────────────────
+    # ── Top objets + carte Aladin ─────────────────────────────
     st.subheader("🏆 Meilleurs objets ce soir")
 
     col_a, col_b, col_c = st.columns(3)
@@ -941,26 +942,76 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     col_b.metric("Meilleur score",     f"{df_obs['Score'].max():.1f}/100" if len(df_obs) > 0 else "—")
     col_c.metric("Meilleur objet",     df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
 
-    # Initialisation compteur affichage
-    if "nb_affiche" not in st.session_state:
-        st.session_state.nb_affiche = 10
+    # Sélecteur objet pour la carte
+    objets_liste = df_obs["Objet"].tolist() if len(df_obs) > 0 else []
+    objet_selec  = st.selectbox(
+        "🔭 Sélectionner un objet pour afficher sa carte du ciel :",
+        objets_liste,
+        index=0 if objets_liste else None
+    )
 
-    nb = min(st.session_state.nb_affiche, len(df_obs))
-    st.dataframe(df_obs.head(nb), use_container_width=True, hide_index=True)
-    st.caption(f"Affichage : {nb} / {len(df_obs)} objets observables")
+    # Colonnes : tableau à gauche, carte Aladin à droite
+    col_tab, col_carte = st.columns([1, 1])
 
-    # Boutons + / -
-    col_plus, col_moins, _ = st.columns([1, 1, 6])
-    with col_plus:
-        if nb < len(df_obs):
-            if st.button("➕ 10 de plus"):
-                st.session_state.nb_affiche += 10
-                st.rerun()
-    with col_moins:
-        if st.session_state.nb_affiche > 10:
-            if st.button("➖ 10 de moins"):
-                st.session_state.nb_affiche = max(10, st.session_state.nb_affiche - 10)
-                st.rerun()
+    with col_tab:
+        st.dataframe(df_obs, use_container_width=True, hide_index=True)
+        st.caption(f"{len(df_obs)} objets observables ce soir")
+
+    with col_carte:
+        if objet_selec:
+            # Récupération coordonnées de l'objet sélectionné
+            row_sel = df[df["Objet"] == objet_selec]
+            if not row_sel.empty:
+                ra_sel  = float(row_sel.iloc[0]["ra"])  if "ra"  in row_sel.columns else 0
+                dec_sel = float(row_sel.iloc[0]["dec"]) if "dec" in row_sel.columns else 0
+            else:
+                # Planète — utiliser le nom directement
+                ra_sel  = 0
+                dec_sel = 0
+
+            st.markdown(f"**🗺️ Carte du ciel — {objet_selec}**")
+
+            # Composant Aladin Lite via HTML
+            aladin_html = f"""
+            <link rel="stylesheet"
+              href="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.min.css"/>
+            <div id="aladin-lite-div"
+                 style="width:100%; height:400px; border-radius:8px;"></div>
+            <script type="text/javascript"
+              src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.min.js"
+              charset="utf-8"></script>
+            <script>
+                var aladin;
+                A.init.then(() => {{
+                    aladin = A.aladin('#aladin-lite-div', {{
+                        survey: 'P/DSS2/color',
+                        fov: 2.0,
+                        target: '{objet_selec}',
+                        showReticle: true,
+                        showZoomControl: true,
+                        showFullscreenControl: true,
+                        showLayersControl: true,
+                        showGotoControl: true,
+                        showShareControl: false,
+                        showCatalog: true,
+                        showFrame: true,
+                        showCooGrid: false,
+                        cooFrame: 'J2000',
+                        showContextMenu: true,
+                    }});
+                    // Marqueur sur l'objet
+                    var cat = A.catalog({{name: '{objet_selec}',
+                                         sourceSize: 18,
+                                         color: '#FF6600'}});
+                    aladin.addCatalog(cat);
+                    cat.addSources([A.source(
+                        {ra_sel}, {dec_sel},
+                        {{name: '{objet_selec}'}})]);
+                }});
+            </script>
+            """
+            st.components.v1.html(aladin_html, height=420)
+            st.caption("Source : Aladin Lite — CDS Strasbourg / DSS2")
 
     st.divider()
 
