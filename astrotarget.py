@@ -959,63 +959,50 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
 
     with col_carte:
         if objet_selec:
-            st.markdown(f"**🗺️ Carte du ciel — {objet_selec}**")
+            st.markdown(f"**🔭 {objet_selec}**")
 
-            # Récupération coordonnées RA/Dec
             row_sel = df[df["Objet"] == objet_selec]
             if not row_sel.empty and "ra" in row_sel.columns:
                 ra_sel  = float(row_sel.iloc[0]["ra"])
                 dec_sel = float(row_sel.iloc[0]["dec"])
-                # URL Aladin avec coordonnées précises
-                url_aladin = (
-                    f"https://aladin.cds.unistra.fr/AladinLite/"
-                    f"?target={ra_sel:.4f}%20{dec_sel:+.4f}"
-                    f"&fov=2.0&survey=P%2FDSS2%2Fcolor"
+                mag_sel = float(row_sel.iloc[0]["Magnitude"])
+                type_sel = str(row_sel.iloc[0]["Type"])
+                score_sel = float(row_sel.iloc[0]["Score"])
+
+                # Infos objet
+                st.markdown(f"**Type :** {type_sel}  \n"
+                           f"**Magnitude :** {mag_sel}  \n"
+                           f"**Score ce soir :** {score_sel}/100")
+
+                # Image via Aladin hips2fits — simple et fiable
+                fov = 2.0
+                width, height = 500, 500
+                img_url = (
+                    f"https://aladinlite.cds.unistra.fr/hips2fits/api/"
+                    f"?hips=CDS%2FP%2FDSS2%2Fcolor"
+                    f"&ra={ra_sel}&dec={dec_sel}"
+                    f"&fov={fov}&width={width}&height={height}"
+                    f"&projection=TAN&format=jpg"
                 )
-                # URL Simbad pour infos détaillées
-                url_simbad = (
-                    f"https://simbad.cds.unistra.fr/simbad/sim-id"
-                    f"?Ident={objet_selec.replace(' ', '+')}"
-                )
+
+                # Affichage image
+                import requests as req
+                resp = req.get(img_url, timeout=8)
+                if resp.status_code == 200:
+                    from io import BytesIO
+                    st.image(BytesIO(resp.content),
+                             caption=f"Image DSS2 — champ {fov}° — {objet_selec}",
+                             use_container_width=True)
+                else:
+                    st.info("Image temporairement indisponible")
+
+                # Coordonnées
+                st.caption(f"📌 RA {ra_sel:.2f}° · Dec {dec_sel:+.2f}°")
+
             else:
-                # Planète — recherche par nom
-                url_aladin = (
-                    f"https://aladin.cds.unistra.fr/AladinLite/"
-                    f"?target={objet_selec.replace(' ', '+')}"
-                    f"&fov=10.0&survey=P%2FDSS2%2Fcolor"
-                )
-                url_simbad = ""
-                ra_sel, dec_sel = 0, 0
-
-            # Aperçu via image DSS2 statique (NASA SkyView)
-            skyview_url = (
-                f"https://skyview.gsfc.nasa.gov/current/cgi/runquery.pl"
-                f"?Position={ra_sel:.4f},{dec_sel:.4f}"
-                f"&Survey=DSS2+Red&Pixels=400&Size=1.0"
-                f"&Projection=Tan&Return=JPEG"
-            )
-
-            # Affichage image + boutons
-            try:
-                st.image(skyview_url,
-                         caption=f"Image DSS2 — {objet_selec}",
-                         use_container_width=True)
-            except Exception:
-                st.info("Aperçu indisponible — utilise les liens ci-dessous")
-
-            # Boutons d'accès
-            st.link_button(
-                "🔭 Ouvrir dans Aladin Lite",
-                url_aladin,
-                use_container_width=True
-            )
-            if url_simbad:
-                st.link_button(
-                    "📖 Fiche SIMBAD",
-                    url_simbad,
-                    use_container_width=True
-                )
-            st.caption("Sources : NASA SkyView · CDS Strasbourg")
+                # Planète
+                st.info("🪐 Les planètes sont en mouvement — "
+                        "position calculée en temps réel par PyEphem")    st.caption("Sources : NASA SkyView · CDS Strasbourg")
 
     st.divider()
 
