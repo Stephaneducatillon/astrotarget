@@ -1002,7 +1002,8 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             else:
                 # Planète
                 st.info("🪐 Les planètes sont en mouvement — "
-                        "position calculée en temps réel par PyEphem")    st.caption("Sources : NASA SkyView · CDS Strasbourg")
+                        "position calculée en temps réel par PyEphem")
+                st.caption("Sources : NASA SkyView · CDS Strasbourg")
 
     st.divider()
 
