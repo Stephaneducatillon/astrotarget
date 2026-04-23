@@ -959,59 +959,63 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
 
     with col_carte:
         if objet_selec:
-            # Récupération coordonnées de l'objet sélectionné
-            row_sel = df[df["Objet"] == objet_selec]
-            if not row_sel.empty:
-                ra_sel  = float(row_sel.iloc[0]["ra"])  if "ra"  in row_sel.columns else 0
-                dec_sel = float(row_sel.iloc[0]["dec"]) if "dec" in row_sel.columns else 0
-            else:
-                # Planète — utiliser le nom directement
-                ra_sel  = 0
-                dec_sel = 0
-
             st.markdown(f"**🗺️ Carte du ciel — {objet_selec}**")
 
-            # Composant Aladin Lite via HTML
-            aladin_html = f"""
-            <link rel="stylesheet"
-              href="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.min.css"/>
-            <div id="aladin-lite-div"
-                 style="width:100%; height:400px; border-radius:8px;"></div>
-            <script type="text/javascript"
-              src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.min.js"
-              charset="utf-8"></script>
-            <script>
-                var aladin;
-                A.init.then(() => {{
-                    aladin = A.aladin('#aladin-lite-div', {{
-                        survey: 'P/DSS2/color',
-                        fov: 2.0,
-                        target: '{objet_selec}',
-                        showReticle: true,
-                        showZoomControl: true,
-                        showFullscreenControl: true,
-                        showLayersControl: true,
-                        showGotoControl: true,
-                        showShareControl: false,
-                        showCatalog: true,
-                        showFrame: true,
-                        showCooGrid: false,
-                        cooFrame: 'J2000',
-                        showContextMenu: true,
-                    }});
-                    // Marqueur sur l'objet
-                    var cat = A.catalog({{name: '{objet_selec}',
-                                         sourceSize: 18,
-                                         color: '#FF6600'}});
-                    aladin.addCatalog(cat);
-                    cat.addSources([A.source(
-                        {ra_sel}, {dec_sel},
-                        {{name: '{objet_selec}'}})]);
-                }});
-            </script>
-            """
-            st.components.v1.html(aladin_html, height=420)
-            st.caption("Source : Aladin Lite — CDS Strasbourg / DSS2")
+            # Récupération coordonnées RA/Dec
+            row_sel = df[df["Objet"] == objet_selec]
+            if not row_sel.empty and "ra" in row_sel.columns:
+                ra_sel  = float(row_sel.iloc[0]["ra"])
+                dec_sel = float(row_sel.iloc[0]["dec"])
+                # URL Aladin avec coordonnées précises
+                url_aladin = (
+                    f"https://aladin.cds.unistra.fr/AladinLite/"
+                    f"?target={ra_sel:.4f}%20{dec_sel:+.4f}"
+                    f"&fov=2.0&survey=P%2FDSS2%2Fcolor"
+                )
+                # URL Simbad pour infos détaillées
+                url_simbad = (
+                    f"https://simbad.cds.unistra.fr/simbad/sim-id"
+                    f"?Ident={objet_selec.replace(' ', '+')}"
+                )
+            else:
+                # Planète — recherche par nom
+                url_aladin = (
+                    f"https://aladin.cds.unistra.fr/AladinLite/"
+                    f"?target={objet_selec.replace(' ', '+')}"
+                    f"&fov=10.0&survey=P%2FDSS2%2Fcolor"
+                )
+                url_simbad = ""
+                ra_sel, dec_sel = 0, 0
+
+            # Aperçu via image DSS2 statique (NASA SkyView)
+            skyview_url = (
+                f"https://skyview.gsfc.nasa.gov/current/cgi/runquery.pl"
+                f"?Position={ra_sel:.4f},{dec_sel:.4f}"
+                f"&Survey=DSS2+Red&Pixels=400&Size=1.0"
+                f"&Projection=Tan&Return=JPEG"
+            )
+
+            # Affichage image + boutons
+            try:
+                st.image(skyview_url,
+                         caption=f"Image DSS2 — {objet_selec}",
+                         use_container_width=True)
+            except Exception:
+                st.info("Aperçu indisponible — utilise les liens ci-dessous")
+
+            # Boutons d'accès
+            st.link_button(
+                "🔭 Ouvrir dans Aladin Lite",
+                url_aladin,
+                use_container_width=True
+            )
+            if url_simbad:
+                st.link_button(
+                    "📖 Fiche SIMBAD",
+                    url_simbad,
+                    use_container_width=True
+                )
+            st.caption("Sources : NASA SkyView · CDS Strasbourg")
 
     st.divider()
 
