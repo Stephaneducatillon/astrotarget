@@ -795,6 +795,7 @@ st.divider()
 # ── Bouton de calcul ──────────────────────────────────────────────────────────
 if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
              use_container_width=True):
+    st.session_state.calcul_fait = False  # Force recalcul
 
     dt   = datetime.combine(date_obs, heure_obs).replace(tzinfo=timezone.utc)
     moon = get_moon_phase(dt)
@@ -934,13 +935,34 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     df = pd.DataFrame(resultats).sort_values("Score", ascending=False)
     df_obs = df[df["Observable"] == "✅"].reset_index(drop=True)
 
-    # ── Top objets + carte Aladin ─────────────────────────────
+    # Sauvegarde résultats pour affichage persistant
+    st.session_state.calcul_fait     = True
+    st.session_state.df_obs          = df_obs.copy()
+    st.session_state.df_all          = df.copy()
+    st.session_state.catalogue_actif = catalogue_actif.copy()
+    st.session_state.moon_saved      = moon
+    st.session_state.meteo_saved     = meteo
+
+    st.rerun()
+
+# ── Affichage résultats (persistant via session_state) ────────────────────────
+if st.session_state.get("calcul_fait", False):
+    df_obs          = st.session_state.df_obs
+    df              = st.session_state.df_all
+    catalogue_actif = st.session_state.catalogue_actif
+    moon            = st.session_state.get("moon_saved", 0)
+    meteo           = st.session_state.get("meteo_saved",
+                          {"nuages": 0, "humidite": 0,
+                           "visibilite": 40, "seeing": 3, "ok": False})
+
     st.subheader("🏆 Meilleurs objets ce soir")
 
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Objets observables", len(df_obs))
-    col_b.metric("Meilleur score",     f"{df_obs['Score'].max():.1f}/100" if len(df_obs) > 0 else "—")
-    col_c.metric("Meilleur objet",     df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
+    col_b.metric("Meilleur score",
+                 f"{df_obs['Score'].max():.1f}/100" if len(df_obs) > 0 else "—")
+    col_c.metric("Meilleur objet",
+                 df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
 
     # Sélecteur objet pour la carte
     objets_liste = df_obs["Objet"].tolist() if len(df_obs) > 0 else []
@@ -950,7 +972,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         index=0 if objets_liste else None
     )
 
-    # Colonnes : tableau à gauche, carte Aladin à droite
+    # Colonnes : tableau à gauche, carte à droite
     col_tab, col_carte = st.columns([1, 1])
 
     with col_tab:
