@@ -964,19 +964,25 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             import matplotlib.pyplot as plt
             from io import BytesIO
 
-            row_sel     = df[df["Objet"] == objet_selec]
-            est_planete = row_sel.empty or "ra" not in row_sel.columns
+            # Infos score depuis df
+            row_score = df[df["Objet"] == objet_selec]
+            mag_sel   = float(row_score.iloc[0]["Magnitude"]) if not row_score.empty else 0.0
+            type_sel  = str(row_score.iloc[0]["Type"])        if not row_score.empty else "—"
+            score_sel = float(row_score.iloc[0]["Score"])     if not row_score.empty else 0.0
 
-            if not est_planete:
-                ra_sel    = float(row_sel.iloc[0]["ra"])
-                dec_sel   = float(row_sel.iloc[0]["dec"])
-                mag_sel   = float(row_sel.iloc[0]["Magnitude"])
-                type_sel  = str(row_sel.iloc[0]["Type"])
-                score_sel = float(row_sel.iloc[0]["Score"])
+            # Coordonnées depuis catalogue_actif
+            row_cat = catalogue_actif[catalogue_actif["nom"] == objet_selec]
+            est_planete = (row_cat.empty or
+                           type_sel == "🪐 Planète" or
+                           "est_planete" in row_cat.columns and
+                           row_cat.iloc[0].get("est_planete", False))
+
+            if not est_planete and not row_cat.empty:
+                ra_sel  = float(row_cat.iloc[0]["ra"])
+                dec_sel = float(row_cat.iloc[0]["dec"])
             else:
                 ra_sel, dec_sel = 0.0, 0.0
-                mag_sel, score_sel = 0.0, 0.0
-                type_sel = "🪐 Planète"
+                est_planete = True
 
             # Fiche objet
             st.markdown(f"### 🔭 {objet_selec}")
