@@ -959,20 +959,19 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
 
     with col_carte:
         if objet_selec:
-            row_sel  = df[df["Objet"] == objet_selec]
+            row_sel     = df[df["Objet"] == objet_selec]
             est_planete = row_sel.empty or "ra" not in row_sel.columns
 
             if not est_planete:
-                ra_sel  = float(row_sel.iloc[0]["ra"])
-                dec_sel = float(row_sel.iloc[0]["dec"])
-                mag_sel = float(row_sel.iloc[0]["Magnitude"])
+                ra_sel    = float(row_sel.iloc[0]["ra"])
+                dec_sel   = float(row_sel.iloc[0]["dec"])
+                mag_sel   = float(row_sel.iloc[0]["Magnitude"])
                 type_sel  = str(row_sel.iloc[0]["Type"])
                 score_sel = float(row_sel.iloc[0]["Score"])
             else:
                 ra_sel, dec_sel = 0.0, 0.0
-                mag_sel   = 0.0
-                type_sel  = "🪐 Planète"
-                score_sel = 0.0
+                mag_sel, score_sel = 0.0, 0.0
+                type_sel = "🪐 Planète"
 
             # Fiche objet
             st.markdown(f"**🔭 {objet_selec}**")
@@ -984,35 +983,37 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             )
 
             if not est_planete:
-                # Image ESA Sky — fiable, pas d'auth requise
+                # Image STScI DSS2 — testé fonctionnel
+                # Taille champ en arcmin selon type objet
+                if type_sel in ["Galaxie", "Nébuleuse"]:
+                    fov_arcmin = 60
+                else:
+                    fov_arcmin = 30
+
                 img_url = (
-                    f"https://sky.esa.int/esasky-tap/images/hips2fits?"
-                    f"hips=DSS2+color&ra={ra_sel}&dec={dec_sel}"
-                    f"&fov=2.0&width=500&height=500"
-                    f"&projection=TAN&format=jpg"
+                    f"https://archive.stsci.edu/cgi-bin/dss_search"
+                    f"?v=poss2ukstu_red"
+                    f"&r={ra_sel}&d={dec_sel}"
+                    f"&e=J2000"
+                    f"&h={fov_arcmin}&w={fov_arcmin}"
+                    f"&f=gif&c=none"
                 )
+
                 try:
                     import requests as req
                     from io import BytesIO
-                    resp = req.get(img_url, timeout=6)
-                    if resp.status_code == 200 and len(resp.content) > 1000:
+                    resp = req.get(img_url, timeout=10)
+                    if resp.status_code == 200 and len(resp.content) > 5000:
                         st.image(BytesIO(resp.content),
-                                 caption=f"DSS2 — {objet_selec}",
+                                 caption=f"Image DSS2 STScI — {objet_selec} "
+                                         f"(champ {fov_arcmin}')",
                                  use_container_width=True)
                     else:
-                        raise Exception("Image vide")
+                        st.warning("Image temporairement indisponible")
                 except Exception:
-                    # Fallback : lien direct Wikipedia
-                    wiki_url = (
-                        f"https://fr.wikipedia.org/wiki/"
-                        f"{objet_selec.replace(' ', '_')}"
-                    )
-                    st.info("📷 Aperçu indisponible")
-                    st.link_button("📖 Voir sur Wikipedia",
-                                   wiki_url,
-                                   use_container_width=True)
+                    st.warning("Image temporairement indisponible")
 
-                # Lien SIMBAD toujours disponible
+                # Bouton SIMBAD
                 url_simbad = (
                     f"https://simbad.cds.unistra.fr/simbad/sim-id"
                     f"?Ident={objet_selec.replace(' ', '+')}"
@@ -1020,8 +1021,11 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 st.link_button("🔬 Fiche SIMBAD",
                                url_simbad,
                                use_container_width=True)
+
+                st.caption("Source : STScI Digitized Sky Survey")
+
             else:
-                st.info("🪐 Position calculée en temps réel — "
+                st.info("🪐 Position en temps réel — "
                         "pas d'image fixe disponible pour les planètes.")
 
     st.divider()
