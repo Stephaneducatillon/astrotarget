@@ -959,14 +959,14 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
 
     with col_carte:
         if objet_selec:
-            row_sel     = df[df["Objet"] == objet_selec]
+            row_sel = df[df["Objet"] == objet_selec]
             est_planete = row_sel.empty or "ra" not in row_sel.columns
 
             if not est_planete:
-                ra_sel    = float(row_sel.iloc[0]["ra"])
-                dec_sel   = float(row_sel.iloc[0]["dec"])
-                mag_sel   = float(row_sel.iloc[0]["Magnitude"])
-                type_sel  = str(row_sel.iloc[0]["Type"])
+                ra_sel = float(row_sel.iloc[0]["ra"])
+                dec_sel = float(row_sel.iloc[0]["dec"])
+                mag_sel = float(row_sel.iloc[0]["Magnitude"])
+                type_sel = str(row_sel.iloc[0]["Type"])
                 score_sel = float(row_sel.iloc[0]["Score"])
             else:
                 ra_sel, dec_sel = 0.0, 0.0
@@ -974,7 +974,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 type_sel = "🪐 Planète"
 
             # Fiche objet
-            st.markdown(f"**🔭 {objet_selec}**")
+            st.markdown(f"### 🔭 {objet_selec}")
             st.markdown(
                 f"**Type :** {type_sel}  \n"
                 f"**Magnitude :** {mag_sel}  \n"
@@ -982,47 +982,44 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 f"**RA :** {ra_sel:.2f}°  ·  **Dec :** {dec_sel:+.2f}°"
             )
 
+            st.divider()
+
+            # Liens externes fiables
+            nom_wiki = objet_selec.replace(" ", "_")
+            url_wiki_fr = f"https://fr.wikipedia.org/wiki/{nom_wiki}"
+            url_wiki_en = f"https://en.wikipedia.org/wiki/{nom_wiki}"
+            url_simbad = (
+                f"https://simbad.cds.unistra.fr/simbad/sim-id"
+                f"?Ident={objet_selec.replace(' ', '+')}"
+            )
+
+            st.link_button(
+                "📖 Wikipedia FR",
+                url_wiki_fr,
+                use_container_width=True
+            )
+            st.link_button(
+                "📖 Wikipedia EN",
+                url_wiki_en,
+                use_container_width=True
+            )
+            st.link_button(
+                "🔬 Fiche SIMBAD",
+                url_simbad,
+                use_container_width=True
+            )
+
             if not est_planete:
-                # Image STScI DSS2 — testé fonctionnel
-                # Taille champ en arcmin selon type objet
-                if type_sel in ["Galaxie", "Nébuleuse"]:
-                    fov_arcmin = 60
-                else:
-                    fov_arcmin = 30
-
-                img_url = (
-                    f"https://archive.stsci.edu/cgi-bin/dss_search"
-                    f"?v=poss2ukstu_red"
-                    f"&r={ra_sel}&d={dec_sel}"
-                    f"&e=J2000"
-                    f"&h={fov_arcmin}&w={fov_arcmin}"
-                    f"&f=gif&c=none"
+                url_aladin = (
+                    f"https://aladin.cds.unistra.fr/AladinLite/"
+                    f"?target={ra_sel:.4f}%20{dec_sel:+.4f}"
+                    f"&fov=1.0&survey=P%2FDSS2%2Fcolor"
                 )
-
-                try:
-                    import requests as req
-                    from io import BytesIO
-                    resp = req.get(img_url, timeout=10)
-                    if resp.status_code == 200 and len(resp.content) > 5000:
-                        st.image(BytesIO(resp.content),
-                                 caption=f"Image DSS2 STScI — {objet_selec} "
-                                         f"(champ {fov_arcmin}')",
-                                 use_container_width=True)
-                    else:
-                        st.warning("Image temporairement indisponible")
-                except Exception:
-                    st.warning("Image temporairement indisponible")
-
-                # Bouton SIMBAD
-                url_simbad = (
-                    f"https://simbad.cds.unistra.fr/simbad/sim-id"
-                    f"?Ident={objet_selec.replace(' ', '+')}"
+                st.link_button(
+                    "🗺️ Carte Aladin Lite",
+                    url_aladin,
+                    use_container_width=True
                 )
-                st.link_button("🔬 Fiche SIMBAD",
-                               url_simbad,
-                               use_container_width=True)
-
-                st.caption("Source : STScI Digitized Sky Survey")
 
             else:
                 st.info("🪐 Position en temps réel — "
