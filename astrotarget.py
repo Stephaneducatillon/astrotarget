@@ -772,13 +772,13 @@ with col3:
         focale        = 0
         grossissement = 0
         barlow_val_v  = 1
-        mag_lim       = mag_limite(diametre)
+        mag_lim       = mag_limite_reelle(diametre, bortle)
 
-        mag_reelle = mag_limite_reelle(diametre, bortle)
-        if mag_reelle < mag_lim:
+        mag_instrument = mag_limite(diametre)
+        if mag_lim < mag_instrument:
             st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
-                       f"mag. accessible réduite à **{mag_reelle}** "
-                       f"(au lieu de {mag_lim} en ciel noir)")
+                       f"mag. accessible = **{mag_lim}** "
+                       f"(au lieu de {mag_instrument} en ciel noir)")
         else:
             st.success(f"✅ Ciel non limitant : mag. limite = {mag_lim}")
         st.metric("Magnitude limite", f"{mag_lim}")
@@ -789,14 +789,14 @@ with col3:
         focale        = 0
         grossissement = 0
         barlow_val_v  = 1
-        mag_lim       = 6.0
-        st.metric("Magnitude limite", "6.0")
-        mag_reelle = mag_limite_reelle(diametre, bortle)
-        if mag_reelle < mag_lim:
+        mag_lim       = mag_limite_reelle(diametre, bortle)
+        st.metric("Magnitude limite", f"{mag_lim}")
+        if mag_lim < 6.3:
             st.warning(f"⚠️ Ciel limitant (Bortle {bortle}) : "
-                       f"mag. accessible réduite à **{mag_reelle}**")
+                       f"mag. accessible = **{mag_lim}**")
         else:
-            st.success(f"✅ Ciel non limitant : mag. limite = {mag_lim}")
+            st.success(f"✅ Ciel correct (Bortle {bortle}) : "
+                       f"mag. limite = {mag_lim}")
 
 st.divider()
 
