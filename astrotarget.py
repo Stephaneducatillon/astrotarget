@@ -870,7 +870,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                     # Magnitude planètes : de -12 (Lune) à +8 (Uranus/Neptune)
                     # Normalisation : -12=100, +8=0
                     mag_p = float(row["magnitude"])
-                    score_mag_p = np.clip((8 - mag_p) / 20 * 100, 0, 100)
+                    score_mag_p = np.clip((8 - mag_p) / 8 * 80 + 20, 0, 100)
 
                     score = round(
                         score_alt    * 0.40 +
