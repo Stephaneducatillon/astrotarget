@@ -834,9 +834,13 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             "ra":          0.0,
             "dec":         0.0,
             "magnitude":   df_planetes["magnitude"],
-            "altitude_pre": df_planetes["altitude"],
-            "est_planete": True
         })
+        # Colonnes supplémentaires pour identifier les planètes
+        planetes_cat["altitude_pre"] = df_planetes["altitude"].values
+        planetes_cat["est_planete"]  = True
+        # Colonnes manquantes dans catalogue_actif — on les initialise
+        catalogue_actif["altitude_pre"] = 0.0
+        catalogue_actif["est_planete"]  = False
         catalogue_actif = pd.concat(
             [catalogue_actif, planetes_cat], ignore_index=True)
 
