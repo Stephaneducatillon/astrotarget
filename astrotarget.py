@@ -825,22 +825,22 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             ngc_filtre = ngc_data[ngc_data["magnitude"] <= mag_lim + 0.5]
             catalogue_actif = pd.concat([catalogue_actif, ngc_filtre], ignore_index=True)
 
-    # Ajout des planètes si cochées
+    # Ajout des planètes directement dans catalogue_actif
     if use_planetes:
         df_planetes = get_planetes(lat, lng, dt)
-        planetes_df = pd.DataFrame({
-            "nom":       df_planetes["nom"],
-            "type":      df_planetes["type"],
-            "ra":        0.0,
-            "dec":       0.0,
-            "magnitude": df_planetes["magnitude"],
-            "altitude":  df_planetes["altitude"],
+        planetes_cat = pd.DataFrame({
+            "nom":         df_planetes["nom"],
+            "type":        "🪐 Planète",
+            "ra":          0.0,
+            "dec":         0.0,
+            "magnitude":   df_planetes["magnitude"],
+            "altitude_pre": df_planetes["altitude"],
             "est_planete": True
         })
-    else:
-        planetes_df = pd.DataFrame()
+        catalogue_actif = pd.concat(
+            [catalogue_actif, planetes_cat], ignore_index=True)
 
-    if catalogue_actif.empty and not use_planetes:
+    if catalogue_actif.empty:
         st.warning("⚠️ Sélectionne au moins un catalogue.")
         st.stop()
 
@@ -849,8 +849,8 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         resultats = []
         for _, row in catalogue_actif.iterrows():
             # Altitude pré-calculée pour les planètes, calculée pour les autres
-            if "altitude" in row and row.get("est_planete", False):
-                alt = row["altitude"]
+            if row.get("est_planete", False):
+                alt = float(row.get("altitude_pre", 0))
             else:
                 alt = get_altitude(row["ra"], row["dec"], lat, lng, dt)
 
@@ -898,36 +898,11 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 "Type":         row["type"],
                 "Score":        score,
                 "Altitude (°)": round(alt, 1),
-                "Magnitude":    row["magnitude"],
+                "Magnitude":    float(row["magnitude"]),
                 "Observable":   "✅" if score > 0 else "❌"
             })
 
-        # Ajout planètes si cochées
-        if use_planetes and not planetes_df.empty:
-            for _, p in planetes_df.iterrows():
-                alt   = p["altitude"]
-                mag_p = float(p["magnitude"])
-                if alt < 5 or meteo["nuages"] > 90:
-                    score_p = 0
-                else:
-                    score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
-                    score_nuit   = 100 - meteo["nuages"]
-                    score_lune_p = 100 - moon if p["nom"] != "Lune" else 100
-                    # Magnitude réelle planètes (-12 à +8) → 0-100
-                    score_mag_p  = np.clip((8 - mag_p) / 20 * 100, 0, 100)
-                    score_p      = round(
-                        score_alt    * 0.40 +
-                        score_mag_p  * 0.30 +
-                        score_nuit   * 0.20 +
-                        score_lune_p * 0.10, 1)
-                resultats.append({
-                    "Objet":        p["nom"],
-                    "Type":         "🪐 Planète",
-                    "Score":        score_p,
-                    "Altitude (°)": round(alt, 1),
-                    "Magnitude":    mag_p,
-                    "Observable":   "✅" if score_p > 0 else "❌"
-                })
+
 
     df = pd.DataFrame(resultats).sort_values("Score", ascending=False)
     df_obs = df[df["Observable"] == "✅"].reset_index(drop=True)
