@@ -811,32 +811,8 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     with st.spinner("Récupération météo en cours..."):
         meteo = get_meteo(lat, lng, dt)
 
-    # ── Conditions du soir ────────────────────────────────────
-    st.subheader("🌤️ Conditions du soir")
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    seeing_labels = {1: "⭐ Très mauvais", 2: "⭐⭐ Mauvais",
-                     3: "⭐⭐⭐ Correct", 4: "⭐⭐⭐⭐ Bon",
-                     5: "⭐⭐⭐⭐⭐ Excellent"}
-    col_m1.metric("🌙 Lune",        f"{moon}%")
-    col_m2.metric("☁️ Nuages",      f"{meteo['nuages']}%"
-                  if meteo["ok"] else "N/A")
-    col_m3.metric("🌬️ Seeing",      seeing_labels.get(meteo.get("seeing", 3), "N/A")
-                  if meteo["ok"] else "N/A")
-    col_m4.metric("👁️ Visibilité",  f"{meteo['visibilite']:.0f} km"
-                  if meteo["ok"] else "N/A")
-
-    if not meteo["ok"]:
-        st.warning("⚠️ Météo indisponible — score calculé sans données météo réelles")
-    elif meteo["nuages"] > 90:
-        st.error("🚫 Ciel bouché — observation impossible ce soir")
-    elif meteo["nuages"] > 60:
-        st.warning("⚠️ Ciel partiellement nuageux — conditions dégradées")
-    else:
-        st.success("✅ Bonnes conditions météo pour observer")
-
     st.divider()
 
-    # ── Calcul scores Messier ─────────────────────────────────
     # Construction du catalogue actif selon sélection
     catalogue_actif = pd.DataFrame(columns=["nom", "type", "ra", "dec", "magnitude"])
     if use_messier:
@@ -976,6 +952,32 @@ if st.session_state.get("calcul_fait", False):
                           {"nuages": 0, "humidite": 0,
                            "visibilite": 40, "seeing": 3, "ok": False})
 
+    # ── Conditions du soir (persistant) ────────────────────────────────────
+    st.subheader("🌤️ Conditions du soir")
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    seeing_labels = {1: "⭐ Très mauvais", 2: "⭐⭐ Mauvais",
+                     3: "⭐⭐⭐ Correct", 4: "⭐⭐⭐⭐ Bon",
+                     5: "⭐⭐⭐⭐⭐ Excellent"}
+    col_m1.metric("🌙 Lune",        f"{moon}%")
+    col_m2.metric("☁️ Nuages",      f"{meteo['nuages']}%"
+                  if meteo["ok"] else "N/A")
+    col_m3.metric("🌬️ Seeing",      seeing_labels.get(meteo.get("seeing", 3), "N/A")
+                  if meteo["ok"] else "N/A")
+    col_m4.metric("👁️ Visibilité",  f"{meteo['visibilite']:.0f} km"
+                  if meteo["ok"] else "N/A")
+
+    if not meteo["ok"]:
+        st.warning("⚠️ Météo indisponible — score calculé sans données météo réelles")
+    elif meteo["nuages"] > 90:
+        st.error("🚫 Ciel bouché — observation impossible ce soir")
+    elif meteo["nuages"] > 60:
+        st.warning("⚠️ Ciel partiellement nuageux — conditions dégradées")
+    else:
+        st.success("✅ Bonnes conditions météo pour observer")
+
+    st.divider()
+
+    # ── Calcul scores Messier ─────────────────────────────────
     st.subheader("🏆 Meilleurs objets ce soir")
 
     col_a, col_b, col_c = st.columns(3)
