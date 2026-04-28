@@ -380,15 +380,23 @@ def mag_limite(diametre_mm):
 def mag_limite_reelle(diametre_mm, bortle):
     """
     Magnitude limite réelle = min(instrument, ciel).
-    Formule calibrée sur valeurs Bortle reconnues :
-    Bortle 3 (Prisches) → ciel 13.5 → instrument 114mm = 12.6 → limite 12.6
-    Bortle 5            → ciel 12.1 → instrument 114mm = 12.6 → limite 12.1
-    Bortle 7            → ciel 10.7 → instrument 114mm = 12.6 → limite 10.7
-    Bortle 8 (Lille)    → ciel 10.0 → instrument 114mm = 12.6 → limite 10.0
-    Bortle 9            → ciel  9.3 → instrument 114mm = 12.6 → limite  9.3
+
+    Télescope/Lunette/Jumelles :
+    Bortle 3 → ciel 13.5, Bortle 8 → ciel 10.0
+
+    Oeil nu (diametre <= 7mm) :
+    Bortle 1 → 7.5, Bortle 3 → 6.5, Bortle 5 → 5.5,
+    Bortle 7 → 4.5, Bortle 8 → 4.0, Bortle 9 → 3.5
     """
     mag_instrument = mag_limite(diametre_mm)
-    mag_ciel = round(13.5 - (bortle - 3) * 0.7, 1)
+
+    if diametre_mm <= 7:
+        # Oeil nu — magnitude limite dépend fortement du Bortle
+        mag_ciel = round(7.5 - (bortle - 1) * 0.5, 1)
+    else:
+        # Instrument optique
+        mag_ciel = round(13.5 - (bortle - 3) * 0.7, 1)
+
     return min(mag_instrument, mag_ciel)
 
 # ─── 6. SCORE 0-100 ───────────────────────────────────────────────────────────
@@ -870,17 +878,25 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
             else:
                 alt = get_altitude(row["ra"], row["dec"], lat, lng, dt)
 
-            # Score planète simplifié (pas de mag limite instrument)
+            # Score planète — intègre magnitude réelle
             if row.get("est_planete", False):
                 if alt < 5 or meteo["nuages"] > 90:
                     score = 0
                 else:
-                    score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
-                    score_nuit   = 100 - meteo["nuages"]
+                    score_alt  = np.clip((alt - 5) / 25, 0, 1) * 100
+                    score_nuit = 100 - meteo["nuages"]
                     score_lune_p = 100 - moon if row["nom"] != "Lune" else 100
-                    score = round(score_alt * 0.60 +
-                                  score_nuit * 0.25 +
-                                  score_lune_p * 0.15, 1)
+
+                    # Magnitude planètes : de -12 (Lune) à +8 (Uranus/Neptune)
+                    # Normalisation : -12=100, +8=0
+                    mag_p = float(row["magnitude"])
+                    score_mag_p = np.clip((8 - mag_p) / 20 * 100, 0, 100)
+
+                    score = round(
+                        score_alt    * 0.40 +
+                        score_mag_p  * 0.30 +
+                        score_nuit   * 0.20 +
+                        score_lune_p * 0.10, 1)
             else:
                 # Calcul fenêtre de visibilité pour score v2
                 fenetre = get_fenetre_visibilite(
@@ -913,22 +929,27 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
         # Ajout planètes si cochées
         if use_planetes and not planetes_df.empty:
             for _, p in planetes_df.iterrows():
-                alt = p["altitude"]
+                alt   = p["altitude"]
+                mag_p = float(p["magnitude"])
                 if alt < 5 or meteo["nuages"] > 90:
                     score_p = 0
                 else:
                     score_alt    = np.clip((alt - 5) / 25, 0, 1) * 100
                     score_nuit   = 100 - meteo["nuages"]
                     score_lune_p = 100 - moon if p["nom"] != "Lune" else 100
-                    score_p      = round(score_alt * 0.60 +
-                                         score_nuit * 0.25 +
-                                         score_lune_p * 0.15, 1)
+                    # Magnitude réelle planètes (-12 à +8) → 0-100
+                    score_mag_p  = np.clip((8 - mag_p) / 20 * 100, 0, 100)
+                    score_p      = round(
+                        score_alt    * 0.40 +
+                        score_mag_p  * 0.30 +
+                        score_nuit   * 0.20 +
+                        score_lune_p * 0.10, 1)
                 resultats.append({
                     "Objet":        p["nom"],
                     "Type":         "🪐 Planète",
                     "Score":        score_p,
                     "Altitude (°)": round(alt, 1),
-                    "Magnitude":    p["magnitude"],
+                    "Magnitude":    mag_p,
                     "Observable":   "✅" if score_p > 0 else "❌"
                 })
 
