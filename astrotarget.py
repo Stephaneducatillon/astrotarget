@@ -863,8 +863,12 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
                 if alt < 5 or meteo["nuages"] > 90:
                     score = 0
                 else:
-                    score_alt  = np.clip((alt - 5) / 25, 0, 1) * 100
-                    score_nuit = 100 - meteo["nuages"]
+                    # Lune : seuil d'altitude abaissé (visible même basse)
+                    if row["nom"] == "Lune":
+                        score_alt = np.clip((alt - 2) / 15, 0, 1) * 100
+                    else:
+                        score_alt = np.clip((alt - 5) / 25, 0, 1) * 100
+                    score_nuit   = 100 - meteo["nuages"]
                     score_lune_p = 100 - moon if row["nom"] != "Lune" else 100
 
                     # Magnitude planètes : de -12 (Lune) à +8 (Uranus/Neptune)
