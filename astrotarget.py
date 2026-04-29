@@ -1110,6 +1110,75 @@ if st.session_state.get("calcul_fait", False):
                                url_simbad,
                                use_container_width=True)
             else:
+                # Coordonnées de la planète en temps réel
+                st.markdown("**📍 Coordonnées de localisation**")
+
+                try:
+                    dt_coord = st.session_state.get(
+                        "dt_saved", datetime.now(timezone.utc))
+                    date_str_coord = dt_coord.strftime("%Y/%m/%d %H:%M:%S")
+
+                    # Observateur depuis le lieu sélectionné
+                    obs_coord = ephem.Observer()
+                    obs_coord.lat  = str(lat)
+                    obs_coord.lon  = str(lng)
+                    obs_coord.date = date_str_coord
+
+                    # Mapping nom planète → objet ephem
+                    planete_map = {
+                        "Mercure": ephem.Mercury(),
+                        "Vénus":   ephem.Venus(),
+                        "Mars":    ephem.Mars(),
+                        "Jupiter": ephem.Jupiter(),
+                        "Saturne": ephem.Saturn(),
+                        "Uranus":  ephem.Uranus(),
+                        "Neptune": ephem.Neptune(),
+                        "Lune":    ephem.Moon(),
+                    }
+
+                    if objet_selec in planete_map:
+                        corps_coord = planete_map[objet_selec]
+                        corps_coord.compute(obs_coord)
+
+                        # RA/Dec en format sexagésimal
+                        ra_h  = int(float(corps_coord.ra) * 12 / np.pi)
+                        ra_m  = int((float(corps_coord.ra) * 12 / np.pi - ra_h) * 60)
+                        ra_s  = int(((float(corps_coord.ra) * 12 / np.pi - ra_h) * 60 - ra_m) * 60)
+
+                        dec_d = int(np.degrees(float(corps_coord.dec)))
+                        dec_m = int(abs(np.degrees(float(corps_coord.dec)) - dec_d) * 60)
+
+                        # Altitude et Azimut
+                        alt_deg = np.degrees(float(corps_coord.alt))
+                        az_deg  = np.degrees(float(corps_coord.az))
+
+                        # Direction cardinale
+                        directions = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
+                                      "S","SSO","SO","OSO","O","ONO","NO","NNO"]
+                        direction = directions[int((az_deg + 11.25) / 22.5) % 16]
+
+                        col_c1, col_c2 = st.columns(2)
+                        col_c1.metric("📐 Ascension droite",
+                                      f"{ra_h:02d}h {ra_m:02d}m {ra_s:02d}s")
+                        col_c2.metric("📐 Déclinaison",
+                                      f"{dec_d:+d}° {dec_m:02d}'")
+                        col_c1.metric("⬆️ Altitude",
+                                      f"{alt_deg:.1f}°")
+                        col_c2.metric("🧭 Azimut",
+                                      f"{az_deg:.1f}° {direction}")
+
+                        # Magnitude et diamètre apparent
+                        mag_coord  = round(float(corps_coord.mag), 1)
+                        diam_coord = round(float(corps_coord.size), 1)
+                        col_c1.metric("✨ Magnitude", f"{mag_coord}")
+                        col_c2.metric("🔭 Diamètre apparent",
+                                      f'{diam_coord}"')
+
+                except Exception as e:
+                    st.caption(f"Coordonnées indisponibles : {e}")
+
+                st.divider()
+
                 # Schéma système solaire avec positions réelles
                 st.markdown("**🌌 Position dans le système solaire**")
 
