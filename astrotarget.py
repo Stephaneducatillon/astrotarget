@@ -971,20 +971,31 @@ if st.session_state.get("calcul_fait", False):
     col_c.metric("Meilleur objet",
                  df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else "—")
 
-    # Sélecteur objet pour la carte
-    objets_liste = df_obs["Objet"].tolist() if len(df_obs) > 0 else []
-    objet_selec  = st.selectbox(
-        "🔭 Sélectionner un objet pour afficher sa carte du ciel :",
-        objets_liste,
-        index=0 if objets_liste else None
-    )
-
     # Colonnes : tableau à gauche, carte à droite
     col_tab, col_carte = st.columns([1, 1])
 
     with col_tab:
-        st.dataframe(df_obs, use_container_width=True, hide_index=True)
+        st.caption("👆 Clique sur une ligne pour afficher la carte")
+        selection = st.dataframe(
+            df_obs,
+            use_container_width=True,
+            hide_index=True,
+            on_select="rerun",
+            selection_mode="single-row",
+            key="tableau_obs"
+        )
         st.caption(f"{len(df_obs)} objets observables ce soir")
+
+    # Récupération objet sélectionné via clic
+    rows_sel = selection.selection.rows if hasattr(selection, "selection") else []
+    if rows_sel:
+        objet_selec = df_obs.iloc[rows_sel[0]]["Objet"]
+        # Sauvegarder en session_state pour persistance
+        st.session_state.objet_selec = objet_selec
+    elif "objet_selec" in st.session_state:
+        objet_selec = st.session_state.objet_selec
+    else:
+        objet_selec = df_obs.iloc[0]["Objet"] if len(df_obs) > 0 else None
 
     with col_carte:
         if objet_selec:
