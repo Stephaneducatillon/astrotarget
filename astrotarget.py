@@ -922,6 +922,7 @@ if st.button("🚀 Calculer le Top 10 ce soir", type="primary",
     st.session_state.catalogue_actif = catalogue_actif.copy()
     st.session_state.moon_saved      = moon
     st.session_state.meteo_saved     = meteo
+    st.session_state.dt_saved        = dt
 
     st.rerun()
 
@@ -1109,8 +1110,144 @@ if st.session_state.get("calcul_fait", False):
                                url_simbad,
                                use_container_width=True)
             else:
-                st.info("🪐 Position en temps réel — "
-                        "pas de carte fixe pour les planètes.")
+                # Schéma système solaire avec positions réelles
+                st.markdown("**🌌 Position dans le système solaire**")
+
+                with st.spinner("Génération du schéma..."):
+                    import matplotlib
+                    matplotlib.use('Agg')
+                    import matplotlib.pyplot as plt
+                    import matplotlib.patches as patches
+                    from io import BytesIO
+
+                    # Récupération dt depuis session_state
+                    dt_schema = st.session_state.get(
+                        "dt_saved",
+                        datetime.now(timezone.utc))
+
+                    date_str = dt_schema.strftime("%Y/%m/%d %H:%M:%S")
+
+                    orbites_ua = {
+                        "Mercure": 0.387, "Vénus": 0.723, "Terre": 1.000,
+                        "Mars": 1.524, "Jupiter": 5.203, "Saturne": 9.537,
+                        "Uranus": 19.19, "Neptune": 30.07,
+                    }
+                    couleurs_sol = {
+                        "Mercure": "#aaaaaa", "Vénus": "#f5deb3",
+                        "Terre": "#4169e1", "Mars": "#cd5c5c",
+                        "Jupiter": "#daa520", "Saturne": "#f4a460",
+                        "Uranus": "#7fffd4", "Neptune": "#6688ff",
+                    }
+                    tailles_sol = {
+                        "Mercure": 4, "Vénus": 7, "Terre": 7,
+                        "Mars": 5, "Jupiter": 16, "Saturne": 13,
+                        "Uranus": 10, "Neptune": 9,
+                    }
+                    corps_sol = {
+                        "Mercure": ephem.Mercury(),
+                        "Vénus":   ephem.Venus(),
+                        "Mars":    ephem.Mars(),
+                        "Jupiter": ephem.Jupiter(),
+                        "Saturne": ephem.Saturn(),
+                        "Uranus":  ephem.Uranus(),
+                        "Neptune": ephem.Neptune(),
+                    }
+                    for c in corps_sol.values():
+                        c.compute(date_str)
+                    soleil_ephem = ephem.Sun()
+                    soleil_ephem.compute(date_str)
+
+                    fig_sol, ax_sol = plt.subplots(
+                        figsize=(6, 6), facecolor='#050510')
+                    ax_sol.set_facecolor('#050510')
+
+                    def r_sol(ua):
+                        return np.log1p(ua * 2) * 2.8
+
+                    max_r_sol = r_sol(30.07) + 0.5
+                    theta_sol = np.linspace(0, 2*np.pi, 300)
+
+                    # Soleil
+                    ax_sol.scatter([0], [0], s=400, c='#FFD700', zorder=6)
+                    ax_sol.annotate("☀ Soleil", (0, 0),
+                                    xytext=(6, 8),
+                                    textcoords="offset points",
+                                    fontsize=8, color='#FFD700',
+                                    fontweight='bold')
+
+                    for nom_sol, ua_sol in orbites_ua.items():
+                        rayon = r_sol(ua_sol)
+                        ax_sol.plot(rayon * np.cos(theta_sol),
+                                    rayon * np.sin(theta_sol),
+                                    color='#1a1a3a', linewidth=0.8,
+                                    zorder=1)
+
+                        if nom_sol == "Terre":
+                            lon_sol = float(soleil_ephem.hlong) + np.pi
+                        else:
+                            lon_sol = float(corps_sol[nom_sol].hlong)
+
+                        x_sol = rayon * np.cos(lon_sol)
+                        y_sol = rayon * np.sin(lon_sol)
+
+                        # Mise en évidence planète sélectionnée
+                        est_selectionnee = (
+                            objet_selec and
+                            nom_sol.lower() in objet_selec.lower())
+                        edge_col = 'white' if est_selectionnee else 'none'
+                        edge_w   = 2.0    if est_selectionnee else 0.3
+
+                        ax_sol.scatter([x_sol], [y_sol],
+                                       s=tailles_sol[nom_sol]**2,
+                                       c=couleurs_sol[nom_sol],
+                                       zorder=5,
+                                       edgecolors=edge_col,
+                                       linewidths=edge_w)
+
+                        if nom_sol == "Saturne":
+                            ell = patches.Ellipse(
+                                (x_sol, y_sol), 0.38, 0.13,
+                                angle=np.degrees(lon_sol)+20,
+                                fill=False,
+                                edgecolor='#f4a460',
+                                linewidth=1.3, alpha=0.8, zorder=4)
+                            ax_sol.add_patch(ell)
+
+                        dx = np.cos(lon_sol) * 0.2
+                        dy = np.sin(lon_sol) * 0.2
+                        ax_sol.annotate(
+                            nom_sol, (x_sol, y_sol),
+                            xytext=(dx*30+4, dy*30+2),
+                            textcoords="offset points",
+                            fontsize=7.5,
+                            color=couleurs_sol[nom_sol],
+                            fontweight='bold')
+
+                    ax_sol.set_xlim(-max_r_sol, max_r_sol)
+                    ax_sol.set_ylim(-max_r_sol, max_r_sol)
+                    ax_sol.set_aspect('equal')
+                    ax_sol.axis('off')
+                    ax_sol.set_title(
+                        f"Système solaire — "
+                        f"{dt_schema.strftime('%d/%m/%Y %H:%M')} UTC",
+                        color='white', fontsize=10, pad=8)
+                    ax_sol.text(
+                        0.02, 0.02,
+                        "Positions réelles PyEphem · Échelle log",
+                        transform=ax_sol.transAxes,
+                        fontsize=7, color='#444466', style='italic')
+
+                    plt.tight_layout()
+                    buf_sol = BytesIO()
+                    plt.savefig(buf_sol, format='png', dpi=110,
+                                bbox_inches='tight',
+                                facecolor='#050510')
+                    buf_sol.seek(0)
+                    plt.close()
+
+                st.image(buf_sol,
+                         caption="La planète sélectionnée est encerclée",
+                         use_container_width=True)
 
     st.divider()
 
