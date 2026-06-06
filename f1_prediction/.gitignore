@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+*.pkl
+!models/artifacts/*.gitkeep
+/tmp/
+fastf1_cache/
+*.parquet
+*.log
+.DS_Store
