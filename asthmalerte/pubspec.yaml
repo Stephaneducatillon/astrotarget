@@ -1,0 +1,50 @@
+name: asthmalerte
+description: Alerte d'urgence en un appui pour les personnes asthmatiques.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Géolocalisation
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+
+  # Ouverture des applications SMS / Téléphone
+  url_launcher: ^6.3.1
+
+  # Stockage local (aucune donnée n'est envoyée sur un serveur)
+  shared_preferences: ^2.3.2
+
+  # Permissions (localisation, contacts système)
+  permission_handler: ^11.3.1
+
+  # Widget sur l'écran d'accueil (Android AppWidget + iOS WidgetKit)
+  home_widget: ^0.7.0
+
+  # Raccourci « Alerte SOS » sur l'icône de l'application (appui long)
+  quick_actions: ^1.0.7
+
+  # Retour haptique pendant le décompte
+  vibration: ^2.0.0
+
+  # Écran allumé pendant une alerte
+  wakelock_plus: ^1.2.8
+
+  # `any` volontairement : flutter_localizations épingle intl à une version
+  # précise qui dépend de la version de Flutter installée.
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

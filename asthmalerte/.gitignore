@@ -1,0 +1,43 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# Fichiers régénérés par `flutter pub get`
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.h
+**/GeneratedPluginRegistrant.m
+**/GeneratedPluginRegistrant.swift
+ios/Flutter/ephemeral/
+
+# Android (projet généré par `flutter create`)
+android/.gradle/
+android/local.properties
+android/gradlew
+android/gradlew.bat
+android/gradle/
+android/app/build/
+*.jks
+*.keystore
+
+# iOS (projet généré par `flutter create`)
+ios/Pods/
+ios/Podfile.lock
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/.symlinks/
+**/*.xcuserdatad/
+**/xcuserdata/
+
+# Éditeurs
+.idea/
+.vscode/
+*.iml
+.DS_Store

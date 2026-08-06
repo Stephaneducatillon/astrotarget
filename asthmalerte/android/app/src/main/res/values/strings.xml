@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AsthmAlerte</string>
+    <string name="widget_title">SOS</string>
+    <string name="widget_default_subtitle">Prévenir mes proches</string>
+    <string name="widget_description">Bouton d\'alerte : prévient vos proches avec votre position.</string>
+    <string name="widget_content_description">Déclencher une alerte asthme</string>
+</resources>
