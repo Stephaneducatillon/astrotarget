@@ -65,7 +65,7 @@ est neutralisé pour qu'un geste involontaire n'annule pas l'alerte.
 
 Les projets Android et iOS sont versionnés : il n'y a rien à générer.
 Chaîne validée avec **Flutter 3.44.8** (Dart 3.12) — `flutter analyze` ne
-remonte aucun problème et les 16 tests passent.
+remonte aucun problème et les 30 tests passent.
 
 ```bash
 cd asthmalerte
@@ -170,16 +170,21 @@ asthmalerte/
 └── test/                            tests unitaires
 ```
 
-Les tests couvrent la construction du message d'alerte (position présente ou
-absente, options désactivées, modèle personnalisé) et la normalisation des
-numéros de téléphone : `flutter test`.
+Les 30 tests (`flutter test`) couvrent :
+
+- la construction du SMS — position présente ou absente, options désactivées,
+  modèle personnalisé, nom manquant ;
+- la normalisation des numéros de téléphone et la sérialisation des contacts ;
+- le rendu de chaque écran, avec un service d'alerte simulé ;
+- le parcours d'urgence complet : décompte, annulation, envoi immédiat,
+  écran de résultat et message « je vais mieux ».
 
 ## État de la vérification
 
 | Vérifié | Comment |
 |---|---|
 | Analyse statique de tout le code Dart | `flutter analyze` — 0 problème |
-| Logique du message et des numéros | `flutter test` — 16 tests au vert |
+| Logique métier et rendu de tous les écrans | `flutter test` — 30 tests au vert |
 | Manifeste, layouts et plists | validation XML / plist |
 | Compilation de l'APK et du binaire iOS | **pas encore faite** — à lancer sur votre machine |
 

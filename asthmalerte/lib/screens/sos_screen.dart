@@ -31,7 +31,7 @@ class _SosScreenState extends State<SosScreen> {
   @override
   void initState() {
     super.initState();
-    WakelockPlus.enable();
+    _keepScreenOn(true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.autoStart) _startCountdown();
     });
@@ -40,8 +40,18 @@ class _SosScreenState extends State<SosScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    WakelockPlus.disable();
+    _keepScreenOn(false);
     super.dispose();
+  }
+
+  /// Écran maintenu allumé pendant l'alerte. Un échec du plugin ne doit
+  /// jamais empêcher l'alerte de partir : on avale l'erreur.
+  Future<void> _keepScreenOn(bool on) async {
+    try {
+      await (on ? WakelockPlus.enable() : WakelockPlus.disable());
+    } catch (_) {
+      // Confort, pas une fonction vitale.
+    }
   }
 
   void _startCountdown() {

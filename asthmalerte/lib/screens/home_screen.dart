@@ -169,38 +169,42 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1D23) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border:
-              Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 30),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            if (badge != null) ...[
-              const SizedBox(height: 4),
+    // Material au-dessus, InkWell dedans : sinon l'onde de contact est peinte
+    // sur le Scaffold, sous la couleur de la tuile, et devient invisible.
+    return Material(
+      color: isDark ? const Color(0xFF1A1D23) : Colors.white,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+          child: Column(
+            children: [
+              Icon(icon, size: 30),
+              const SizedBox(height: 8),
               Text(
-                badge!,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                label,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
+              if (badge != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  badge!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
