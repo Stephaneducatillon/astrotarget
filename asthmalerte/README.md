@@ -63,47 +63,25 @@ est neutralisé pour qu'un geste involontaire n'annule pas l'alerte.
 
 ## Compiler et installer
 
-L'arborescence versionnée contient le code Dart et **les fichiers natifs
-spécifiques au projet**. Les projets Android/iOS générés (Gradle, Xcode) ne le
-sont pas — on les régénère en une commande.
+Les projets Android et iOS sont versionnés : il n'y a rien à générer.
+Chaîne validée avec **Flutter 3.44.8** (Dart 3.12) — `flutter analyze` ne
+remonte aucun problème et les 16 tests passent.
 
 ```bash
 cd asthmalerte
-
-# 1. Génère les projets natifs manquants sans toucher au code Dart
-flutter create --org com.astrotarget --project-name asthmalerte \
-  --platforms android,ios .
-
-# 2. Dépendances
 flutter pub get
-
-# 3. Vérifications
 flutter analyze
 flutter test
-
-# 4. Lancer sur un appareil connecté
-flutter run
+flutter run          # sur un appareil connecté
 ```
 
-> Si `flutter create` écrase un fichier livré ici (`AndroidManifest.xml`,
-> `Info.plist`…), restaurez-le : `git checkout -- asthmalerte/android asthmalerte/ios`.
+### Android
 
-### Réglages Android à vérifier
+`android/app/build.gradle.kts` est déjà configuré : `applicationId`
+`com.astrotarget.asthmalerte`, `minSdk 24`, `targetSdk 36` — au-dessus des
+minimums exigés par geolocator et permission_handler.
 
-Dans `android/app/build.gradle` (généré) :
-
-```gradle
-android {
-    namespace = "com.astrotarget.asthmalerte"
-    defaultConfig {
-        applicationId = "com.astrotarget.asthmalerte"
-        minSdk = 23          // requis par geolocator / permission_handler
-        targetSdk = 34
-    }
-}
-```
-
-Le widget fonctionne ensuite sans étape supplémentaire : appui long sur l'écran
+Le widget fonctionne sans étape supplémentaire : appui long sur l'écran
 d'accueil → **Widgets** → **AsthmAlerte** → glisser le carré rouge « SOS ».
 
 Générer l'APK :
@@ -195,3 +173,16 @@ asthmalerte/
 Les tests couvrent la construction du message d'alerte (position présente ou
 absente, options désactivées, modèle personnalisé) et la normalisation des
 numéros de téléphone : `flutter test`.
+
+## État de la vérification
+
+| Vérifié | Comment |
+|---|---|
+| Analyse statique de tout le code Dart | `flutter analyze` — 0 problème |
+| Logique du message et des numéros | `flutter test` — 16 tests au vert |
+| Manifeste, layouts et plists | validation XML / plist |
+| Compilation de l'APK et du binaire iOS | **pas encore faite** — à lancer sur votre machine |
+
+L'APK n'a pas pu être compilé dans l'environnement où le projet a été écrit
+(SDK Android inaccessible). Le premier `flutter build apk` peut donc encore
+révéler un détail de configuration Gradle ; le reste de la chaîne est vérifié.
