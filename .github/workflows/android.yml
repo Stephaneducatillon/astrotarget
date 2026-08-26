@@ -70,8 +70,26 @@ jobs:
             android/app/build/reports/lint-results-debug.html
           if-no-files-found: ignore
 
-      - name: Publication de l'APK
+      - name: Construction de l'APK de release signe
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRelease
+
+      - name: Verification de la signature
+        working-directory: android
+        run: |
+          APK=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
+          echo "APK : $APK ($(du -h "$APK" | cut -f1))"
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify --print-certs "$APK"
+
+      - name: Publication de l'APK de debogage
         uses: actions/upload-artifact@v4
         with:
           name: cielscore-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+
+      - name: Publication de l'APK de release
+        uses: actions/upload-artifact@v4
+        with:
+          name: cielscore-release-apk
+          path: android/app/build/outputs/apk/release/*.apk

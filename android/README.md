@@ -19,14 +19,55 @@ récent installe les deux.
 ```bash
 cd android
 ./gradlew assembleDebug          # APK de débogage
+./gradlew assembleRelease        # APK de release signé
 ./gradlew testDebugUnitTest      # 36 tests de conformité
-./gradlew installDebug           # installation sur un appareil connecté
+./gradlew installRelease         # installation sur un appareil connecté
 ```
 
-L'APK produit se trouve dans `app/build/outputs/apk/debug/`.
+Les APK produits se trouvent dans `app/build/outputs/apk/{debug,release}/`.
 
 La CI GitHub Actions (`.github/workflows/android.yml`) exécute les tests, Lint et
-la construction de l'APK à chaque push, et publie l'APK comme artefact.
+les deux constructions à chaque push, vérifie la signature de l'APK de release et
+publie les deux comme artefacts.
+
+### Installer l'APK de release
+
+Téléchargez l'artefact `cielscore-release-apk` depuis l'onglet Actions,
+décompressez-le et transférez l'APK sur le téléphone. Android demandera
+d'autoriser l'installation depuis cette source, l'application ne venant pas du
+Play Store.
+
+### Signature
+
+L'APK de release est signé avec la clé de **test** versionnée dans le dépôt,
+`keystore/cielscore-test.jks` :
+
+| | |
+|---|---|
+| Alias | `cielscore-test` |
+| Mot de passe du magasin et de la clé | `cielscore` |
+| Empreinte SHA-256 | `87:78:87:7B:AC:6F:8A:72:3C:D9:C4:89:2A:6B:D8:EA:68:22:56:DC:AA:91:41:35:41:D6:02:51:7A:A0:83:01` |
+
+Ses identifiants sont publics, exactement comme ceux du `debug.keystore` fourni
+avec le SDK Android. Elle existe pour que l'APK soit installable et, surtout,
+**mis à jour d'une version à l'autre sans désinstaller** : toutes les
+constructions partagent la même signature.
+
+> Cette clé ne doit jamais servir à publier l'application. N'importe qui peut
+> signer un APK avec elle, puisqu'elle est dans le dépôt.
+
+Pour une vraie distribution, fournissez votre propre clé par l'environnement —
+elle est alors utilisée à la place, sans jamais être versionnée :
+
+```bash
+export RELEASE_STORE_FILE=/chemin/vers/ma-cle.jks
+export RELEASE_STORE_PASSWORD=…
+export RELEASE_KEY_ALIAS=…
+export RELEASE_KEY_PASSWORD=…
+./gradlew assembleRelease
+```
+
+En intégration continue, les mêmes valeurs se placent dans les secrets du dépôt.
 
 ### Tester le moteur sans SDK Android
 
