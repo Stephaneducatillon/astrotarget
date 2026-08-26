@@ -27,15 +27,27 @@ cd android
 Les APK produits se trouvent dans `app/build/outputs/apk/{debug,release}/`.
 
 La CI GitHub Actions (`.github/workflows/android.yml`) exécute les tests, Lint et
-les deux constructions à chaque push, vérifie la signature de l'APK de release et
-publie les deux comme artefacts.
+les deux constructions à chaque push, vérifie la signature de l'APK de release,
+publie les deux comme artefacts et met à jour la Release `apk-latest`.
 
-### Installer l'APK de release
+### Installer l'application sur un téléphone
 
-Téléchargez l'artefact `cielscore-release-apk` depuis l'onglet Actions,
-décompressez-le et transférez l'APK sur le téléphone. Android demandera
-d'autoriser l'installation depuis cette source, l'application ne venant pas du
-Play Store.
+Le plus simple, sans compte GitHub ni décompression — lien permanent, toujours
+à jour :
+
+**https://github.com/Stephaneducatillon/astrotarget/releases/tag/apk-latest**
+
+Ouvrez cette page depuis le téléphone, téléchargez le fichier `.apk`, puis
+ouvrez-le. Android demandera d'autoriser l'installation depuis cette source,
+l'application ne venant pas du Play Store.
+
+La Release est reconstruite à chaque push : le lien ne change jamais, et comme
+toutes les constructions partagent la même signature, les versions suivantes
+s'installent par-dessus sans rien perdre.
+
+L'onglet Actions expose aussi les APK comme artefacts (`cielscore-release-apk`
+et `cielscore-debug-apk`), mais ils exigent d'être connecté à GitHub et arrivent
+sous forme de `.zip` à décompresser.
 
 ### Signature
 

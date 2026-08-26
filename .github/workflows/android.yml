@@ -21,6 +21,9 @@ jobs:
     name: Tests, Lint et APK
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Recuperation du depot
         uses: actions/checkout@v4
@@ -93,3 +96,49 @@ jobs:
         with:
           name: cielscore-release-apk
           path: android/app/build/outputs/apk/release/*.apk
+
+      # Une Release donne un lien de telechargement direct et permanent, sans
+      # compte GitHub ni decompression : c'est la voie a suivre pour installer
+      # l'application sur un telephone.
+      - name: Publication de la Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' android/app/build.gradle.kts)
+          APK=$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)
+          NAME="cielscore-$VERSION.apk"
+          cp "$APK" "$NAME"
+
+          {
+            echo "Application Android CielScore, version $VERSION."
+            echo
+            echo "**Telechargez \`$NAME\` ci-dessous**, puis ouvrez le fichier sur"
+            echo "votre telephone. Android demandera d'autoriser l'installation depuis"
+            echo "cette source, l'application ne venant pas du Play Store."
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | $VERSION |"
+            echo "| Commit | \`${GITHUB_SHA:0:7}\` |"
+            echo "| Taille | $(du -h "$NAME" | cut -f1) |"
+            echo "| Android minimum | 8.0 (API 26) |"
+            echo
+            echo "Signe avec la cle de test du depot : les mises a jour s'installent"
+            echo "par-dessus, sans desinstallation prealable."
+            echo
+            echo "Les fonctions IA et l'image du jour demandent une cle d'API,"
+            echo "a renseigner dans l'onglet Profil. Le reste fonctionne sans."
+          } > notes.md
+
+          # La Release est recreee a chaque construction : le lien reste identique.
+          gh release delete apk-latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create apk-latest "$NAME" \
+            --title "CielScore $VERSION — derniere construction" \
+            --notes-file notes.md \
+            --prerelease \
+            --target "$GITHUB_SHA"
+
+          echo "Telechargement direct :"
+          echo "  https://github.com/$GITHUB_REPOSITORY/releases/download/apk-latest/$NAME"
