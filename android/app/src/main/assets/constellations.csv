@@ -1,0 +1,32 @@
+abbr;name_fr;segments
+UMa;Grande Ourse;eta_UMa>zet_UMa,zet_UMa>eps_UMa,eps_UMa>del_UMa,del_UMa>gam_UMa,gam_UMa>bet_UMa,bet_UMa>alp_UMa,alp_UMa>del_UMa
+UMi;Petite Ourse;alp_UMi>del_UMi,del_UMi>eps_UMi,eps_UMi>zet_UMi,zet_UMi>bet_UMi,bet_UMi>gam_UMi,gam_UMi>eta_UMi,eta_UMi>zet_UMi
+Cas;Cassiopee;bet_Cas>alp_Cas,alp_Cas>gam_Cas,gam_Cas>del_Cas,del_Cas>eps_Cas
+Cep;Cephee;alp_Cep>bet_Cep,bet_Cep>gam_Cep,gam_Cep>iot_Cep,iot_Cep>zet_Cep,zet_Cep>alp_Cep,alp_Cep>eta_Cep
+Dra;Dragon;gam_Dra>bet_Dra,bet_Dra>xi__Dra,xi__Dra>gam_Dra,xi__Dra>del_Dra,del_Dra>eps_Dra,eps_Dra>chi_Dra,zet_Dra>eta_Dra,eta_Dra>the_Dra_x
+Cyg;Cygne;alp_Cyg>gam_Cyg,gam_Cyg>bet_Cyg,del_Cyg>gam_Cyg,gam_Cyg>eps_Cyg
+Lyr;Lyre;alp_Lyr>zet_Lyr,zet_Lyr>del_Lyr,del_Lyr>gam_Lyr,gam_Lyr>bet_Lyr,bet_Lyr>zet_Lyr
+Aql;Aigle;gam_Aql>alp_Aql,alp_Aql>bet_Aql,gam_Aql>del_Aql,del_Aql>lam_Aql,zet_Aql>eps_Aql,zet_Aql>del_Aql,bet_Aql>the_Aql,the_Aql>eta_Aql
+Boo;Bouvier;alp_Boo>eta_Boo,alp_Boo>eps_Boo,eps_Boo>del_Boo,del_Boo>bet_Boo,bet_Boo>gam_Boo,gam_Boo>rho_Boo,rho_Boo>alp_Boo,alp_Boo>zet_Boo
+CrB;Couronne boreale;the_CrB>bet_CrB,bet_CrB>alp_CrB,alp_CrB>gam_CrB,gam_CrB>del_CrB,del_CrB>eps_CrB,eps_CrB>iot_CrB
+Her;Hercule;alp_Her>bet_Her,bet_Her>gam_Her,bet_Her>zet_Her,zet_Her>eps_Her,eps_Her>del_Her,del_Her>alp_Her,zet_Her>eta_Her,eta_Her>pi__Her,pi__Her>eps_Her,pi__Her>rho_Her,rho_Her>the_Her,del_Her>xi__Her
+Per;Persee;alp_Per>gam_Per,gam_Per>eta_Per,alp_Per>del_Per,del_Per>eps_Per,eps_Per>zet_Per,alp_Per>rho_Per,rho_Per>bet_Per,eps_Per>xi__Per
+Aur;Cocher;alp_Aur>bet_Aur,bet_Aur>the_Aur,the_Aur>bet_Tau,bet_Tau>iot_Aur,iot_Aur>eps_Aur,eps_Aur>alp_Aur,eps_Aur>eta_Aur,eta_Aur>zet_Aur
+Tau;Taureau;bet_Tau>eps_Tau,eps_Tau>alp_Tau,alp_Tau>the_Tau,the_Tau>gam_Tau,gam_Tau>lam_Tau,gam_Tau>del_Tau,del_Tau>eps_Tau,zet_Tau>alp_Tau
+Ori;Orion;alp_Ori>lam_Ori,lam_Ori>gam_Ori,gam_Ori>del_Ori,del_Ori>eps_Ori,eps_Ori>zet_Ori,zet_Ori>alp_Ori,del_Ori>bet_Ori,zet_Ori>kap_Ori,bet_Ori>eta_Ori,eta_Ori>del_Ori,gam_Ori>pi3_Ori,eps_Ori>iot_Ori
+Gem;Gemeaux;alp_Gem>bet_Gem,alp_Gem>eta_Gem,eta_Gem>mu__Gem,bet_Gem>del_Gem,del_Gem>zet_Gem,zet_Gem>gam_Gem,del_Gem>lam_Gem,gam_Gem>xi__Gem,alp_Gem>eps_Gem
+CMa;Grand Chien;alp_CMa>bet_CMa,alp_CMa>gam_CMa,alp_CMa>om2_CMa,om2_CMa>del_CMa,del_CMa>eta_CMa,del_CMa>eps_CMa,eps_CMa>zet_CMa,zet_CMa>bet_CMa
+CMi;Petit Chien;alp_CMi>bet_CMi
+Leo;Lion;alp_Leo>eta_Leo,eta_Leo>gam_Leo,gam_Leo>zet_Leo,zet_Leo>mu__Leo,mu__Leo>eps_Leo,alp_Leo>the_Leo,the_Leo>del_Leo,del_Leo>gam_Leo,the_Leo>bet_Leo,bet_Leo>del_Leo
+Vir;Vierge;alp_Vir>gam_Vir,gam_Vir>eta_Vir,eta_Vir>bet_Vir,gam_Vir>del_Vir,del_Vir>eps_Vir,alp_Vir>zet_Vir,zet_Vir>del_Vir
+Sco;Scorpion;bet_Sco>del_Sco,del_Sco>pi__Sco,del_Sco>sig_Sco,sig_Sco>alp_Sco,alp_Sco>tau_Sco,tau_Sco>eps_Sco,eps_Sco>mu__Sco,mu__Sco>zet_Sco,zet_Sco>eta_Sco,eta_Sco>the_Sco,the_Sco>iot_Sco,iot_Sco>kap_Sco,kap_Sco>lam_Sco,lam_Sco>ups_Sco
+Sgr;Sagittaire;gam_Sgr>del_Sgr,del_Sgr>eps_Sgr,del_Sgr>lam_Sgr,lam_Sgr>phi_Sgr,phi_Sgr>sig_Sgr,sig_Sgr>tau_Sgr,tau_Sgr>zet_Sgr,zet_Sgr>phi_Sgr,eps_Sgr>eta_Sgr,zet_Sgr>eps_Sgr,sig_Sgr>pi__Sgr
+And;Andromede;alp_And>del_And,del_And>bet_And,bet_And>gam_And,del_And>mu__And,mu__And>nu__And
+Peg;Pegase;alp_Peg>bet_Peg,bet_Peg>alp_And,alp_And>gam_Peg,gam_Peg>alp_Peg,bet_Peg>eta_Peg,eta_Peg>mu__Peg,alp_Peg>zet_Peg,zet_Peg>the_Peg,the_Peg>eps_Peg
+Ari;Belier;alp_Ari>bet_Ari,bet_Ari>gam_Ari,alp_Ari>f41_Ari
+Cnc;Cancer;bet_Cnc>del_Cnc,del_Cnc>gam_Cnc,gam_Cnc>iot_Cnc,del_Cnc>alp_Cnc
+Cet;Baleine;alp_Cet>gam_Cet,gam_Cet>del_Cet,del_Cet>zet_Cet,zet_Cet>tau_Cet,tau_Cet>bet_Cet,bet_Cet>iot_Cet,iot_Cet>eta_Cet,eta_Cet>the_Cet,the_Cet>zet_Cet
+Oph;Ophiuchus;alp_Oph>kap_Oph,kap_Oph>lam_Oph,lam_Oph>del_Oph,del_Oph>eps_Oph,eps_Oph>zet_Oph,zet_Oph>eta_Oph,eta_Oph>bet_Oph,bet_Oph>alp_Oph,eta_Oph>nu__Oph,bet_Oph>gam_Oph
+Psc;Poissons;alp_Psc>omi_Psc,omi_Psc>eta_Psc,eta_Psc>eps_Psc,eps_Psc>del_Psc,del_Psc>ome_Psc,ome_Psc>iot_Psc,iot_Psc>the_Psc,the_Psc>gam_Psc,alp_Psc>nu__Psc,nu__Psc>mu__Psc,mu__Psc>xi__Psc
+Cap;Capricorne;al2_Cap>bet_Cap,bet_Cap>psi_Cap,psi_Cap>ome_Cap,ome_Cap>zet_Cap,zet_Cap>del_Cap,del_Cap>gam_Cap,gam_Cap>the_Cap,the_Cap>al2_Cap
+Aqr;Verseau;bet_Aqr>alp_Aqr,alp_Aqr>gam_Aqr,gam_Aqr>zet_Aqr,zet_Aqr>eta_Aqr,gam_Aqr>lam_Aqr,lam_Aqr>phi_Aqr,lam_Aqr>del_Aqr,bet_Aqr>eps_Aqr,alp_Aqr>the_Aqr
