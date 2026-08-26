@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -43,6 +44,7 @@ import com.cielscore.app.scoring.Formulas
 import com.cielscore.app.ui.AppUiState
 import com.cielscore.app.ui.AppViewModel
 import com.cielscore.app.ui.components.Chip
+import com.cielscore.app.ui.components.DateTimeSelector
 import com.cielscore.app.ui.components.LabeledValue
 import com.cielscore.app.ui.components.ObjectSheet
 import com.cielscore.app.ui.components.ScoreBadge
@@ -347,18 +349,32 @@ private fun CatalogCard(viewModel: AppViewModel, state: AppUiState) {
 
 @Composable
 private fun ComputeCard(viewModel: AppViewModel, state: AppUiState) {
-    SectionCard(title = "Session", subtitle = formatDateTime(state.params.epochMillis)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = {
-                viewModel.updateParams { it.copy(epochMillis = System.currentTimeMillis()) }
-            }) { Text("Maintenant") }
-            TextButton(onClick = {
-                viewModel.updateParams { it.copy(epochMillis = it.epochMillis - 3_600_000L) }
-            }) { Text("−1 h") }
-            TextButton(onClick = {
-                viewModel.updateParams { it.copy(epochMillis = it.epochMillis + 3_600_000L) }
-            }) { Text("+1 h") }
+    SectionCard(
+        title = "Session",
+        subtitle = "Date et heure locales de l'observation",
+    ) {
+        DateTimeSelector(
+            epochMillis = state.params.epochMillis,
+            onChange = { chosen ->
+                viewModel.updateParams { it.copy(epochMillis = chosen) }
+            },
+        )
+
+        // Rappel de l'etat du ciel a l'instant choisi : la reponse est
+        // immediate, sans attendre le calcul du Top.
+        state.night?.let { night ->
+            Row(
+                Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Chip(
+                    night.currentPhase.label,
+                    Color(night.currentPhase.colorArgb).copy(alpha = 0.28f),
+                )
+                Chip("Soleil %.0f°".format(state.sunAltitudeDeg))
+            }
         }
+
         Button(
             onClick = viewModel::computeSession,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

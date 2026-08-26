@@ -60,15 +60,18 @@ kotlinc -cp "$RUNTIME_CP" -d "$WORK/classes" \
   "$SRC/catalog/SkyObject.kt" \
   "$SRC/catalog/CommuneIndex.kt" \
   "$SRC/model/SessionModels.kt" \
-  "$SRC/model/SmartTelescope.kt"
+  "$SRC/model/SmartTelescope.kt" \
+  "$SRC/model/SessionInstant.kt"
 
 echo "Compilation des tests"
 kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
   "$TEST/DocumentationConformanceTest.kt" \
-  "$TEST/CommuneIndexTest.kt"
+  "$TEST/CommuneIndexTest.kt" \
+  "$TEST/SessionInstantTest.kt"
 
 echo "Execution"
 java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
   org.junit.runner.JUnitCore \
   com.cielscore.app.DocumentationConformanceTest \
-  com.cielscore.app.CommuneIndexTest
+  com.cielscore.app.CommuneIndexTest \
+  com.cielscore.app.SessionInstantTest
