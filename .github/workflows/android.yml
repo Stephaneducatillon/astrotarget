@@ -16,6 +16,13 @@ on:
       - ".github/workflows/android.yml"
   workflow_dispatch:
 
+# Une seule construction a la fois par branche : un nouveau push annule celle
+# qui la precede au lieu de s'empiler derriere. Evite les files d'attente qui
+# se bloquent, et rend la derniere construction toujours prioritaire.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Tests, Lint et APK
