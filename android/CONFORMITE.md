@@ -11,7 +11,7 @@ v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
 
 | Section | Élément | Où c'est implémenté |
 |---|---|---|
-| 2.1 → 2.8 | Les 8 onglets et leur accès public / connecté | `ui/screens/`, `MainActivity.kt` |
+| 2.1 → 2.8 | Les onglets et leur accès public / connecté (voir 3.4 pour Équipement) | `ui/screens/`, `MainActivity.kt` |
 | 3.2 | Les trois vues du panneau latéral | `ui/components/ObjectSheet.kt` |
 | 3.3 | Règles d'affichage de la carte (alt > 2°, > 0°, > 5°, Lune > 2°) | `ui/components/SkyMapView.kt` |
 | 3.4 | Projection azimutale équidistante | `astro/SkyProjection.kt` |
@@ -47,7 +47,7 @@ l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé
 | Sujet | Décision retenue |
 |---|---|
 | Architecture | Application Android native (Kotlin + Jetpack Compose), calculs embarqués. Aucune dépendance au code Python. |
-| Périmètre | Les 8 onglets **et** la carte du ciel interactive. |
+| Périmètre | Les onglets du document **et** la carte du ciel interactive. |
 | Lieu et Bortle | Fichier `communes_bortle.csv` embarqué : recherche et rattachement GPS hors ligne, indice de Bortle ajustable. |
 | Comptes | Compte et carnet 100 % locaux (Room), clés d'API saisies dans le Profil. |
 | Smart télescopes | Seuls les **7 modèles détaillés** au tableau 5.9 sont intégrés. |
@@ -134,12 +134,36 @@ Le §3.3 annonce 174 étoiles et 113 segments sans fournir les données.
 | §9.3 Restauration de la base depuis un dépôt distant | Sauvegarde Android (`backup_rules.xml`) ; aucune base distante |
 | §1.2 Hébergement Hugging Face Spaces | APK construit par GitHub Actions |
 | §8.2 API Géo en ligne | Inutile : les communes sont embarquées, la recherche est hors ligne |
-| §2.5 Diagnostic par focale d'oculaire | Table de 8 focales usuelles, champ apparent 52° |
 
 Le module Caldwell mérite une note : construit depuis OpenNGC par
 correspondance C# → NGC/IC comme le prévoit le §8.1, il ne donne que **106**
 objets, car C9 (Sh2-155), C41 (Hyades) et C99 (Coalsack) n'ont pas d'entrée
 NGC/IC. Les trois sont ajoutés explicitement pour atteindre les **109** annoncés.
+
+---
+
+### 3.4 Onglet Équipement retiré
+
+Le §2.5 décrit un onglet **Équipement** (oculaires, astrophotographie, smart
+télescopes). Il a été **retiré à votre demande**, faute d'utilité au quotidien,
+avec l'intention de le rétablir plus tard.
+
+L'application compte donc **7 onglets** au lieu de 8. Rien d'autre n'est
+affecté : les formules des §5.7 et §5.8 (grossissement, champ réel, pupille de
+sortie, F/D effectif, échantillonnage, bornes de Shannon) restent implémentées
+dans `scoring/Formulas.kt` et couvertes par les tests, et les smart télescopes
+restent sélectionnables depuis le Dashboard, avec leur formule de score du §6.4.
+
+Pour le rétablir, l'écran est intact dans l'historique Git :
+
+```bash
+git log --oneline --diff-filter=D -- '*EquipmentScreen.kt'   # trouver le commit
+git show <commit>^:android/app/src/main/java/com/cielscore/app/ui/screens/EquipmentScreen.kt \
+  > android/app/src/main/java/com/cielscore/app/ui/screens/EquipmentScreen.kt
+```
+
+Il reste ensuite à réintroduire l'entrée `EQUIPMENT` dans l'énumération
+`AppTab` de `MainActivity.kt` et sa branche dans le `when`.
 
 ---
 

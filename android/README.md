@@ -94,7 +94,7 @@ Kotlin, téléchargé depuis Maven Central :
 
 ## Ce que fait l'application
 
-### Les huit onglets
+### Les onglets
 
 | Onglet | Accès | Fonction |
 |---|---|---|
@@ -102,7 +102,6 @@ Kotlin, téléchargé depuis Maven Central :
 | **Dashboard** | connecté | Choix du lieu parmi 34 869 communes, réglage de l'instrument, calcul du Top 20 des cibles, fiche objet détaillée |
 | **Explorer** | connecté | Recherche libre dans les catalogues, filtres par catalogue et par type |
 | **Sessions** | connecté | Plan de soirée IA, export PDF, enregistrement d'observation, carnet |
-| **Équipement** | connecté | Oculaires, astrophotographie, smart télescopes |
 | **Statistiques** | connecté | Compteurs, progression Messier et Caldwell, heatmap sur 12 mois, favoris |
 | **Assistant IA** | connecté | Chat avec injection du contexte réel de la session |
 | **Profil** | public | Connexion, inscription, récupération, clés d'API, mode nuit |

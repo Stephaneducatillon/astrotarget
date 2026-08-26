@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,7 +49,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cielscore.app.ui.AppViewModel
 import com.cielscore.app.ui.screens.AssistantScreen
 import com.cielscore.app.ui.screens.DashboardScreen
-import com.cielscore.app.ui.screens.EquipmentScreen
 import com.cielscore.app.ui.screens.ExplorerScreen
 import com.cielscore.app.ui.screens.InformationScreen
 import com.cielscore.app.ui.screens.ProfileScreen
@@ -77,7 +75,6 @@ enum class AppTab(
     DASHBOARD("Dashboard", "Cibles", Icons.Filled.Star, true),
     EXPLORER("Explorer", "Explorer", Icons.Filled.Explore, true),
     SESSIONS("Sessions", "Sessions", Icons.Filled.NightsStay, true),
-    EQUIPMENT("Equipement", "Materiel", Icons.Filled.Visibility, true),
     STATISTICS("Statistiques", "Stats", Icons.Filled.Insights, true),
     ASSISTANT("Assistant IA", "Assistant", Icons.Filled.Chat, true),
     PROFILE("Profil", "Profil", Icons.Filled.Person, false),
@@ -166,7 +163,6 @@ private fun CielScoreApp() {
                         AppTab.DASHBOARD -> DashboardScreen(viewModel, state)
                         AppTab.EXPLORER -> ExplorerScreen(viewModel, state)
                         AppTab.SESSIONS -> SessionsScreen(viewModel, state)
-                        AppTab.EQUIPMENT -> EquipmentScreen(state)
                         AppTab.STATISTICS -> StatisticsScreen(viewModel, state)
                         AppTab.ASSISTANT -> AssistantScreen(viewModel, state)
                         AppTab.PROFILE -> ProfileScreen(viewModel, state)
