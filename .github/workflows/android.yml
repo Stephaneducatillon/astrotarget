@@ -18,7 +18,7 @@ on:
 
 jobs:
   build:
-    name: Tests unitaires et APK de debogage
+    name: Tests, Lint et APK
     runs-on: ubuntu-latest
 
     steps:
