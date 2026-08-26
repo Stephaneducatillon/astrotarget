@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.cielscore.app.ui.screens
 
 import android.Manifest
@@ -8,6 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -197,7 +201,11 @@ private fun SiteCard(viewModel: AppViewModel, state: AppUiState) {
 @Composable
 private fun InstrumentCard(viewModel: AppViewModel, state: AppUiState) {
     SectionCard(title = "Instrument") {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        // FlowRow : les puces passent a la ligne au lieu d'etre comprimees.
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             InstrumentType.entries.forEach { type ->
                 FilterChip(
                     selected = state.params.instrument == type && !state.params.isSmartMode ||
@@ -224,35 +232,45 @@ private fun InstrumentCard(viewModel: AppViewModel, state: AppUiState) {
 
         if (state.params.isSmartMode) {
             Column(Modifier.padding(top = 10.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SmartTelescope.CATALOG.take(4).forEach { scope ->
-                        FilterChip(
-                            selected = state.params.smartTelescope?.name == scope.name,
-                            onClick = {
-                                viewModel.updateParams { it.copy(smartTelescope = scope) }
-                            },
-                            label = {
-                                Text(scope.model, style = MaterialTheme.typography.labelSmall)
-                            },
-                        )
-                    }
-                }
-                Row(
-                    Modifier.padding(top = 4.dp),
+                // Une seule rangee fluide : la liste peut s'allonger sans casser
+                // la mise en page.
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    SmartTelescope.CATALOG.drop(4).forEach { scope ->
+                    SmartTelescope.CATALOG.forEach { scope ->
                         FilterChip(
                             selected = state.params.smartTelescope?.name == scope.name,
                             onClick = {
                                 viewModel.updateParams { it.copy(smartTelescope = scope) }
                             },
                             label = {
-                                Text(scope.model, style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    scope.model,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                )
                             },
                         )
                     }
                 }
+
+                // Rappel des caracteristiques du modele retenu.
+                state.params.smartTelescope?.let { scope ->
+                    Text(
+                        "%s — %.0f mm f/%.1f — champ %.0f' x %.0f'".format(
+                            scope.brand,
+                            scope.diameterMm,
+                            scope.focalRatio,
+                            scope.fieldWidthArcmin,
+                            scope.fieldHeightArcmin,
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+
                 Text(
                     "Duree de pose cumulee : %.0f min".format(state.params.smartExposureMinutes),
                     style = MaterialTheme.typography.bodySmall,
@@ -327,7 +345,10 @@ private fun ParamSlider(
 @Composable
 private fun CatalogCard(viewModel: AppViewModel, state: AppUiState) {
     SectionCard(title = "Catalogues") {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Catalog.entries.forEach { catalog ->
                 val enabled = catalog != Catalog.PLANETS || !state.params.isSmartMode
                 FilterChip(
