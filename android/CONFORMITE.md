@@ -52,10 +52,16 @@ l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé
 | Smart télescopes | Seuls les **7 modèles détaillés** au tableau 5.9 sont intégrés. |
 | Carte du ciel | Figures de constellations **complètes** (358 étoiles, 239 segments) plutôt que les 174 / 113 du §3.3. |
 | Objets sans dimensions | Consultables dans l'Explorer, exclus du Top du Dashboard. |
+| Formule du §5.9 | La **formule** fait foi, pas le tableau qui l'accompagne (voir 3.1). |
+| Seuil des planètes brillantes | **−3°** de hauteur du Soleil, valeur de RG-P-03 (voir 3.1). |
+| Critères non définis | Définitions retenues pour « Fenêtre », F/D et champ (voir 3.2). |
 
 ---
 
 ## 3. Écarts par rapport au document
+
+Les trois points ci-dessous ont été **soumis et arbitrés** : les choix décrits
+sont ceux retenus dans l'application, et non des options ouvertes.
 
 ### 3.1 Incohérences internes au document
 
@@ -71,10 +77,12 @@ le tableau annonce **12,6**. L'écart est d'environ **+0,9 magnitude** sur tous 
 modèles (+1,3 pour le S30). Le terme constant qui reproduirait le tableau serait
 ≈ 2,95 au lieu de 2,1.
 
-→ **L'application applique la formule**, qui est l'élément normatif. Les
-magnitudes limites affichées sont donc inférieures d'environ 0,9 à celles du
-tableau. Corriger la constante dans `Formulas.smartTelescopeLimitingMagnitude`
-suffirait à basculer sur le tableau.
+→ **Arbitrage retenu : l'application applique la formule**, qui est l'élément
+normatif. Les magnitudes limites affichées sont donc inférieures d'environ 0,9 à
+celles du tableau du §5.9, qui est à considérer comme illustratif.
+
+Pour mémoire, si ce choix devait un jour être revu : porter la constante `2.1` à
+≈ 2,95 dans `Formulas.smartTelescopeLimitingMagnitude` reproduirait le tableau.
 
 **Le §2.5 annonce 12 smart télescopes, le §5.9 n'en détaille que 7.**
 → Les 7 documentés sont intégrés (décision validée).
@@ -82,21 +90,21 @@ suffirait à basculer sur le tableau.
 **Le §4.2 et la règle RG-P-03 divergent sur le seuil des planètes brillantes.**
 Le tableau du §4.2 place Vénus et Jupiter dès le crépuscule civil (Soleil à 0°),
 RG-P-03 précise « (−3°) ».
-→ L'application retient **−3°**, la règle nommée étant la plus spécifique.
+→ **Arbitrage retenu : −3°**, la règle nommée étant la plus spécifique.
 
 ### 3.2 Éléments que le document ne définit pas
 
 **Le critère « Fenêtre » (§6.1, 15 %).**
 Le document donne `min(durée_min / 240, 1) × 100` sans définir `durée_min`.
-→ Retenu : **le temps passé au-dessus de 30° (seuil optimal du §2.2) pendant que
-le Soleil est sous l'horizon, évalué sur les 10 heures suivant l'heure de
-session** — la même fenêtre que la courbe d'altitude du §2.2.
+→ **Arbitrage retenu : le temps passé au-dessus de 30° (seuil optimal du §2.2)
+pendant que le Soleil est sous l'horizon, évalué sur les 10 heures suivant
+l'heure de session** — la même fenêtre que la courbe d'altitude du §2.2.
 Voir `ScoringEngine.observationWindowMinutes`.
 
 **Les critères F/D et champ du score smart télescope (§6.4, 5 % chacun).**
 Le document énonce les principes (« bonus F/D court », « grand champ favorable
 aux nébuleuses étendues ») sans formule.
-→ Retenu :
+→ **Arbitrage retenu :**
 - F/D : `clip((8 − F/D) / 6, 0, 1) × 100`, soit 100 à F/2 et 0 à partir de F/8 ;
 - champ : maximum lorsque l'objet occupe la moitié du champ, nul s'il est
   ponctuel ou plus grand que le champ.
