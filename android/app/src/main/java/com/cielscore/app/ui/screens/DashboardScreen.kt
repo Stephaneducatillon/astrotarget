@@ -258,13 +258,22 @@ private fun InstrumentCard(viewModel: AppViewModel, state: AppUiState) {
                 // Rappel des caracteristiques du modele retenu.
                 state.params.smartTelescope?.let { scope ->
                     Text(
-                        "%s — %.0f mm f/%.1f — champ %.0f' x %.0f'".format(
-                            scope.brand,
-                            scope.diameterMm,
-                            scope.focalRatio,
-                            scope.fieldWidthArcmin,
-                            scope.fieldHeightArcmin,
-                        ),
+                        buildString {
+                            append(
+                                "%s — %.0f mm f/%.1f — champ %.0f' x %.0f'".format(
+                                    scope.brand,
+                                    scope.diameterMm,
+                                    scope.focalRatio,
+                                    scope.fieldWidthArcmin,
+                                    scope.fieldHeightArcmin,
+                                )
+                            )
+                            if (scope.sensorName.isNotBlank()) {
+                                append(" — %s a %.2f \"/px".format(
+                                    scope.sensorName, scope.samplingArcsecPerPixel
+                                ))
+                            }
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp),

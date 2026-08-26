@@ -67,11 +67,13 @@ echo "Compilation des tests"
 kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
   "$TEST/DocumentationConformanceTest.kt" \
   "$TEST/CommuneIndexTest.kt" \
-  "$TEST/SessionInstantTest.kt"
+  "$TEST/SessionInstantTest.kt" \
+  "$TEST/SmartTelescopeCatalogTest.kt"
 
 echo "Execution"
 java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
   org.junit.runner.JUnitCore \
   com.cielscore.app.DocumentationConformanceTest \
   com.cielscore.app.CommuneIndexTest \
-  com.cielscore.app.SessionInstantTest
+  com.cielscore.app.SessionInstantTest \
+  com.cielscore.app.SmartTelescopeCatalogTest

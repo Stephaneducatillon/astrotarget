@@ -18,6 +18,8 @@ data class SmartTelescope(
     val sensorWidthMm: Double,
     val sensorHeightMm: Double,
     val pixelSizeUm: Double,
+    /** Reference du capteur, quand elle est connue : IMX585, IMX462... */
+    val sensorName: String = "",
 ) {
     val name: String get() = "$brand $model"
 
@@ -31,32 +33,47 @@ data class SmartTelescope(
     val fieldHeightArcmin: Double
         get() = Formulas.sensorFieldDeg(sensorHeightMm, focalMm) * 60.0
 
+    /** Echantillonnage, en secondes d'arc par pixel (section 5.8). */
+    val samplingArcsecPerPixel: Double
+        get() = Formulas.samplingArcsecPerPixel(pixelSizeUm, focalMm)
+
     /** Section 5.9 — magnitude limite selon la duree de pose et le Bortle. */
     fun limitingMagnitude(exposureMinutes: Double, bortle: Int): Double =
         Formulas.smartTelescopeLimitingMagnitude(diameterMm, exposureMinutes * 60.0, bortle)
 
     companion object {
         /**
-         * Les sept modeles du tableau de la section 5.9, dans l'ordre du document.
+         * Modeles proposes par l'application.
          *
-         * ATTENTION — la documentation ne fournit que le DIAMETRE de chaque
-         * modele. La focale, les dimensions du capteur et la taille de pixel
-         * proviennent des specifications constructeur : elles sont necessaires
-         * au module Equipement (section 2.5 : « ouverture, focale, capteur,
-         * champ ») et aux criteres F/D et champ du score smart telescope
-         * (section 6.4), mais elles ne sont PAS issues du document.
-         * Ce tableau est volontairement isole pour etre corrige d'un seul geste.
+         * Les sept premiers, marques (5.9), sont ceux du tableau de la
+         * section 5.9 ; les deux Pro ont ete ajoutes a la demande de
+         * l'utilisateur, le document ne les connaissant pas.
          *
-         *   marque, modele, diametre mm, focale mm, capteur L mm, capteur H mm, pixel um
+         * ATTENTION SUR LA PROVENANCE — la documentation ne fournit que le
+         * DIAMETRE de chaque modele, seule grandeur dont depende la magnitude
+         * limite de la section 5.9. La focale, le capteur et la taille de pixel
+         * proviennent des specifications constructeur : ils ne servent qu'aux
+         * criteres F/D et champ du score smart telescope (section 6.4, 5 %
+         * chacun) et a l'affichage. Ce tableau est volontairement isole pour
+         * etre corrige d'un seul geste.
+         *
+         * Les dimensions du capteur IMX585 sont deduites de sa definition,
+         * 3856 x 2180 pixels au pas de 2,9 um, soit 11,18 x 6,32 mm : la
+         * diagonale obtenue, 12,85 mm, correspond bien au format 1/1,2 pouce.
+         *
+         *   marque, modele, diametre mm, focale mm, capteur L mm, capteur H mm,
+         *   pixel um, capteur
          */
         val CATALOG: List<SmartTelescope> = listOf(
-            SmartTelescope("ZWO", "Seestar S30", 30.0, 150.0, 5.6, 3.2, 2.9),
-            SmartTelescope("ZWO", "Seestar S50", 50.0, 250.0, 5.6, 3.2, 2.9),
-            SmartTelescope("Vaonis", "Vespera II", 50.0, 250.0, 8.4, 4.7, 2.9),
-            SmartTelescope("Vaonis", "Stellina", 80.0, 400.0, 7.4, 5.0, 2.4),
-            SmartTelescope("Unistellar", "Odyssey Pro", 85.0, 320.0, 7.4, 4.2, 2.9),
-            SmartTelescope("Unistellar", "eVscope 2", 114.0, 450.0, 7.4, 4.2, 2.9),
-            SmartTelescope("Celestron", "Origin Mk II", 152.0, 335.0, 7.4, 5.0, 2.4),
+            SmartTelescope("ZWO", "Seestar S30", 30.0, 150.0, 5.6, 3.2, 2.9, "IMX662"),        // 5.9
+            SmartTelescope("ZWO", "Seestar S30 Pro", 30.0, 150.0, 11.18, 6.32, 2.9, "IMX585"),
+            SmartTelescope("ZWO", "Seestar S50", 50.0, 250.0, 5.6, 3.2, 2.9, "IMX462"),        // 5.9
+            SmartTelescope("ZWO", "Seestar S50 Pro", 50.0, 260.0, 11.18, 6.32, 2.9, "IMX585"),
+            SmartTelescope("Vaonis", "Vespera II", 50.0, 250.0, 8.4, 4.7, 2.9, ""),            // 5.9
+            SmartTelescope("Vaonis", "Stellina", 80.0, 400.0, 7.4, 5.0, 2.4, "IMX178"),        // 5.9
+            SmartTelescope("Unistellar", "Odyssey Pro", 85.0, 320.0, 7.4, 4.2, 2.9, "IMX347"), // 5.9
+            SmartTelescope("Unistellar", "eVscope 2", 114.0, 450.0, 7.4, 4.2, 2.9, "IMX347"),  // 5.9
+            SmartTelescope("Celestron", "Origin Mk II", 152.0, 335.0, 7.4, 5.0, 2.4, "IMX178"),// 5.9
         )
     }
 }

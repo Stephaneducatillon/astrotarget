@@ -50,7 +50,7 @@ l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé
 | Périmètre | Les onglets du document **et** la carte du ciel interactive. |
 | Lieu et Bortle | Fichier `communes_bortle.csv` embarqué : recherche et rattachement GPS hors ligne, indice de Bortle ajustable. |
 | Comptes | Compte et carnet 100 % locaux (Room), clés d'API saisies dans le Profil. |
-| Smart télescopes | Seuls les **7 modèles détaillés** au tableau 5.9 sont intégrés. |
+| Smart télescopes | Les **7 modèles détaillés** au tableau 5.9, plus les 2 Seestar Pro ajoutés ensuite (voir 3.5). |
 | Carte du ciel | Figures de constellations **complètes** (358 étoiles, 239 segments) plutôt que les 174 / 113 du §3.3. |
 | Objets sans dimensions | Consultables dans l'Explorer, exclus du Top du Dashboard. |
 | Formule du §5.9 | La **formule** fait foi, pas le tableau qui l'accompagne (voir 3.1). |
@@ -86,7 +86,9 @@ Pour mémoire, si ce choix devait un jour être revu : porter la constante `2.1`
 ≈ 2,95 dans `Formulas.smartTelescopeLimitingMagnitude` reproduirait le tableau.
 
 **Le §2.5 annonce 12 smart télescopes, le §5.9 n'en détaille que 7.**
-→ Les 7 documentés sont intégrés (décision validée).
+→ Les 7 documentés ont d'abord été intégrés seuls (décision validée), puis
+2 modèles récents s'y sont ajoutés à votre demande (voir 3.5) : le catalogue
+en compte **9**.
 
 **Le §4.2 et la règle RG-P-03 divergent sur le seuil des planètes brillantes.**
 Le tableau du §4.2 place Vénus et Jupiter dès le crépuscule civil (Soleil à 0°),
@@ -164,6 +166,34 @@ git show <commit>^:android/app/src/main/java/com/cielscore/app/ui/screens/Equipm
 
 Il reste ensuite à réintroduire l'entrée `EQUIPMENT` dans l'énumération
 `AppTab` de `MainActivity.kt` et sa branche dans le `when`.
+
+---
+
+### 3.5 Deux smart télescopes ajoutés hors document
+
+Le document ne connaît ni le **Seestar S30 Pro** ni le **Seestar S50 Pro**,
+sortis après sa rédaction. Ils ont été ajoutés à votre demande, avec les
+caractéristiques que vous avez relevées sur les fiches constructeur :
+
+| Modèle | Diamètre | Focale | F/D | Capteur | Pixel |
+|---|---|---|---|---|---|
+| Seestar S30 Pro | 30 mm | 150 mm | f/5,0 | IMX585 | 2,9 µm |
+| Seestar S50 Pro | 50 mm | 260 mm | f/5,2 | IMX585 | 2,9 µm |
+
+Les dimensions du capteur ne sont pas relevées mais **déduites** : l'IMX585
+compte 3856 × 2180 pixels au pas de 2,9 µm, soit 11,18 × 6,32 mm. La diagonale
+obtenue, 12,85 mm, correspond exactement au format 1/1,2 pouce annoncé par le
+fabricant — la déduction est donc vérifiable, et un test la verrouille.
+
+Conséquence sur le scoring : **aucune approximation ne pèse sur la magnitude
+limite**, qui ne dépend que du diamètre (§5.9). La focale et le capteur ne
+servent qu'aux deux critères à 5 % du score smart télescope (§6.4) et à
+l'affichage.
+
+Le catalogue compte donc 9 modèles, dont 7 documentés. Il reste une entrée
+incertaine, héritée de la première version : les dimensions du capteur du
+**Vespera II**, non vérifiées, et dont la référence est laissée vide dans le
+code plutôt que devinée.
 
 ---
 
