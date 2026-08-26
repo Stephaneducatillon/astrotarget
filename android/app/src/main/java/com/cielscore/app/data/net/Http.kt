@@ -1,11 +1,12 @@
 package com.cielscore.app.data.net
 
+import com.cielscore.app.util.Log
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import java.util.concurrent.TimeUnit
 
 /**
  * Client HTTP partage par les interfaces externes de la section 8.2.
@@ -32,9 +33,16 @@ object Http {
                 .header("Accept", "application/json")
                 .build()
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return@use null
+                if (!response.isSuccessful) {
+                    // On journalise l'hote et le code, jamais l'URL complete :
+                    // certaines portent une cle d'API dans leurs parametres.
+                    Log.w("Http", "${request.url.host} a repondu ${response.code}")
+                    return@use null
+                }
                 response.body?.string()
             }
+        }.onFailure {
+            Log.w("Http", "appel impossible : ${it.javaClass.simpleName} ${it.message.orEmpty()}")
         }.getOrNull()
     }
 
@@ -50,9 +58,14 @@ object Http {
                 .post(body)
             headers.forEach { (k, v) -> builder.header(k, v) }
             client.newCall(builder.build()).execute().use { response ->
-                if (!response.isSuccessful) return@use null
+                if (!response.isSuccessful) {
+                    Log.w("Http", "${response.request.url.host} a repondu ${response.code}")
+                    return@use null
+                }
                 response.body?.string()
             }
+        }.onFailure {
+            Log.w("Http", "appel impossible : ${it.javaClass.simpleName} ${it.message.orEmpty()}")
         }.getOrNull()
     }
 }

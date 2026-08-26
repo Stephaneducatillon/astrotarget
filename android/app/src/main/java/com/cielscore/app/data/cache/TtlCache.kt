@@ -50,10 +50,8 @@ class TtlCache<V>(private val ttlMillis: Long) {
         const val GEO_TTL = 24 * 60 * 60 * 1000L
 
         /** Cle meteo : lieu arrondi au centieme de degre + heure pleine. */
-        fun weatherKey(lat: Double, lon: Double, epochMillis: Long): String {
-            val hour = epochMillis / (60 * 60 * 1000L)
-            return "%.2f_%.2f_%d".format(lat, lon, hour)
-        }
+        fun weatherKey(lat: Double, lon: Double, epochMillis: Long): String =
+            com.cielscore.app.data.net.ApiUrls.weatherCacheKey(lat, lon, epochMillis)
 
         /** Cle Kp : horodatage arrondi a 10 minutes. */
         fun kpKey(epochMillis: Long): String = (epochMillis / (10 * 60 * 1000L)).toString()

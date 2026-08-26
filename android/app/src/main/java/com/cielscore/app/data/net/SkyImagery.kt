@@ -31,12 +31,7 @@ object SkyImagery {
         survey: Survey = Survey.DSS2_COLOR,
         pixels: Int = 512,
     ): String {
-        val fov = fieldDeg.coerceIn(0.05, 5.0)
-        return "https://alasky.u-strasbg.fr/hips-image-services/hips2fits?" +
-            "hips=${java.net.URLEncoder.encode(survey.hipsId, "UTF-8")}" +
-            "&width=$pixels&height=$pixels" +
-            "&fov=%.4f&projection=TAN&coordsys=icrs&rotation_angle=0.0".format(fov) +
-            "&ra=%.6f&dec=%.6f&format=jpg".format(raDeg, decDeg)
+        return ApiUrls.hips2fits(survey.hipsId, raDeg, decDeg, fieldDeg, pixels)
     }
 
     /** Champ d'affichage adapte a la taille angulaire de l'objet. */
@@ -125,8 +120,8 @@ object SkyImagery {
             .apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }
             .format(java.util.Date(epochMillis))
         // Stellarium Web attend la position en degres et l'instant en ISO 8601.
-        return "https://stellarium-web.org/skysource/" +
-            java.net.URLEncoder.encode(target.designation.ifBlank { target.id }, "UTF-8") +
-            "?fov=5&date=$iso&lat=%.4f&lng=%.4f&elev=0".format(latitude, longitude)
+        return ApiUrls.stellariumWeb(
+            target.designation.ifBlank { target.id }, latitude, longitude, iso
+        )
     }
 }

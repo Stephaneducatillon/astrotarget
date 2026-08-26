@@ -22,12 +22,7 @@ object WeatherApi {
     }
 
     private suspend fun fetch(lat: Double, lon: Double, epochMillis: Long): SkyConditions? {
-        val url = buildString {
-            append("https://api.open-meteo.com/v1/forecast")
-            append("?latitude=%.4f&longitude=%.4f".format(lat, lon))
-            append("&hourly=cloud_cover,wind_speed_10m,relative_humidity_2m,visibility,temperature_2m")
-            append("&forecast_days=3&timeformat=unixtime&timezone=UTC&wind_speed_unit=kmh")
-        }
+        val url = ApiUrls.openMeteoForecast(lat, lon)
         val body = Http.getString(url) ?: run {
             Log.w("WeatherApi", "Open-Meteo indisponible, repli sur les valeurs par defaut")
             return null
