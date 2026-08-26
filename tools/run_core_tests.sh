@@ -43,7 +43,7 @@ COMPILER_CP="$LIB/kotlin-compiler.jar:$LIB/coroutines.jar:$LIB/trove4j.jar:$LIB/
 RUNTIME_CP="$LIB/kotlin-stdlib.jar:$LIB/coroutines.jar:$LIB/junit.jar:$LIB/hamcrest.jar"
 
 kotlinc() {
-  java -cp "$COMPILER_CP" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler \
+  java -Dfile.encoding=UTF-8 -cp "$COMPILER_CP" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler \
     -no-stdlib -no-reflect -nowarn "$@"
 }
 
@@ -58,13 +58,17 @@ kotlinc -cp "$RUNTIME_CP" -d "$WORK/classes" \
   "$SRC/scoring/Formulas.kt" \
   "$SRC/scoring/ScoringEngine.kt" \
   "$SRC/catalog/SkyObject.kt" \
+  "$SRC/catalog/CommuneIndex.kt" \
   "$SRC/model/SessionModels.kt" \
   "$SRC/model/SmartTelescope.kt"
 
 echo "Compilation des tests"
 kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
-  "$TEST/DocumentationConformanceTest.kt"
+  "$TEST/DocumentationConformanceTest.kt" \
+  "$TEST/CommuneIndexTest.kt"
 
 echo "Execution"
-java -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
-  org.junit.runner.JUnitCore com.cielscore.app.DocumentationConformanceTest
+java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
+  org.junit.runner.JUnitCore \
+  com.cielscore.app.DocumentationConformanceTest \
+  com.cielscore.app.CommuneIndexTest

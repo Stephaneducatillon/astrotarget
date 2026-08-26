@@ -17,7 +17,6 @@ import com.cielscore.app.data.auth.AuthRepository
 import com.cielscore.app.data.db.ObservationEntity
 import com.cielscore.app.data.db.UserEntity
 import com.cielscore.app.data.net.ApodApi
-import com.cielscore.app.data.net.GeoApi
 import com.cielscore.app.data.net.LaunchApi
 import com.cielscore.app.data.net.MistralApi
 import com.cielscore.app.data.net.SpaceWeatherApi
@@ -386,7 +385,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         viewModelScope.launch {
-            val results = GeoApi.searchCommunes(query)
+            val results = container.communes.search(query)
+            // La saisie a pu changer pendant le chargement du fichier.
             if (_state.value.communeQuery == query) {
                 _state.value = _state.value.copy(communeResults = results)
             }
@@ -398,10 +398,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         updateParams { it.copy(site = site) }
     }
 
-    /** Position GPS de l'appareil : rattachee a la commune la plus proche. */
+    /**
+     * Position GPS de l'appareil, rattachee hors ligne a la commune la plus
+     * proche : le nom, le departement et l'indice de Bortle en decoulent, mais
+     * les coordonnees retenues restent celles du telephone.
+     */
     fun useDeviceLocation(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            val commune = GeoApi.communeAt(latitude, longitude)
+            val commune = container.communes.nearest(latitude, longitude)
             val site = commune?.copy(latitude = latitude, longitude = longitude)
                 ?: ObservingSite(
                     name = "Position GPS",

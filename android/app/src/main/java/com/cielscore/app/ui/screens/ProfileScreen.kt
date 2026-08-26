@@ -319,7 +319,8 @@ private fun AboutCard() {
         Text(
             "Donnees : OpenNGC (catalogues), Open-Meteo (meteo), GFZ Potsdam et NOAA SWPC " +
                 "(indice Kp), NASA (image du jour), The Space Devs (lancements), " +
-                "CDS Strasbourg (Aladin Lite et hips2fits), API Geo (communes), Mistral (IA).",
+                "CDS Strasbourg (Aladin Lite et hips2fits) et Mistral (IA). Les 34 869 " +
+                "communes francaises et leur indice de Bortle sont embarques.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp),

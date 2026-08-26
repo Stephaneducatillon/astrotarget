@@ -45,6 +45,9 @@ jobs:
             exit 1
           fi
 
+      - name: Validation du fichier des communes
+        run: python3 tools/check_communes.py
+
       - name: Tests unitaires du moteur de calcul
         working-directory: android
         run: ./gradlew --no-daemon testDebugUnitTest

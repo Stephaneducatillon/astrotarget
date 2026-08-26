@@ -19,7 +19,7 @@ récent installe les deux.
 ```bash
 cd android
 ./gradlew assembleDebug          # APK de débogage
-./gradlew testDebugUnitTest      # 26 tests de conformité
+./gradlew testDebugUnitTest      # 36 tests de conformité
 ./gradlew installDebug           # installation sur un appareil connecté
 ```
 
@@ -46,7 +46,7 @@ Kotlin, téléchargé depuis Maven Central :
 | Onglet | Accès | Fonction |
 |---|---|---|
 | **Informations** | public | Tableau de bord du jour : meilleure cible, image APOD, Soleil et Lune, nuit astronomique, indice Kp, calendrier sur 60 jours, prochains lancements |
-| **Dashboard** | connecté | Choix du lieu et de l'instrument, calcul du Top 20 des cibles, fiche objet détaillée |
+| **Dashboard** | connecté | Choix du lieu parmi 34 869 communes, réglage de l'instrument, calcul du Top 20 des cibles, fiche objet détaillée |
 | **Explorer** | connecté | Recherche libre dans les catalogues, filtres par catalogue et par type |
 | **Sessions** | connecté | Plan de soirée IA, export PDF, enregistrement d'observation, carnet |
 | **Équipement** | connecté | Oculaires, astrophotographie, smart télescopes |
@@ -81,8 +81,9 @@ sous 5°, brillance de surface au-delà de la limite du site, magnitude au-delà
 la limite dynamique, couverture nuageuse supérieure à 90 %.
 
 Tout est calculé sur l'appareil : éphémérides, crépuscules, brillance de surface
-et score. Seuls la météo, l'image du jour, l'indice Kp, les lancements,
-l'imagerie et l'IA nécessitent le réseau.
+et score. La recherche de commune et le rattachement d'une position GPS le sont
+aussi, le fichier des 34 869 communes étant embarqué. Seuls la météo, l'image du
+jour, l'indice Kp, les lancements, l'imagerie et l'IA nécessitent le réseau.
 
 ---
 
@@ -95,14 +96,15 @@ android/app/src/main/
 │   ├── caldwell.csv           109 objets
 │   ├── ngcic.csv              13 308 objets (OpenNGC)
 │   ├── stars.csv              358 étoiles brillantes
-│   └── constellations.csv     31 figures, 239 segments
+│   ├── constellations.csv     31 figures, 239 segments
+│   └── communes_bortle.csv    34 869 communes, Bortle estimé
 └── java/com/cielscore/app/
     ├── astro/                 éphémérides, crépuscules, projection, calendrier
     ├── scoring/               formules (§5) et moteur de score (§4 et §6)
     ├── catalog/               modèle d'objet et chargement des catalogues
     ├── model/                 paramètres de session, smart télescopes
     ├── data/
-    │   ├── net/               Open-Météo, Kp, APOD, lancements, Géo, CDS, Mistral
+    │   ├── net/               Open-Météo, Kp, APOD, lancements, CDS, Mistral
     │   ├── db/                Room : users, observations, statistiques
     │   ├── auth/              PBKDF2-SHA256, codes de récupération
     │   ├── cache/             cache à durée de vie (§4.6)
@@ -121,7 +123,15 @@ python3 tools/build_catalogs.py   # depuis NGC.csv (OpenNGC), à la racine du d�
 python3 tools/build_stars.py      # étoiles et figures de constellations
 ```
 
-La CI vérifie que les assets committés correspondent bien à ces scripts.
+`communes_bortle.csv` fait exception : ce n'est pas un fichier généré mais une
+donnée source, livrée telle quelle. Ses invariants sont vérifiés par :
+
+```bash
+python3 tools/check_communes.py
+```
+
+La CI exécute ces trois scripts et vérifie que les assets committés correspondent
+bien à leur source.
 
 ---
 
@@ -138,8 +148,8 @@ restent sur l'appareil.
 Sans clé, le reste de l'application fonctionne normalement : seules les
 fonctions concernées affichent un message explicite.
 
-Les autres services — Open-Météo, GFZ Potsdam, NOAA SWPC, The Space Devs,
-CDS Strasbourg, API Géo — sont gratuits et ne demandent aucune clé.
+Les autres services — Open-Météo, GFZ Potsdam, NOAA SWPC, The Space Devs et
+CDS Strasbourg — sont gratuits et ne demandent aucune clé.
 
 ---
 
@@ -149,8 +159,8 @@ Aucun compte distant, aucune télémétrie. Le compte, le carnet d'observation e
 les clés d'API restent sur l'appareil. Le mot de passe est haché en
 PBKDF2-SHA256 sur 260 000 itérations avec un sel de 16 octets par utilisateur ;
 le code de récupération est haché de la même manière et n'est affiché qu'une
-seule fois. La position n'est envoyée qu'à Open-Météo et à l'API Géo, pour la
-météo et le nom de la commune.
+seule fois. La position n'est envoyée qu'à Open-Météo, pour la météo : le nom de la commune
+et son indice de Bortle sont déterminés sur l'appareil.
 
 ---
 
@@ -164,7 +174,6 @@ météo et le nom de la commune.
 | Image du jour | NASA APOD |
 | Lancements | The Space Devs |
 | Imagerie du ciel | CDS Strasbourg (hips2fits, Aladin Lite) |
-| Communes françaises | API Géo de l'État |
 | Intelligence artificielle | Mistral AI |
 
 Échelle de pollution lumineuse d'après Bortle J. (2001), *Sky & Telescope* ;

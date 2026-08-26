@@ -121,6 +121,7 @@ private fun SiteCard(viewModel: AppViewModel, state: AppUiState) {
                 value = state.communeQuery,
                 onValueChange = viewModel::setCommuneQuery,
                 label = { Text("Rechercher une commune") },
+                supportingText = { Text("34 869 communes, recherche hors ligne") },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -179,7 +180,7 @@ private fun SiteCard(viewModel: AppViewModel, state: AppUiState) {
             )
             if (state.params.site.bortleEstimated) {
                 Text(
-                    "Indice estime d'apres la population de la commune. Ajustez-le si vous " +
+                    "Indice estime, issu du fichier des communes. Ajustez-le si vous " +
                         "connaissez la qualite reelle de votre ciel.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.secondary,

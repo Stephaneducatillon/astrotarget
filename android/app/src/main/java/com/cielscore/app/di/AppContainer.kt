@@ -2,6 +2,7 @@ package com.cielscore.app.di
 
 import android.content.Context
 import com.cielscore.app.catalog.CatalogRepository
+import com.cielscore.app.catalog.CommuneRepository
 import com.cielscore.app.catalog.StarCatalog
 import com.cielscore.app.data.auth.AuthRepository
 import com.cielscore.app.data.db.CielScoreDatabase
@@ -17,6 +18,7 @@ class AppContainer(context: Context) {
     val auth: AuthRepository by lazy { AuthRepository(database) }
     val observations: ObservationRepository by lazy { ObservationRepository(database) }
     val catalogs: CatalogRepository by lazy { CatalogRepository(appContext) }
+    val communes: CommuneRepository by lazy { CommuneRepository(appContext) }
     val stars: StarCatalog by lazy { StarCatalog(appContext) }
     val settings: SettingsStore by lazy { SettingsStore(appContext) }
 }

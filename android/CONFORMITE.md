@@ -28,6 +28,7 @@ v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
 | 6.5 | Lecture du score | `scoring/Formulas.scoreInterpretation` |
 | 7.1 → 7.5 | Phases, score de nuit, couleurs, nuits d'été | `astro/Twilight.kt` |
 | 8.1 | Messier 110, Caldwell 109, NGC/IC 13 308, 6 corps | `assets/`, `tools/build_catalogs.py` |
+| 8.1 | 34 869 communes françaises, Bortle automatique France entière | `assets/communes_bortle.csv`, `catalog/CommuneIndex.kt` |
 | 8.2 | Les 8 interfaces externes | `data/net/` |
 | 8.4 | Stratégie de repli service par service | `data/net/`, `model/SkyConditions` |
 | 9.1 | PBKDF2-SHA256, 260 000 itérations, sel 16 octets, comparaison à temps constant | `data/auth/PasswordHasher.kt` |
@@ -36,7 +37,7 @@ v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
 | 10.2 | L'exemple complet M57 est rejoué en test | `DocumentationConformanceTest.kt` |
 
 Les valeurs chiffrées du document (tableaux 5.1, 5.2, 5.5, 5.6, 6.2, 7.2, 10.2)
-sont vérifiées automatiquement par **26 tests unitaires**. Le score final de
+sont vérifiées automatiquement par **36 tests unitaires**. Le score final de
 l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé.
 
 ---
@@ -47,7 +48,7 @@ l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé
 |---|---|
 | Architecture | Application Android native (Kotlin + Jetpack Compose), calculs embarqués. Aucune dépendance au code Python. |
 | Périmètre | Les 8 onglets **et** la carte du ciel interactive. |
-| Lieu et Bortle | Géolocalisation + recherche de commune via l'API Géo de l'État, l'indice de Bortle étant estimé puis ajustable. |
+| Lieu et Bortle | Fichier `communes_bortle.csv` embarqué : recherche et rattachement GPS hors ligne, indice de Bortle ajustable. |
 | Comptes | Compte et carnet 100 % locaux (Room), clés d'API saisies dans le Profil. |
 | Smart télescopes | Seuls les **7 modèles détaillés** au tableau 5.9 sont intégrés. |
 | Carte du ciel | Figures de constellations **complètes** (358 étoiles, 239 segments) plutôt que les 174 / 113 du §3.3. |
@@ -117,12 +118,6 @@ fournit que le diamètre.
 **spécifications constructeur**, pas du document. Elles sont regroupées dans une
 seule table, `SmartTelescope.CATALOG`, pour être corrigées d'un seul geste.
 
-**Le fichier `communes_bortle.csv` (34 870 lignes, §8.1) n'est pas fourni.**
-→ Remplacé par l'API Géo de l'État (gratuite, sans clé) pour le nom, le
-département et les coordonnées, avec un indice de Bortle **estimé d'après la
-population** puis ajustable par l'utilisateur. La valeur par défaut hors commune
-reste Bortle 5 (RG-INFO-01). Table d'estimation dans `GeoApi.estimateBortle`.
-
 **Le fond d'étoiles de la carte du ciel.**
 Le §3.3 annonce 174 étoiles et 113 segments sans fournir les données.
 → Table J2000 constituée pour l'application : **358 étoiles, 31 figures,
@@ -138,6 +133,7 @@ Le §3.3 annonce 174 étoiles et 113 segments sans fournir les données.
 | §1.2 auth.py + SQLite | Room, base locale `cielscore.db` |
 | §9.3 Restauration de la base depuis un dépôt distant | Sauvegarde Android (`backup_rules.xml`) ; aucune base distante |
 | §1.2 Hébergement Hugging Face Spaces | APK construit par GitHub Actions |
+| §8.2 API Géo en ligne | Inutile : les communes sont embarquées, la recherche est hors ligne |
 | §2.5 Diagnostic par focale d'oculaire | Table de 8 focales usuelles, champ apparent 52° |
 
 Le module Caldwell mérite une note : construit depuis OpenNGC par
