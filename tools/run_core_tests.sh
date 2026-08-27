@@ -62,7 +62,8 @@ kotlinc -cp "$RUNTIME_CP" -d "$WORK/classes" \
   "$SRC/model/SessionModels.kt" \
   "$SRC/model/SmartTelescope.kt" \
   "$SRC/model/SessionInstant.kt" \
-  "$SRC/data/net/ApiUrls.kt"
+  "$SRC/data/net/ApiUrls.kt" \
+  "$SRC/model/ApiKey.kt"
 
 echo "Compilation des tests"
 kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
@@ -70,7 +71,8 @@ kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
   "$TEST/CommuneIndexTest.kt" \
   "$TEST/SessionInstantTest.kt" \
   "$TEST/SmartTelescopeCatalogTest.kt" \
-  "$TEST/ApiUrlsTest.kt"
+  "$TEST/ApiUrlsTest.kt" \
+  "$TEST/ApiKeyTest.kt"
 
 echo "Execution"
 java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
@@ -79,4 +81,5 @@ java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
   com.cielscore.app.CommuneIndexTest \
   com.cielscore.app.SessionInstantTest \
   com.cielscore.app.SmartTelescopeCatalogTest \
-  com.cielscore.app.ApiUrlsTest
+  com.cielscore.app.ApiUrlsTest \
+  com.cielscore.app.ApiKeyTest

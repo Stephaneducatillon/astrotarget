@@ -6,7 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -23,8 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.cielscore.app.data.auth.AuthRepository
+import com.cielscore.app.model.ApiKey
 import com.cielscore.app.ui.AppUiState
 import com.cielscore.app.ui.AppViewModel
 import com.cielscore.app.ui.components.LabeledValue
@@ -248,41 +255,72 @@ private fun ResetForm(onSubmit: (String, String, String) -> Unit) {
 /** Cles d'API : NASA APOD et Mistral (section 8.2). */
 @Composable
 private fun KeysCard(viewModel: AppViewModel, state: AppUiState) {
-    var nasa by remember(state.nasaApiKey) { mutableStateOf(state.nasaApiKey.orEmpty()) }
-    var mistral by remember(state.mistralApiKey) { mutableStateOf(state.mistralApiKey.orEmpty()) }
-
     SectionCard(
         title = "Cles d'API",
         subtitle = "Conservees sur l'appareil, jamais transmises ailleurs",
     ) {
-        OutlinedTextField(
-            value = nasa,
-            onValueChange = { nasa = it },
-            label = { Text("Cle NASA APOD") },
-            supportingText = { Text("Image du jour de l'onglet Informations") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+        // Les cles sont enregistrees a la frappe : aucun bouton a presser, donc
+        // aucune saisie perdue en changeant d'onglet.
+        ApiKeyField(
+            label = "Cle NASA APOD",
+            hint = "Image du jour de l'onglet Informations",
+            value = state.nasaApiKey.orEmpty(),
+            onValueChange = viewModel::setNasaKey,
         )
-        TextButton(onClick = { viewModel.setNasaKey(nasa) }) { Text("Enregistrer la cle NASA") }
-
-        OutlinedTextField(
-            value = mistral,
-            onValueChange = { mistral = it },
-            label = { Text("Cle Mistral") },
-            supportingText = { Text("Guide objet, plan de soiree et assistant") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+        ApiKeyField(
+            label = "Cle Mistral",
+            hint = "Guide objet, plan de soiree et assistant",
+            value = state.mistralApiKey.orEmpty(),
+            onValueChange = viewModel::setMistralKey,
+            modifier = Modifier.padding(top = 10.dp),
         )
-        TextButton(onClick = { viewModel.setMistralKey(mistral) }) {
-            Text("Enregistrer la cle Mistral")
-        }
 
         Text(
             "Sans cle, le reste de l'application fonctionne normalement : seules les " +
                 "fonctions concernees affichent un message explicite.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(top = 10.dp),
+        )
+    }
+}
+
+/** Champ de cle d'API : saisie masquable, enregistrement immediat, etat visible. */
+@Composable
+private fun ApiKeyField(
+    label: String,
+    hint: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var revealed by remember { mutableStateOf(false) }
+
+    Column(modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            supportingText = { Text(hint) },
+            singleLine = true,
+            visualTransformation = if (revealed) VisualTransformation.None
+            else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { revealed = !revealed }) {
+                    Icon(
+                        if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (revealed) "Masquer la cle" else "Afficher la cle",
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            ApiKey.statusLabel(value),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 16.dp),
         )
     }
 }

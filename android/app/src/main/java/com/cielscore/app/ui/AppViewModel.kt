@@ -112,11 +112,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(AppUiState())
     val state: StateFlow<AppUiState> = _state.asStateFlow()
 
+    /**
+     * Achevee des que les preferences sont relues au demarrage.
+     *
+     * Sans elle, l'onglet Informations appelle l'image du jour avant que la cle
+     * NASA soit restauree, et affiche « renseignez une cle » alors qu'une cle
+     * est bien enregistree.
+     */
+    private val settingsRestored = kotlinx.coroutines.CompletableDeferred<Unit>()
+
     val observations get() = container.observations
     val starCatalog get() = container.stars
 
     init {
-        viewModelScope.launch { restoreSettings() }
+        viewModelScope.launch {
+            // Le finally garantit que rien ne reste suspendu si la relecture
+            // des preferences echoue.
+            try {
+                restoreSettings()
+            } catch (error: Exception) {
+                Log.e("Reglages", "Relecture des preferences impossible", error)
+            } finally {
+                settingsRestored.complete(Unit)
+            }
+        }
     }
 
     // ------------------------------------------------------------- Preferences
@@ -181,17 +200,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { container.settings.setNightMode(enabled) }
     }
 
+    /**
+     * Les cles sont ecrites a chaque frappe, sans bouton a presser : une cle
+     * saisie puis oubliee au changement d'onglet etait perdue.
+     */
     fun setNasaKey(value: String) {
-        _state.value = _state.value.copy(nasaApiKey = value)
+        val key = value.trim()
+        _state.value = _state.value.copy(nasaApiKey = key)
         viewModelScope.launch {
-            container.settings.setNasaApiKey(value)
-            loadApod()
+            container.settings.setNasaApiKey(key)
+            if (key.isNotBlank()) loadApod()
         }
     }
 
     fun setMistralKey(value: String) {
-        _state.value = _state.value.copy(mistralApiKey = value)
-        viewModelScope.launch { container.settings.setMistralApiKey(value) }
+        val key = value.trim()
+        _state.value = _state.value.copy(mistralApiKey = key)
+        viewModelScope.launch { container.settings.setMistralApiKey(key) }
     }
 
     fun dismissMessage() {
@@ -535,6 +560,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun loadApod() {
+        // Ne pas conclure a l'absence de cle avant d'avoir relu les preferences.
+        settingsRestored.await()
         ApodApi.today(_state.value.nasaApiKey)
             .onSuccess { _state.value = _state.value.copy(apod = it, apodError = null) }
             .onFailure {
