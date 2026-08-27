@@ -21,6 +21,7 @@ import com.cielscore.app.data.net.LaunchApi
 import com.cielscore.app.data.net.MistralApi
 import com.cielscore.app.data.net.SpaceWeatherApi
 import com.cielscore.app.data.net.WeatherApi
+import com.cielscore.app.data.prefs.StoredSettings
 import com.cielscore.app.model.MoonState
 import com.cielscore.app.model.ObservingSite
 import com.cielscore.app.model.SessionParams
@@ -111,55 +112,46 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(AppUiState())
     val state: StateFlow<AppUiState> = _state.asStateFlow()
 
-    /**
-     * Achevee des que les preferences sont relues au demarrage.
-     *
-     * Sans elle, l'onglet Informations appelle l'image du jour avant que la cle
-     * NASA soit restauree, et affiche « renseignez une cle » alors qu'une cle
-     * est bien enregistree.
-     */
-    private val settingsRestored = kotlinx.coroutines.CompletableDeferred<Unit>()
-
     val observations get() = container.observations
     val starCatalog get() = container.stars
 
     init {
-        viewModelScope.launch {
-            // Le finally garantit que rien ne reste suspendu si la relecture
-            // des preferences echoue.
-            try {
-                restoreSettings()
-            } catch (error: Exception) {
-                Log.e("Reglages", "Relecture des preferences impossible", error)
-            } finally {
-                settingsRestored.complete(Unit)
+        // Les preferences se lisent de maniere synchrone : l'etat est complet
+        // avant que le premier ecran se compose. Plus aucune course entre la
+        // restauration et l'onglet Informations, qui reclamait une cle d'API
+        // alors qu'une cle etait bien enregistree.
+        val stored = restoreSettings()
+        // Seul le rattachement du compte touche la base et reste asynchrone.
+        stored.currentUser?.let { username ->
+            viewModelScope.launch {
+                val user = runCatching { container.auth.findUser(username) }.getOrNull()
+                if (user != null) _state.value = _state.value.copy(user = user)
+                else Log.w("Reglages", "Compte « $username » introuvable en base")
             }
         }
+        refreshSkyState()
     }
 
     // ------------------------------------------------------------- Preferences
 
-    private suspend fun restoreSettings() {
+    private fun restoreSettings(): StoredSettings {
         val stored = container.settings.read()
-        val user = stored.currentUser?.let { container.auth.findUser(it) }
-        val params = SessionParams(
-            site = stored.site ?: ObservingSite.DEFAULT,
-            instrument = stored.instrument,
-            diameterMm = stored.diameterMm,
-            focalMm = stored.focalMm,
-            eyePupilMm = stored.eyePupilMm,
-            smartTelescope = SmartTelescope.CATALOG.firstOrNull { it.name == stored.smartModel },
-            smartExposureMinutes = stored.smartExposureMinutes,
-            catalogs = decodeCatalogs(stored.catalogs),
-        )
         _state.value = _state.value.copy(
-            user = user,
-            params = params,
+            params = SessionParams(
+                site = stored.site ?: ObservingSite.DEFAULT,
+                instrument = stored.instrument,
+                diameterMm = stored.diameterMm,
+                focalMm = stored.focalMm,
+                eyePupilMm = stored.eyePupilMm,
+                smartTelescope = SmartTelescope.CATALOG.firstOrNull { it.name == stored.smartModel },
+                smartExposureMinutes = stored.smartExposureMinutes,
+                catalogs = decodeCatalogs(stored.catalogs),
+            ),
             nightMode = stored.nightMode,
             nasaApiKey = stored.nasaApiKey,
             mistralApiKey = stored.mistralApiKey,
         )
-        refreshSkyState()
+        return stored
     }
 
     private fun decodeCatalogs(raw: String?): Set<Catalog> {
@@ -177,16 +169,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val updated = transform(_state.value.params)
         _state.value = _state.value.copy(params = updated)
         container.persistenceScope.launch {
-            with(container.settings) {
-                setSite(updated.site)
-                setInstrument(updated.instrument)
-                setDiameter(updated.diameterMm)
-                setFocal(updated.focalMm)
-                setEyePupil(updated.eyePupilMm)
-                setCatalogs(updated.catalogs.joinToString(",") { it.name })
-                setSmartModel(updated.smartTelescope?.name)
-                setSmartExposure(updated.smartExposureMinutes)
-            }
+            container.settings.setSession(
+                site = updated.site,
+                instrument = updated.instrument,
+                diameterMm = updated.diameterMm,
+                focalMm = updated.focalMm,
+                eyePupilMm = updated.eyePupilMm,
+                catalogs = updated.catalogs.joinToString(",") { it.name },
+                smartModel = updated.smartTelescope?.name,
+                smartExposureMinutes = updated.smartExposureMinutes,
+            )
         }
         refreshSkyState()
     }
@@ -554,8 +546,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun loadApod() {
-        // Ne pas conclure a l'absence de cle avant d'avoir relu les preferences.
-        settingsRestored.await()
         ApodApi.today(_state.value.nasaApiKey)
             .onSuccess { _state.value = _state.value.copy(apod = it, apodError = null) }
             .onFailure {
@@ -591,7 +581,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val result = container.auth.register(username, password, firstName, lastName)
             result.onSuccess { registration ->
-                container.settings.setCurrentUser(registration.user.username)
+                container.persistenceScope.launch {
+                    container.settings.setCurrentUser(registration.user.username)
+                }
                 _state.value = _state.value.copy(user = registration.user)
             }
             onResult(result)
@@ -612,10 +604,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun logout() {
-        viewModelScope.launch {
-            container.settings.setCurrentUser(null)
-            _state.value = _state.value.copy(user = null, chat = emptyList(), eveningPlan = null)
-        }
+        container.persistenceScope.launch { container.settings.setCurrentUser(null) }
+        _state.value = _state.value.copy(user = null, chat = emptyList(), eveningPlan = null)
     }
 
     companion object {
