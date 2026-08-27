@@ -33,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -141,27 +140,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     // ------------------------------------------------------------- Preferences
 
     private suspend fun restoreSettings() {
-        val settings = container.settings
-        val username = settings.currentUser.first()
-        val user = username?.let { container.auth.findUser(it) }
-        val site = settings.site.first() ?: ObservingSite.DEFAULT
-        val smartName = settings.smartModel.first()
+        val stored = container.settings.read()
+        val user = stored.currentUser?.let { container.auth.findUser(it) }
         val params = SessionParams(
-            site = site,
-            instrument = settings.instrument.first(),
-            diameterMm = settings.diameterMm.first(),
-            focalMm = settings.focalMm.first(),
-            eyePupilMm = settings.eyePupilMm.first(),
-            smartTelescope = SmartTelescope.CATALOG.firstOrNull { it.name == smartName },
-            smartExposureMinutes = settings.smartExposureMinutes.first(),
-            catalogs = decodeCatalogs(settings.catalogs.first()),
+            site = stored.site ?: ObservingSite.DEFAULT,
+            instrument = stored.instrument,
+            diameterMm = stored.diameterMm,
+            focalMm = stored.focalMm,
+            eyePupilMm = stored.eyePupilMm,
+            smartTelescope = SmartTelescope.CATALOG.firstOrNull { it.name == stored.smartModel },
+            smartExposureMinutes = stored.smartExposureMinutes,
+            catalogs = decodeCatalogs(stored.catalogs),
         )
         _state.value = _state.value.copy(
             user = user,
             params = params,
-            nightMode = settings.nightMode.first(),
-            nasaApiKey = settings.nasaApiKey.first(),
-            mistralApiKey = settings.mistralApiKey.first(),
+            nightMode = stored.nightMode,
+            nasaApiKey = stored.nasaApiKey,
+            mistralApiKey = stored.mistralApiKey,
         )
         refreshSkyState()
     }
@@ -180,7 +176,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun updateParams(transform: (SessionParams) -> SessionParams) {
         val updated = transform(_state.value.params)
         _state.value = _state.value.copy(params = updated)
-        viewModelScope.launch {
+        container.persistenceScope.launch {
             with(container.settings) {
                 setSite(updated.site)
                 setInstrument(updated.instrument)
@@ -191,13 +187,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 setSmartModel(updated.smartTelescope?.name)
                 setSmartExposure(updated.smartExposureMinutes)
             }
-            refreshSkyState()
         }
+        refreshSkyState()
     }
 
     fun setNightMode(enabled: Boolean) {
         _state.value = _state.value.copy(nightMode = enabled)
-        viewModelScope.launch { container.settings.setNightMode(enabled) }
+        container.persistenceScope.launch { container.settings.setNightMode(enabled) }
     }
 
     /**
@@ -207,16 +203,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setNasaKey(value: String) {
         val key = value.trim()
         _state.value = _state.value.copy(nasaApiKey = key)
-        viewModelScope.launch {
-            container.settings.setNasaApiKey(key)
-            if (key.isNotBlank()) loadApod()
-        }
+        container.persistenceScope.launch { container.settings.setNasaApiKey(key) }
+        if (key.isNotBlank()) viewModelScope.launch { loadApod() }
     }
 
     fun setMistralKey(value: String) {
         val key = value.trim()
         _state.value = _state.value.copy(mistralApiKey = key)
-        viewModelScope.launch { container.settings.setMistralApiKey(key) }
+        container.persistenceScope.launch { container.settings.setMistralApiKey(key) }
     }
 
     fun dismissMessage() {
@@ -577,7 +571,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             container.auth.login(username, password)
                 .onSuccess { user ->
-                    container.settings.setCurrentUser(user.username)
+                    container.persistenceScope.launch {
+                        container.settings.setCurrentUser(user.username)
+                    }
                     _state.value = _state.value.copy(user = user)
                     onResult(null)
                 }

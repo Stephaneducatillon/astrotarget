@@ -2,24 +2,51 @@ package com.cielscore.app.data.prefs
 
 import android.content.Context
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.cielscore.app.model.ApiKey
 import com.cielscore.app.model.InstrumentType
 import com.cielscore.app.model.ObservingSite
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.cielscore.app.util.Log
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
+import java.io.IOException
 
 private val Context.dataStore by preferencesDataStore(name = "cielscore_settings")
+
+/** Instantane de tout ce que l'application conserve entre deux lancements. */
+data class StoredSettings(
+    val currentUser: String? = null,
+    val nasaApiKey: String? = null,
+    val mistralApiKey: String? = null,
+    val nightMode: Boolean = false,
+    val site: ObservingSite? = null,
+    val instrument: InstrumentType = InstrumentType.TELESCOPE,
+    val diameterMm: Double = 130.0,
+    val focalMm: Double = 650.0,
+    val eyePupilMm: Double = 6.0,
+    val catalogs: String? = null,
+    val smartModel: String? = null,
+    val smartExposureMinutes: Double = 60.0,
+)
 
 /**
  * Preferences locales : session en cours, lieu, instrument et cles d'API.
  *
  * Les cles NASA APOD et Mistral (section 8.2) sont saisies par l'utilisateur
  * depuis le Profil et restent sur l'appareil.
+ *
+ * DataStore propage les erreurs de lecture sous forme d'IOException dans son
+ * flux : sans les intercepter, un incident de fichier ferait perdre d'un coup
+ * l'ensemble des reglages. Toutes les lectures passent donc par [read], qui
+ * retombe sur des preferences vides plutot que d'echouer, et qui ne parcourt
+ * le fichier qu'une seule fois au lieu d'une fois par valeur.
  */
 class SettingsStore(private val context: Context) {
 
@@ -45,45 +72,76 @@ class SettingsStore(private val context: Context) {
         val NIGHT_MODE = booleanPreferencesKey("night_mode")
     }
 
-    val currentUser: Flow<String?> = context.dataStore.data.map { it[Keys.CURRENT_USER] }
-    val nasaApiKey: Flow<String?> = context.dataStore.data.map { it[Keys.NASA_KEY] }
-    val mistralApiKey: Flow<String?> = context.dataStore.data.map { it[Keys.MISTRAL_KEY] }
-    val nightMode: Flow<Boolean> = context.dataStore.data.map { it[Keys.NIGHT_MODE] ?: false }
+    /** Lecture unique de toutes les preferences, sans jamais lever d'exception. */
+    suspend fun read(): StoredSettings {
+        val prefs: Preferences = context.dataStore.data
+            .catch { error ->
+                if (error is IOException) {
+                    Log.w("Reglages", "Lecture des preferences impossible : ${error.message}")
+                    emit(emptyPreferences())
+                } else {
+                    throw error
+                }
+            }
+            .first()
 
-    val site: Flow<ObservingSite?> = context.dataStore.data.map { prefs ->
-        val name = prefs[Keys.SITE_NAME] ?: return@map null
-        val lat = prefs[Keys.SITE_LAT] ?: return@map null
-        val lon = prefs[Keys.SITE_LON] ?: return@map null
-        ObservingSite(
-            name = name,
-            latitude = lat,
-            longitude = lon,
-            bortle = prefs[Keys.SITE_BORTLE] ?: 5,
-            department = prefs[Keys.SITE_DEPARTMENT].orEmpty(),
-            bortleEstimated = prefs[Keys.SITE_BORTLE_ESTIMATED] ?: true,
+        val site = run {
+            val name = prefs[Keys.SITE_NAME]
+            val lat = prefs[Keys.SITE_LAT]
+            val lon = prefs[Keys.SITE_LON]
+            if (name == null || lat == null || lon == null) null
+            else ObservingSite(
+                name = name,
+                latitude = lat,
+                longitude = lon,
+                bortle = prefs[Keys.SITE_BORTLE] ?: 5,
+                department = prefs[Keys.SITE_DEPARTMENT].orEmpty(),
+                bortleEstimated = prefs[Keys.SITE_BORTLE_ESTIMATED] ?: true,
+            )
+        }
+
+        val stored = StoredSettings(
+            currentUser = prefs[Keys.CURRENT_USER],
+            nasaApiKey = prefs[Keys.NASA_KEY],
+            mistralApiKey = prefs[Keys.MISTRAL_KEY],
+            nightMode = prefs[Keys.NIGHT_MODE] ?: false,
+            site = site,
+            instrument = prefs[Keys.INSTRUMENT]?.let { name ->
+                InstrumentType.entries.firstOrNull { it.name == name }
+            } ?: InstrumentType.TELESCOPE,
+            diameterMm = prefs[Keys.DIAMETER] ?: 130.0,
+            focalMm = prefs[Keys.FOCAL] ?: 650.0,
+            eyePupilMm = prefs[Keys.PUPIL] ?: 6.0,
+            catalogs = prefs[Keys.CATALOGS],
+            smartModel = prefs[Keys.SMART_MODEL],
+            smartExposureMinutes = prefs[Keys.SMART_EXPOSURE] ?: 60.0,
         )
-    }
 
-    val instrument: Flow<InstrumentType> = context.dataStore.data.map { prefs ->
-        prefs[Keys.INSTRUMENT]?.let { name ->
-            InstrumentType.entries.firstOrNull { it.name == name }
-        } ?: InstrumentType.TELESCOPE
+        Log.i(
+            "Reglages",
+            "Preferences relues : ${prefs.asMap().size} entrees, " +
+                "compte=${stored.currentUser ?: "aucun"}, " +
+                "lieu=${stored.site?.name ?: "aucun"}, " +
+                "cle NASA=${ApiKey.mask(stored.nasaApiKey).ifEmpty { "absente" }}, " +
+                "cle Mistral=${ApiKey.mask(stored.mistralApiKey).ifEmpty { "absente" }}"
+        )
+        return stored
     }
-
-    val diameterMm: Flow<Double> = context.dataStore.data.map { it[Keys.DIAMETER] ?: 130.0 }
-    val focalMm: Flow<Double> = context.dataStore.data.map { it[Keys.FOCAL] ?: 650.0 }
-    val eyePupilMm: Flow<Double> = context.dataStore.data.map { it[Keys.PUPIL] ?: 6.0 }
-    val catalogs: Flow<String?> = context.dataStore.data.map { it[Keys.CATALOGS] }
-    val smartModel: Flow<String?> = context.dataStore.data.map { it[Keys.SMART_MODEL] }
-    val smartExposureMinutes: Flow<Double> =
-        context.dataStore.data.map { it[Keys.SMART_EXPOSURE] ?: 60.0 }
 
     suspend fun setCurrentUser(username: String?) = edit { prefs ->
         if (username == null) prefs.remove(Keys.CURRENT_USER) else prefs[Keys.CURRENT_USER] = username
     }
 
-    suspend fun setNasaApiKey(value: String) = edit { it[Keys.NASA_KEY] = value.trim() }
-    suspend fun setMistralApiKey(value: String) = edit { it[Keys.MISTRAL_KEY] = value.trim() }
+    suspend fun setNasaApiKey(value: String) {
+        edit { it[Keys.NASA_KEY] = value.trim() }
+        Log.i("Reglages", "Cle NASA enregistree : ${ApiKey.mask(value).ifEmpty { "effacee" }}")
+    }
+
+    suspend fun setMistralApiKey(value: String) {
+        edit { it[Keys.MISTRAL_KEY] = value.trim() }
+        Log.i("Reglages", "Cle Mistral enregistree : ${ApiKey.mask(value).ifEmpty { "effacee" }}")
+    }
+
     suspend fun setNightMode(enabled: Boolean) = edit { it[Keys.NIGHT_MODE] = enabled }
 
     suspend fun setSite(site: ObservingSite) = edit { prefs ->
@@ -105,7 +163,9 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun setSmartExposure(minutes: Double) = edit { it[Keys.SMART_EXPOSURE] = minutes }
 
+    /** Une ecriture qui echoue est signalee, jamais avalee en silence. */
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
-        context.dataStore.edit { prefs -> block(prefs) }
+        runCatching { context.dataStore.edit { prefs -> block(prefs) } }
+            .onFailure { Log.e("Reglages", "Ecriture des preferences impossible", it) }
     }
 }

@@ -8,6 +8,9 @@ import com.cielscore.app.data.auth.AuthRepository
 import com.cielscore.app.data.db.CielScoreDatabase
 import com.cielscore.app.data.db.ObservationRepository
 import com.cielscore.app.data.prefs.SettingsStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /** Assemblage des dependances de l'application. */
 class AppContainer(context: Context) {
@@ -21,4 +24,13 @@ class AppContainer(context: Context) {
     val communes: CommuneRepository by lazy { CommuneRepository(appContext) }
     val stars: StarCatalog by lazy { StarCatalog(appContext) }
     val settings: SettingsStore by lazy { SettingsStore(appContext) }
+
+    /**
+     * Portee liee a l'application, pas a l'ecran.
+     *
+     * Les ecritures de preferences ne doivent pas dependre du cycle de vie du
+     * ViewModel : une cle saisie juste avant de quitter l'application verrait
+     * sinon son enregistrement annule avant d'atteindre le disque.
+     */
+    val persistenceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 }

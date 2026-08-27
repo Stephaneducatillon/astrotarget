@@ -34,6 +34,14 @@
     public static ** valueOf(java.lang.String);
 }
 
+# DataStore Preferences s'appuie sur protobuf-lite, dont les champs sont lus
+# par reflexion : les elaguer ferait perdre silencieusement tous les reglages.
+-keep class androidx.datastore.preferences.protobuf.** { *; }
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}
+-dontwarn androidx.datastore.**
+
 # Dependances tierces.
 -keepattributes Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, AnnotationDefault
