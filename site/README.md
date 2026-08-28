@@ -106,14 +106,33 @@ sécurité décrites dans `SUPABASE.md`. Changez-le à chaque rentrée.
 Les **salons du chat** se règlent aussi dans `js/config.js` : ajoutez ou
 retirez des entrées de la liste `salons`.
 
+## Montrer le site sans l'héberger
+
+`apercu.html` regroupe tout le site — les sept pages, le style, les scripts —
+dans **un seul fichier autonome**. Il s'ouvre par un double-clic, s'envoie par
+e-mail et fonctionne sans connexion : de quoi le présenter en réunion de club.
+
+Après une modification du site, régénérez-le :
+
+```bash
+python3 site/outils/construire-apercu.py
+```
+
 ## Mettre le site en ligne
 
 Le dossier ne contient que des fichiers statiques : n'importe quel hébergement
 convient (GitHub Pages, Netlify, l'hébergement de la MJC, un simple FTP).
 
-Pour **GitHub Pages** : dans les réglages du dépôt, *Pages → Source: Deploy
-from a branch*, choisissez la branche et le dossier `/site`. Le site est alors
-publié sur `https://<compte>.github.io/astrotarget/`.
+Pour **GitHub Pages**, le dépôt contient déjà le nécessaire
+(`.github/workflows/pages.yml`) :
+
+1. fusionnez cette branche dans `main` ;
+2. dans le dépôt, *Settings → Pages → Source* : choisissez **GitHub Actions** ;
+3. le site est publié sur `https://<compte>.github.io/astrotarget/`, et remis à
+   jour à chaque modification de `site/` poussée sur `main`.
+
+Le mode *Deploy from a branch* ne convient pas ici : il n'accepte que la racine
+du dépôt ou `docs/`, jamais `site/`.
 
 ## Choix techniques
 

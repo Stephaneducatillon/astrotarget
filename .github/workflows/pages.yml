@@ -1,0 +1,41 @@
+# Publie le dossier site/ sur GitHub Pages.
+#
+# Avant la première exécution : dépôt → Settings → Pages → Source =
+# « GitHub Actions ». Ensuite, chaque modification du site poussée sur main
+# met le site en ligne automatiquement.
+name: Publier le site du club
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication à la fois ; les publications en attente sont
+# remplacées par la plus récente.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploiement
+        uses: actions/deploy-pages@v4

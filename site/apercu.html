@@ -1,0 +1,2735 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club d'astronomie — MJC de Douai</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* =========================================================
+   Club d'astronomie — MJC de Douai
+   Feuille de style unique du site statique.
+   ========================================================= */
+
+/* --- 1. Jetons de design ------------------------------------------------ */
+:root {
+  --nuit-900: #070b18;
+  --nuit-800: #0b1020;
+  --nuit-700: #111832;
+  --nuit-600: #172041;
+  --nuit-500: #202c55;
+
+  --texte:      #e9edf9;
+  --texte-doux: #a6b1cf;
+  --texte-faible: #7a86a8;
+
+  --or:      #f2b544;
+  --or-fonce:#c98f24;
+  --bleu:    #6ea8ff;
+  --violet:  #a98bff;
+  --vert:    #4fd08a;
+  --rouge:   #ff6b6b;
+
+  --bordure: rgba(255, 255, 255, 0.09);
+  --bordure-forte: rgba(255, 255, 255, 0.18);
+
+  --ombre: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --ombre-douce: 0 2px 14px rgba(0, 0, 0, 0.3);
+
+  --rayon: 14px;
+  --rayon-sm: 9px;
+
+  --largeur: 1140px;
+  --gouttiere: 24px;
+
+  --police-titre: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --police-texte: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --transition: 180ms ease;
+}
+
+/* --- 2. Base ------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--nuit-800);
+  color: var(--texte);
+  font-family: var(--police-texte);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { font-family: var(--police-titre); line-height: 1.2; margin: 0 0 0.5em; font-weight: 600; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); letter-spacing: -0.015em; }
+h3 { font-size: 1.2rem; }
+
+p { margin: 0 0 1em; }
+a { color: var(--bleu); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--or); }
+img { max-width: 100%; display: block; }
+hr { border: 0; border-top: 1px solid var(--bordure); margin: 2.5rem 0; }
+
+:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.conteneur {
+  width: 100%;
+  max-width: var(--largeur);
+  margin-inline: auto;
+  padding-inline: var(--gouttiere);
+}
+
+.saut-contenu {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--or);
+  color: var(--nuit-900);
+  padding: 10px 18px;
+  border-radius: 0 0 var(--rayon-sm) 0;
+  font-weight: 600;
+  z-index: 200;
+}
+.saut-contenu:focus { left: 0; }
+
+.visuellement-cache {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* --- 3. En-tête et navigation ------------------------------------------ */
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 16, 32, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.entete__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 68px;
+}
+
+.marque { display: flex; align-items: center; gap: 11px; color: var(--texte); font-weight: 600; }
+.marque:hover { color: var(--texte); }
+.marque__logo {
+  width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #33427a, #0d1226);
+  border: 1px solid var(--bordure-forte);
+  font-size: 19px;
+}
+.marque__texte { display: flex; flex-direction: column; line-height: 1.15; }
+.marque__nom { font-family: var(--police-titre); font-size: 1.02rem; }
+.marque__lieu { font-size: 0.72rem; color: var(--texte-faible); letter-spacing: 0.09em; text-transform: uppercase; }
+
+.nav { display: flex; align-items: center; gap: 4px; }
+.nav a {
+  color: var(--texte-doux);
+  padding: 8px 13px;
+  border-radius: var(--rayon-sm);
+  font-size: 0.94rem;
+  transition: background var(--transition), color var(--transition);
+}
+.nav a:hover { background: rgba(255, 255, 255, 0.06); color: var(--texte); }
+.nav a[aria-current="page"] { color: var(--or); background: rgba(242, 181, 68, 0.1); }
+.nav .nav__membre {
+  margin-left: 6px;
+  border: 1px solid var(--bordure-forte);
+  color: var(--texte);
+}
+.nav .nav__membre:hover { border-color: var(--or); color: var(--or); background: transparent; }
+
+.burger {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--bordure-forte);
+  color: var(--texte);
+  border-radius: var(--rayon-sm);
+  width: 42px; height: 38px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 880px) {
+  .burger { display: block; }
+  .nav {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 10px var(--gouttiere) 18px;
+    background: var(--nuit-800);
+    border-bottom: 1px solid var(--bordure);
+  }
+  .nav[hidden] { display: none; }
+  .nav a { padding: 12px 14px; }
+  .nav .nav__membre { margin-left: 0; text-align: center; }
+}
+
+/* --- 4. Héros ----------------------------------------------------------- */
+.heros {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--bordure);
+  background:
+    radial-gradient(1100px 520px at 78% -12%, rgba(110, 168, 255, 0.16), transparent 60%),
+    radial-gradient(760px 420px at 12% 8%, rgba(169, 139, 255, 0.13), transparent 62%),
+    linear-gradient(180deg, var(--nuit-900), var(--nuit-800));
+}
+.heros__ciel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.85; }
+.heros__inner { position: relative; padding: clamp(70px, 12vw, 130px) 0 clamp(60px, 9vw, 100px); max-width: 760px; }
+.heros p.heros__accroche { font-size: clamp(1.02rem, 2.2vw, 1.22rem); color: var(--texte-doux); max-width: 60ch; }
+
+.heros--court .heros__inner { padding: clamp(48px, 7vw, 78px) 0 clamp(38px, 5vw, 58px); }
+
+.surtitre {
+  display: inline-block;
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--or);
+  border: 1px solid rgba(242, 181, 68, 0.35);
+  border-radius: 999px;
+  padding: 5px 14px;
+  margin-bottom: 18px;
+}
+
+/* --- 5. Boutons --------------------------------------------------------- */
+.boutons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.96rem;
+  padding: 12px 22px;
+  border-radius: var(--rayon-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition), border-color var(--transition), color var(--transition);
+}
+.btn:active { transform: translateY(1px); }
+.btn--principal { background: var(--or); color: #241703; }
+.btn--principal:hover { background: #ffc85e; color: #241703; }
+.btn--secondaire { background: transparent; color: var(--texte); border-color: var(--bordure-forte); }
+.btn--secondaire:hover { border-color: var(--or); color: var(--or); }
+.btn--discret { background: rgba(255,255,255,0.05); color: var(--texte-doux); border-color: var(--bordure); }
+.btn--discret:hover { color: var(--texte); border-color: var(--bordure-forte); }
+.btn--danger { background: transparent; border-color: rgba(255,107,107,0.4); color: var(--rouge); }
+.btn--danger:hover { background: rgba(255,107,107,0.12); }
+.btn--petit { padding: 7px 13px; font-size: 0.85rem; }
+.btn--bloc { width: 100%; }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+/* --- 6. Sections et grilles -------------------------------------------- */
+.section { padding: clamp(52px, 8vw, 84px) 0; }
+.section--alt { background: var(--nuit-900); border-block: 1px solid var(--bordure); }
+.section__entete { max-width: 62ch; margin-bottom: 38px; }
+.section__entete p { color: var(--texte-doux); margin-bottom: 0; }
+
+.grille { display: grid; gap: 20px; }
+.grille--2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+.grille--3 { grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+.grille--4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.carte {
+  background: linear-gradient(160deg, var(--nuit-700), var(--nuit-600));
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 24px;
+  box-shadow: var(--ombre-douce);
+  transition: border-color var(--transition), transform var(--transition);
+}
+.carte--survol:hover { border-color: rgba(242, 181, 68, 0.4); transform: translateY(-3px); }
+.carte h3 { margin-bottom: 8px; }
+.carte p:last-child { margin-bottom: 0; }
+.carte__icone { font-size: 1.7rem; line-height: 1; margin-bottom: 12px; }
+.carte__meta { color: var(--texte-faible); font-size: 0.85rem; }
+
+.texte-doux { color: var(--texte-doux); }
+.texte-faible { color: var(--texte-faible); font-size: 0.88rem; }
+.centre { text-align: center; }
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+
+.liste-nue { list-style: none; margin: 0; padding: 0; }
+.liste-check { list-style: none; padding: 0; margin: 0 0 1em; }
+.liste-check li { position: relative; padding-left: 28px; margin-bottom: 10px; }
+.liste-check li::before { content: "✦"; position: absolute; left: 0; color: var(--or); }
+
+.etiquette {
+  display: inline-block;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(110, 168, 255, 0.14);
+  color: var(--bleu);
+  border: 1px solid rgba(110, 168, 255, 0.25);
+}
+.etiquette--or { background: rgba(242, 181, 68, 0.14); color: var(--or); border-color: rgba(242, 181, 68, 0.3); }
+.etiquette--violet { background: rgba(169, 139, 255, 0.14); color: var(--violet); border-color: rgba(169, 139, 255, 0.3); }
+.etiquette--vert { background: rgba(79, 208, 138, 0.14); color: var(--vert); border-color: rgba(79, 208, 138, 0.3); }
+
+/* --- 7. Agenda ---------------------------------------------------------- */
+.evenement {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 20px;
+  align-items: start;
+  padding: 20px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--nuit-700);
+  margin-bottom: 14px;
+}
+.evenement--passe { opacity: 0.55; }
+.evenement__date {
+  text-align: center;
+  background: var(--nuit-500);
+  border-radius: var(--rayon-sm);
+  padding: 10px 6px;
+  border: 1px solid var(--bordure);
+}
+.evenement__jour { font-family: var(--police-titre); font-size: 1.7rem; line-height: 1; }
+.evenement__mois { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--texte-doux); }
+.evenement__annee { font-size: 0.72rem; color: var(--texte-faible); }
+.evenement h3 { margin-bottom: 6px; }
+.evenement__infos { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--texte-faible); font-size: 0.87rem; margin-bottom: 8px; }
+
+@media (max-width: 560px) {
+  .evenement { grid-template-columns: 1fr; }
+  .evenement__date { display: flex; align-items: baseline; gap: 8px; justify-content: center; }
+}
+
+/* --- 8. Galerie --------------------------------------------------------- */
+.galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.galerie__item {
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  background: var(--nuit-700);
+}
+.galerie__vignette {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  font-size: 2.4rem;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(110,168,255,0.22), transparent 55%),
+    radial-gradient(circle at 72% 68%, rgba(242,181,68,0.16), transparent 55%),
+    var(--nuit-900);
+  color: var(--texte-doux);
+}
+.galerie__legende { padding: 12px 14px; }
+.galerie__legende strong { display: block; font-size: 0.95rem; }
+.galerie__legende span { color: var(--texte-faible); font-size: 0.82rem; }
+
+/* --- 9. Formulaires ----------------------------------------------------- */
+.champ { margin-bottom: 16px; }
+.champ label { display: block; font-size: 0.88rem; color: var(--texte-doux); margin-bottom: 6px; font-weight: 500; }
+
+input[type="text"], input[type="email"], input[type="password"],
+input[type="search"], input[type="url"], select, textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--texte);
+  background: var(--nuit-900);
+  border: 1px solid var(--bordure-forte);
+  border-radius: var(--rayon-sm);
+  padding: 11px 13px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--or);
+  box-shadow: 0 0 0 3px rgba(242, 181, 68, 0.16);
+}
+textarea { resize: vertical; min-height: 90px; }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--texte-doux) 50%), linear-gradient(135deg, var(--texte-doux) 50%, transparent 50%); background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+
+.aide { font-size: 0.82rem; color: var(--texte-faible); margin-top: 5px; }
+
+.message {
+  border-radius: var(--rayon-sm);
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  border: 1px solid;
+}
+.message--erreur { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.35); color: #ffb3b3; }
+.message--succes { background: rgba(79,208,138,0.1); border-color: rgba(79,208,138,0.35); color: #9de9c1; }
+.message--info { background: rgba(110,168,255,0.1); border-color: rgba(110,168,255,0.3); color: #b8d3ff; }
+.message[hidden] { display: none; }
+
+/* --- 10. Espace membre -------------------------------------------------- */
+.membre-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 980px) { .membre-grille { grid-template-columns: 1fr; } }
+
+.panneau-connexion { max-width: 460px; margin-inline: auto; }
+
+.onglets { display: flex; gap: 4px; border-bottom: 1px solid var(--bordure); margin-bottom: 22px; flex-wrap: wrap; }
+.onglets button {
+  font: inherit;
+  font-size: 0.94rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--texte-doux);
+  padding: 11px 16px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+.onglets button:hover { color: var(--texte); }
+.onglets button[aria-selected="true"] { color: var(--or); border-bottom-color: var(--or); }
+
+.barre-membre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--nuit-700);
+  margin-bottom: 26px;
+}
+.barre-membre__identite { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  width: 40px; height: 40px; flex: none;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 600;
+  background: linear-gradient(140deg, var(--bleu), var(--violet));
+  color: #0a0f1f;
+}
+
+/* Base documentaire */
+.doc-outils { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.doc-outils input[type="search"] { flex: 1 1 220px; }
+.doc-outils select { flex: 0 1 190px; }
+
+.doc {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-sm);
+  background: var(--nuit-700);
+  margin-bottom: 10px;
+}
+.doc__icone { font-size: 1.4rem; line-height: 1.2; }
+.doc__corps { flex: 1; min-width: 0; }
+.doc__titre { font-weight: 600; margin-bottom: 3px; }
+.doc__desc { color: var(--texte-doux); font-size: 0.9rem; margin-bottom: 8px; }
+.doc__meta { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 0.8rem; color: var(--texte-faible); }
+
+/* Chat */
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: min(620px, 74vh);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--nuit-700);
+  overflow: hidden;
+}
+.chat__entete {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 13px 17px;
+  border-bottom: 1px solid var(--bordure);
+  background: var(--nuit-600);
+}
+.chat__salons { display: flex; gap: 6px; flex-wrap: wrap; }
+.chat__salon {
+  font: inherit; font-size: 0.83rem;
+  background: transparent; color: var(--texte-doux);
+  border: 1px solid var(--bordure); border-radius: 999px;
+  padding: 4px 12px; cursor: pointer;
+  transition: all var(--transition);
+}
+.chat__salon[aria-pressed="true"] { background: rgba(242,181,68,0.14); color: var(--or); border-color: rgba(242,181,68,0.35); }
+.chat__fil { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.chat__vide { margin: auto; text-align: center; color: var(--texte-faible); font-size: 0.9rem; }
+
+.msg { display: flex; gap: 11px; max-width: 88%; }
+.msg__avatar { width: 32px; height: 32px; font-size: 0.8rem; }
+.msg__bulle {
+  background: var(--nuit-500);
+  border: 1px solid var(--bordure);
+  border-radius: 4px 12px 12px 12px;
+  padding: 9px 13px;
+}
+.msg__auteur { font-size: 0.79rem; color: var(--texte-doux); font-weight: 600; margin-bottom: 2px; }
+.msg__texte { font-size: 0.94rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg__heure { font-size: 0.72rem; color: var(--texte-faible); margin-top: 4px; }
+.msg--moi { margin-left: auto; flex-direction: row-reverse; }
+.msg--moi .msg__bulle { background: rgba(242, 181, 68, 0.13); border-color: rgba(242, 181, 68, 0.28); border-radius: 12px 4px 12px 12px; }
+.msg--moi .msg__auteur { text-align: right; }
+.msg--moi .msg__heure { text-align: right; }
+
+.chat__saisie { display: flex; gap: 10px; padding: 13px; border-top: 1px solid var(--bordure); background: var(--nuit-600); }
+.chat__saisie textarea { min-height: 44px; max-height: 130px; }
+
+/* Bandeau de mode (démo / connecté) */
+.bandeau-mode {
+  font-size: 0.84rem;
+  padding: 10px 16px;
+  border-radius: var(--rayon-sm);
+  border: 1px dashed rgba(242,181,68,0.35);
+  background: rgba(242,181,68,0.07);
+  color: var(--texte-doux);
+  margin-bottom: 24px;
+}
+.bandeau-mode strong { color: var(--or); }
+
+/* --- 11. Pied de page --------------------------------------------------- */
+.pied {
+  background: var(--nuit-900);
+  border-top: 1px solid var(--bordure);
+  padding: 52px 0 28px;
+  font-size: 0.92rem;
+}
+.pied__grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 32px; margin-bottom: 34px; }
+.pied h4 { font-size: 0.79rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--texte-faible); margin-bottom: 14px; }
+.pied a { color: var(--texte-doux); }
+.pied a:hover { color: var(--or); }
+.pied li { margin-bottom: 8px; }
+.pied__bas {
+  border-top: 1px solid var(--bordure);
+  padding-top: 20px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: space-between;
+  color: var(--texte-faible);
+  font-size: 0.85rem;
+}
+
+/* --- 12. Divers --------------------------------------------------------- */
+.a-completer {
+  border-bottom: 1px dashed rgba(242, 181, 68, 0.5);
+  color: var(--or);
+  cursor: help;
+}
+
+</style>
+</head>
+<body>
+<a class="saut-contenu" href="#contenu">Aller au contenu</a>
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="#index">
+      <span class="marque__logo" aria-hidden="true">🔭</span>
+      <span class="marque__texte">
+        <span class="marque__nom">Club d'astronomie</span>
+        <span class="marque__lieu">MJC de Douai</span>
+      </span>
+    </a>
+    <button class="burger" data-burger aria-expanded="false" aria-controls="menu-principal" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav" id="menu-principal" data-nav aria-label="Navigation principale">
+      <a href="#index" aria-current="page">Accueil</a>
+      <a href="#club">Le club</a>
+      <a href="#activites">Activités</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#galerie">Galerie</a>
+      <a href="#adherer">Nous rejoindre</a>
+      <a href="#membres" class="nav__membre">🔒 Espace membres</a>
+    </nav>
+  </div>
+</header>
+<main id="contenu">
+<div class="page" data-page="index">
+
+
+  <section class="heros">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">MJC de Douai</span>
+      <h1>Le ciel est au-dessus de Douai.<br>Encore faut-il lever les yeux.</h1>
+      <p class="heros__accroche">
+        Nous sommes un club d'astronomie amateur : des soirées d'observation,
+        des ateliers pour apprivoiser son instrument et des conférences pour
+        comprendre ce que l'on regarde. Aucun prérequis, aucun matériel
+        obligatoire — la curiosité suffit pour la première séance.
+      </p>
+      <div class="boutons">
+        <a class="btn btn--principal" href="#agenda">Voir les prochaines séances</a>
+        <a class="btn btn--secondaire" href="#adherer">Nous rejoindre</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Ce que l'on fait ensemble</h2>
+        <p>
+          Quatre activités qui reviennent tout au long de la saison, de
+          septembre à juin, en salle à la MJC comme sous le ciel.
+        </p>
+      </div>
+      <div class="grille grille--4">
+        <article class="carte carte--survol">
+          <div class="carte__icone" aria-hidden="true">🔭</div>
+          <h3>Soirées d'observation</h3>
+          <p class="texte-doux mb-0">
+            Une à deux fois par mois, selon la Lune et la météo. Les
+            instruments du club sont partagés : venez les mains dans les poches.
+          </p>
+        </article>
+        <article class="carte carte--survol">
+          <div class="carte__icone" aria-hidden="true">🛠️</div>
+          <h3>Ateliers pratiques</h3>
+          <p class="texte-doux mb-0">
+            Mise en station, collimation, choix des oculaires, lecture d'une
+            carte du ciel. De quoi cesser de subir son matériel.
+          </p>
+        </article>
+        <article class="carte carte--survol">
+          <div class="carte__icone" aria-hidden="true">📷</div>
+          <h3>Astrophotographie</h3>
+          <p class="texte-doux mb-0">
+            Des poses courtes au trépied jusqu'au traitement d'images
+            empilées : progresser à son rythme, en s'entraidant.
+          </p>
+        </article>
+        <article class="carte carte--survol">
+          <div class="carte__icone" aria-hidden="true">🎓</div>
+          <h3>Conférences</h3>
+          <p class="texte-doux mb-0">
+            Une heure pour comprendre les étoiles, les planètes ou la
+            cosmologie, en français et sans équation obligatoire.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Prochaines dates</h2>
+        <p>
+          Les séances d'observation sont confirmées quelques jours avant, une
+          fois la météo connue. Les adhérents sont prévenus dans l'espace
+          membres.
+        </p>
+      </div>
+      <div data-agenda data-agenda-limite="3"></div>
+      <div class="boutons">
+        <a class="btn btn--secondaire" href="#agenda">Tout l'agenda</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="grille grille--2">
+        <div>
+          <h2>Première fois ?</h2>
+          <p class="texte-doux">
+            La plupart des personnes qui poussent la porte n'ont jamais
+            regardé dans un télescope. C'est exactement le bon moment.
+          </p>
+          <ul class="liste-check">
+            <li>Les deux premières séances sont sans engagement.</li>
+            <li>Le club prête ses instruments pendant les observations.</li>
+            <li>Habillez-vous plus chaudement que vous ne le pensez : on reste immobile dehors.</li>
+            <li>Une lampe de poche à lumière rouge suffit comme premier « matériel ».</li>
+          </ul>
+          <div class="boutons">
+            <a class="btn btn--principal" href="#adherer">Comment nous rejoindre</a>
+          </div>
+        </div>
+        <div class="carte">
+          <h3>Un espace réservé aux membres</h3>
+          <p class="texte-doux">
+            Les adhérents disposent d'un espace en ligne avec :
+          </p>
+          <ul class="liste-check">
+            <li>une <strong>base documentaire</strong> — cartes du ciel, fiches
+              pratiques, comptes rendus de séance, tutoriels de traitement ;</li>
+            <li>un <strong>chat entre membres</strong> pour décider d'une sortie
+              quand une éclaircie s'annonce, ou demander un coup de main sur
+              une image.</li>
+          </ul>
+          <div class="boutons">
+            <a class="btn btn--secondaire" href="#membres">Accéder à l'espace membres</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="club" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Le club</span>
+      <h1>Des amateurs, au sens propre</h1>
+      <p class="heros__accroche">
+        Aucun d'entre nous n'est astronome professionnel. Nous sommes des
+        gens du Douaisis qui aimons le ciel et qui avons choisi de le
+        regarder ensemble plutôt que chacun dans son jardin.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="grille grille--2">
+        <div>
+          <h2>Notre fonctionnement</h2>
+          <p class="texte-doux">
+            Le club est une activité de la MJC de Douai. Il est animé par des
+            bénévoles et vit des adhésions et du temps que chacun y met. Les
+            décisions — programme de la saison, achat de matériel, sorties —
+            se prennent collectivement en début d'année.
+          </p>
+          <p class="texte-doux">
+            La saison suit le calendrier de la MJC, de septembre à juin. Elle
+            alterne les rendez-vous en salle, indépendants de la météo, et
+            les séances d'observation, décidées au dernier moment en fonction
+            du ciel.
+          </p>
+          <p class="texte-doux mb-0">
+            <span class="a-completer" title="À compléter : année de création, nombre d'adhérents, noms des animateurs">
+              Année de création, nombre d'adhérents et animateurs : à compléter.
+            </span>
+          </p>
+        </div>
+        <div class="carte">
+          <h3>En bref</h3>
+          <ul class="liste-nue texte-doux">
+            <li>📍 <strong>Lieu</strong> — MJC de Douai (59500)</li>
+            <li>📅 <strong>Saison</strong> — de septembre à juin</li>
+            <li>🌙 <strong>Observation</strong> — 1 à 2 sorties par mois</li>
+            <li>👥 <strong>Public</strong> — à partir de 8 ans, adultes bienvenus</li>
+            <li>💶 <strong>Adhésion</strong> —
+              <span class="a-completer" title="À compléter">tarif à compléter</span>
+              (adhésion MJC incluse)</li>
+          </ul>
+          <div class="boutons">
+            <a class="btn btn--principal btn--petit" href="#adherer">Nous rejoindre</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Le matériel du club</h2>
+        <p>
+          Il est prêté pendant les séances et utilisable par tous les
+          adhérents formés à son maniement — c'est justement l'objet des
+          ateliers.
+        </p>
+      </div>
+      <div class="grille grille--3">
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🔭</div>
+          <h3>Télescopes</h3>
+          <p class="texte-doux mb-0">
+            Instruments du club, du Dobson facile à manier pour débuter à la
+            monture équatoriale pour la photo.
+            <span class="a-completer" title="À compléter : modèles et diamètres">Détail à compléter.</span>
+          </p>
+        </article>
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">👀</div>
+          <h3>Oculaires et filtres</h3>
+          <p class="texte-doux mb-0">
+            Une gamme d'oculaires partagée, des filtres lunaire et
+            anti-pollution lumineuse — indispensables si près de la ville.
+          </p>
+        </article>
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">📚</div>
+          <h3>Documentation</h3>
+          <p class="texte-doux mb-0">
+            Cartes, atlas et fiches accumulés au fil des saisons, rassemblés
+            dans <a href="#membres">l'espace membres</a>.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Observer près de Douai</h2>
+        <p>
+          Le Douaisis n'est pas un désert de haute altitude : la pollution
+          lumineuse y est réelle. Cela ne nous empêche pas d'observer, cela
+          change ce que l'on observe.
+        </p>
+      </div>
+      <div class="grille grille--3">
+        <article class="carte">
+          <h3>Depuis la ville</h3>
+          <p class="texte-doux mb-0">
+            La Lune, les planètes et les étoiles doubles se moquent des
+            lampadaires. Une soirée sur le parvis de la MJC reste une vraie
+            soirée d'astronomie.
+          </p>
+        </article>
+        <article class="carte">
+          <h3>À la campagne</h3>
+          <p class="texte-doux mb-0">
+            Pour le ciel profond — galaxies, nébuleuses, amas — nous nous
+            déplaçons hors agglomération. Le covoiturage s'organise dans le
+            chat des membres.
+          </p>
+        </article>
+        <article class="carte">
+          <h3>Nuit et météo</h3>
+          <p class="texte-doux mb-0">
+            Nous visons les nuits sans Lune et sans nuages : d'où des sorties
+            confirmées tardivement, souvent 48 heures avant.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="activites" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Activités</span>
+      <h1>Cinq façons de pratiquer</h1>
+      <p class="heros__accroche">
+        On peut venir pour une seule de ces activités. La plupart des
+        adhérents finissent par toutes les essayer.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="grille grille--2">
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🌌</div>
+          <span class="etiquette etiquette--or">1 à 2 fois par mois</span>
+          <h3>Soirées d'observation</h3>
+          <p class="texte-doux">
+            Le cœur du club. On installe les instruments à la tombée de la
+            nuit, on repère les constellations de la saison, puis on pointe :
+            planètes, amas, nébuleuses, galaxies selon la période et la
+            qualité du ciel.
+          </p>
+          <p class="texte-doux mb-0">
+            Les séances en ville sont courtes et familiales ; celles à la
+            campagne durent plus longtemps et visent le ciel profond.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🛠️</div>
+          <span class="etiquette etiquette--violet">En salle</span>
+          <h3>Ateliers matériel</h3>
+          <p class="texte-doux">
+            Beaucoup de télescopes dorment dans les placards parce que
+            personne n'a montré comment s'en servir. Ces ateliers réparent
+            cela : mise en station, collimation, alignement du chercheur,
+            grossissement utile, entretien.
+          </p>
+          <p class="texte-doux mb-0">
+            Venez avec votre instrument, quel qu'il soit et quel que soit son
+            âge.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">📷</div>
+          <span class="etiquette etiquette--vert">Progressif</span>
+          <h3>Initiation à l'astrophotographie</h3>
+          <p class="texte-doux">
+            On commence avec ce que vous avez : un appareil photo, un
+            trépied, quelques poses de quelques secondes. Puis viennent
+            l'empilement, le suivi, le prétraitement et le traitement.
+          </p>
+          <p class="texte-doux mb-0">
+            Les images du club sont commentées entre membres — c'est de loin
+            la manière la plus rapide de progresser.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🎓</div>
+          <span class="etiquette">Ouvert à tous</span>
+          <h3>Conférences et soirées à thème</h3>
+          <p class="texte-doux">
+            Une heure sur un sujet : la vie des étoiles, l'exploration
+            martienne, les exoplanètes, la mesure des distances dans
+            l'Univers. Accessible sans bagage scientifique, suivie de
+            questions autant que le public en a.
+          </p>
+          <p class="texte-doux mb-0">Entrée libre, adhésion non nécessaire.</p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🏫</div>
+          <span class="etiquette">Sur demande</span>
+          <h3>Animations scolaires et périscolaires</h3>
+          <p class="texte-doux">
+            Le club intervient auprès des écoles, collèges et centres de
+            loisirs du Douaisis : séances de découverte, observation du
+            Soleil en toute sécurité, ateliers cartes du ciel.
+          </p>
+          <p class="texte-doux mb-0">
+            Les demandes se font via
+            <a href="#adherer-contact">la page contact</a> ou l'accueil de
+            la MJC.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">☀️</div>
+          <span class="etiquette etiquette--or">Ponctuel</span>
+          <h3>Observation solaire</h3>
+          <p class="texte-doux">
+            En journée, avec les filtres adaptés du club — jamais autrement :
+            taches, granulation, protubérances. Une activité de plein jour
+            appréciée lors des fêtes de quartier et des portes ouvertes.
+          </p>
+          <p class="texte-doux mb-0">
+            <strong>Jamais d'observation du Soleil sans le matériel de
+            protection du club.</strong>
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur centre">
+      <h2>Envie d'essayer ?</h2>
+      <p class="texte-doux">
+        Les prochaines dates sont dans l'agenda. Les deux premières séances
+        sont sans engagement.
+      </p>
+      <div class="boutons" style="justify-content:center">
+        <a class="btn btn--principal" href="#agenda">Voir l'agenda</a>
+        <a class="btn btn--secondaire" href="#adherer">Nous rejoindre</a>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="agenda" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Agenda</span>
+      <h1>Les prochains rendez-vous</h1>
+      <p class="heros__accroche">
+        Les rendez-vous en salle ont lieu quoi qu'il arrive. Les séances
+        d'observation sont confirmées 48 heures avant, une fois la météo
+        connue : les adhérents sont prévenus dans l'espace membres.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>À venir</h2>
+        <p>Saison en cours, de septembre à juin.</p>
+      </div>
+      <div data-agenda></div>
+
+      <div class="carte" style="margin-top:32px">
+        <h3>Comment savoir si une observation est maintenue ?</h3>
+        <p class="texte-doux mb-0">
+          Une séance d'observation dépend de trois choses : la couverture
+          nuageuse, la Lune et le froid. La décision est annoncée dans le
+          salon <strong>« Sorties &amp; météo »</strong> de
+          <a href="#membres">l'espace membres</a>. En cas d'annulation,
+          la séance est reportée à la fenêtre favorable suivante.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Séances passées</h2>
+        <p>Ce que nous avons observé récemment — l'historique de la saison.</p>
+      </div>
+      <div data-agenda data-agenda-passes="true"></div>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="galerie" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Galerie</span>
+      <h1>Ce que nous avons vu</h1>
+      <p class="heros__accroche">
+        Des images prises par les membres, depuis le Douaisis ou en sortie.
+        Elles ne rivalisent pas avec Hubble — elles ont l'avantage d'avoir
+        été faites par nous, avec du matériel accessible.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="message message--info">
+        <strong>Emplacements à remplir.</strong> Déposez les photos dans
+        <code>site/img/</code>, puis remplacez chaque bloc
+        <code>galerie__vignette</code> ci-dessous par
+        <code>&lt;img src="img/mon-image.jpg" alt="description"&gt;</code>.
+        Pensez à créditer l'auteur et à indiquer le matériel utilisé.
+      </div>
+
+      <div class="galerie">
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🌕</div>
+          <figcaption class="galerie__legende">
+            <strong>La Lune au premier quartier</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🪐</div>
+          <figcaption class="galerie__legende">
+            <strong>Saturne et ses anneaux</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🌌</div>
+          <figcaption class="galerie__legende">
+            <strong>M31, la galaxie d'Andromède</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">✨</div>
+          <figcaption class="galerie__legende">
+            <strong>M42, la nébuleuse d'Orion</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">☀️</div>
+          <figcaption class="galerie__legende">
+            <strong>Taches solaires</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🔭</div>
+          <figcaption class="galerie__legende">
+            <strong>Soirée d'observation du club</strong>
+            <span>Auteur à compléter</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <p class="texte-faible" style="margin-top:26px">
+        Vous êtes adhérent et souhaitez voir une de vos images ici ?
+        Partagez-la dans le salon « Nos images » de
+        <a href="#membres">l'espace membres</a>.
+      </p>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="adherer" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Nous rejoindre</span>
+      <h1>Adhérer au club</h1>
+      <p class="heros__accroche">
+        Deux séances d'essai, puis l'adhésion si le ciel vous a convaincu.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="grille grille--2">
+        <div>
+          <h2>Comment ça se passe</h2>
+          <ol class="texte-doux">
+            <li style="margin-bottom:12px">
+              <strong>Venez à une séance.</strong> Choisissez une date dans
+              <a href="#agenda">l'agenda</a> et prévenez-nous par e-mail :
+              on vous attend, on vous présente et on vous prête un instrument.
+            </li>
+            <li style="margin-bottom:12px">
+              <strong>Essayez une deuxième fois.</strong> Idéalement une
+              séance en salle et une séance d'observation : les deux visages
+              du club.
+            </li>
+            <li style="margin-bottom:12px">
+              <strong>Adhérez à la MJC et au club.</strong> L'inscription se
+              fait à l'accueil de la MJC de Douai, sur place ou selon les
+              modalités en vigueur.
+            </li>
+            <li>
+              <strong>Recevez votre code d'accès</strong> à l'espace membres
+              — base documentaire et chat du club.
+            </li>
+          </ol>
+
+          <h2 style="margin-top:36px">Tarifs</h2>
+          <p class="texte-doux">
+            L'adhésion au club s'ajoute à l'adhésion annuelle à la MJC, qui
+            couvre l'assurance et l'accès aux locaux.
+          </p>
+          <ul class="liste-check">
+            <li>Adhésion MJC :
+              <span class="a-completer" title="À compléter">tarif à compléter</span></li>
+            <li>Cotisation club astronomie :
+              <span class="a-completer" title="À compléter">tarif à compléter</span></li>
+            <li>Tarif réduit (étudiants, demandeurs d'emploi) :
+              <span class="a-completer" title="À compléter">à compléter</span></li>
+          </ul>
+          <p class="texte-faible">
+            Les tarifs exacts et les réductions en vigueur sont donnés par
+            l'accueil de la MJC.
+          </p>
+        </div>
+
+        <div>
+          <div class="carte" id="contact">
+            <h3>Nous écrire</h3>
+            <p class="texte-doux">
+              Une question, une envie d'essayer, une demande d'animation
+              scolaire : écrivez-nous, une personne du club vous répond.
+            </p>
+            <p class="texte-doux">
+              📧 <a href="mailto:contact@example.org" data-email-club>contact@example.org</a><br>
+              <span class="texte-faible">Adresse à compléter dans <code>site/js/config.js</code></span>
+            </p>
+            <hr>
+            <h3>Nous trouver</h3>
+            <p class="texte-doux mb-0">
+              MJC de Douai<br>
+              <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+              59500 Douai<br>
+              <span class="a-completer" title="À compléter">téléphone à compléter</span>
+            </p>
+          </div>
+
+          <div class="carte" style="margin-top:20px">
+            <h3>Faut-il un télescope ?</h3>
+            <p class="texte-doux mb-0">
+              Non, et nous déconseillons même d'en acheter un avant d'avoir
+              observé plusieurs fois avec ceux du club. Vous saurez alors ce
+              que vous aimez regarder — et donc quel instrument a du sens
+              pour vous. Une paire de jumelles reste, très souvent, le
+              meilleur premier achat.
+            </p>
+          </div>
+
+          <div class="carte" style="margin-top:20px">
+            <h3>Et les enfants ?</h3>
+            <p class="texte-doux mb-0">
+              Bienvenus à partir de 8 ans, accompagnés d'un adulte lors des
+              séances en soirée. Certaines observations en ville sont
+              accessibles dès 6 ans : elles sont signalées dans l'agenda.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+<div class="page" data-page="membres" hidden>
+
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Espace membres</span>
+      <h1>La base documentaire et le chat du club</h1>
+      <p class="heros__accroche">
+        Réservé aux adhérents. Le code d'accès est remis lors de
+        l'inscription au club.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ Vue « non connecté » ============ -->
+  <section class="section" data-vue-connexion hidden>
+    <div class="conteneur">
+      <div class="panneau-connexion">
+        <div class="bandeau-mode" data-bandeau-mode></div>
+
+        <div class="onglets" role="tablist">
+          <button type="button" role="tab" aria-selected="true"
+                  data-onglet-auth="connexion">Se connecter</button>
+          <button type="button" role="tab" aria-selected="false"
+                  data-onglet-auth="inscription">Créer un compte</button>
+        </div>
+
+        <div data-panneau-auth="connexion">
+          <form data-form-connexion novalidate>
+            <div class="message" data-msg-connexion hidden></div>
+            <div class="champ">
+              <label for="cx-email">Adresse e-mail</label>
+              <input type="email" id="cx-email" name="email" autocomplete="email" required>
+            </div>
+            <div class="champ">
+              <label for="cx-mdp">Mot de passe</label>
+              <input type="password" id="cx-mdp" name="motdepasse" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn--principal btn--bloc">Se connecter</button>
+          </form>
+        </div>
+
+        <div data-panneau-auth="inscription" hidden>
+          <form data-form-inscription novalidate>
+            <div class="message" data-msg-inscription hidden></div>
+            <div class="champ">
+              <label for="in-nom">Nom affiché</label>
+              <input type="text" id="in-nom" name="nom" autocomplete="name" required>
+              <p class="aide">C'est le nom que verront les autres membres dans le chat.</p>
+            </div>
+            <div class="champ">
+              <label for="in-email">Adresse e-mail</label>
+              <input type="email" id="in-email" name="email" autocomplete="email" required>
+            </div>
+            <div class="champ">
+              <label for="in-mdp">Mot de passe</label>
+              <input type="password" id="in-mdp" name="motdepasse" autocomplete="new-password" required>
+              <p class="aide">8 caractères minimum.</p>
+            </div>
+            <div class="champ">
+              <label for="in-code">Code d'accès du club</label>
+              <input type="text" id="in-code" name="code" required>
+              <p class="aide">Remis aux adhérents lors de l'inscription au club.</p>
+            </div>
+            <button type="submit" class="btn btn--principal btn--bloc">Créer mon compte</button>
+          </form>
+        </div>
+
+        <p class="texte-faible" style="margin-top:22px">
+          Pas encore adhérent ? <a href="#adherer">Voir comment nous rejoindre</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Vue « connecté » ============ -->
+  <section class="section" data-vue-espace hidden>
+    <div class="conteneur">
+      <div class="bandeau-mode" data-bandeau-mode></div>
+
+      <div class="barre-membre">
+        <div class="barre-membre__identite">
+          <div class="avatar" data-membre-avatar aria-hidden="true">?</div>
+          <div>
+            <strong data-membre-nom></strong><br>
+            <span class="texte-faible" data-membre-email></span>
+          </div>
+        </div>
+        <button type="button" class="btn btn--discret btn--petit" data-deconnexion>Se déconnecter</button>
+      </div>
+
+      <div class="membre-grille">
+
+        <!-- ---- Base documentaire ---- -->
+        <div>
+          <h2>Base documentaire</h2>
+          <p class="texte-doux">
+            Cartes, fiches pratiques, tutoriels et comptes rendus rassemblés
+            par le club. Chacun peut y ajouter une ressource utile.
+          </p>
+
+          <div class="doc-outils">
+            <label class="visuellement-cache" for="doc-recherche">Rechercher un document</label>
+            <input type="search" id="doc-recherche" placeholder="Rechercher un document…" data-recherche-docs>
+            <label class="visuellement-cache" for="doc-categorie">Filtrer par catégorie</label>
+            <select id="doc-categorie" data-filtre-categorie>
+              <option value="">Toutes les catégories</option>
+            </select>
+          </div>
+
+          <div data-liste-docs></div>
+
+          <details class="carte" style="margin-top:22px">
+            <summary style="cursor:pointer;font-weight:600">➕ Ajouter un document</summary>
+            <form data-form-doc style="margin-top:18px" novalidate>
+              <div class="message" data-msg-doc hidden></div>
+              <div class="champ">
+                <label for="doc-titre">Titre</label>
+                <input type="text" id="doc-titre" name="titre" required>
+              </div>
+              <div class="champ">
+                <label for="doc-cat">Catégorie</label>
+                <input type="text" id="doc-cat" name="categorie" list="categories-connues"
+                       placeholder="Fiches pratiques, Cartes du ciel, Logiciels…">
+                <datalist id="categories-connues">
+                  <option value="Cartes du ciel"></option>
+                  <option value="Catalogues"></option>
+                  <option value="Fiches pratiques"></option>
+                  <option value="Logiciels"></option>
+                  <option value="Astrophotographie"></option>
+                  <option value="Comptes rendus"></option>
+                </datalist>
+              </div>
+              <div class="champ">
+                <label for="doc-url">Lien (facultatif)</label>
+                <input type="url" id="doc-url" name="url" placeholder="https://…">
+                <p class="aide">
+                  Lien vers une page, un PDF ou un fichier partagé. Laissez vide
+                  pour un document consultable au local du club.
+                </p>
+              </div>
+              <div class="champ">
+                <label for="doc-desc">Description</label>
+                <textarea id="doc-desc" name="description" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn--principal">Ajouter à la base</button>
+            </form>
+          </details>
+        </div>
+
+        <!-- ---- Chat ---- -->
+        <div>
+          <h2>Chat entre membres</h2>
+          <p class="texte-doux">
+            Pour organiser une sortie quand le ciel se dégage, demander un
+            conseil ou partager une image.
+          </p>
+
+          <div class="chat">
+            <div class="chat__entete">
+              <div class="chat__salons" data-salons></div>
+            </div>
+            <div class="chat__fil" data-fil aria-live="polite"></div>
+            <form class="chat__saisie" data-form-chat>
+              <label class="visuellement-cache" for="chat-message">Votre message</label>
+              <textarea id="chat-message" rows="1" placeholder="Écrire un message… (Entrée pour envoyer)"></textarea>
+              <button type="submit" class="btn btn--principal">Envoyer</button>
+            </form>
+          </div>
+
+          <p class="texte-faible" style="margin-top:14px">
+            Les messages sont visibles par tous les membres connectés. Merci
+            d'y rester courtois : c'est le salon du club, pas un réseau social.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+</main>
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h4>Le club</h4>
+        <p class="texte-doux">
+          Un club d'astronomie ouvert à tous, hébergé par la MJC de Douai.
+          Observation, initiation et partage du ciel, du débutant curieux à
+          l'astrophotographe patient.
+        </p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul class="liste-nue">
+          <li><a href="#club">Le club</a></li>
+          <li><a href="#activites">Nos activités</a></li>
+          <li><a href="#agenda">Agenda</a></li>
+          <li><a href="#galerie">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous rejoindre</h4>
+        <ul class="liste-nue">
+          <li><a href="#adherer">Adhérer au club</a></li>
+          <li><a href="#adherer-contact">Nous écrire</a></li>
+          <li><a href="#membres">Espace membres</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous trouver</h4>
+        <p class="texte-doux mb-0">
+          MJC de Douai<br>
+          <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+          59500 Douai<br>
+          <span class="a-completer" title="À compléter">téléphone à compléter</span>
+        </p>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <span>© <span data-annee>2026</span> Club d'astronomie — MJC de Douai</span>
+      <span>Site réalisé par les membres du club · <a href="https://github.com/Stephaneducatillon/astrotarget">code source</a></span>
+    </div>
+  </div>
+</footer>
+<script>
+/* =========================================================
+   Configuration du site — le seul fichier à éditer pour
+   passer de la démo locale à un vrai espace membre partagé.
+   ========================================================= */
+window.CONFIG = {
+  /* Nom affiché dans les en-têtes et le pied de page. */
+  nomClub: "Club d'astronomie",
+  nomStructure: "MJC de Douai",
+
+  /* Adresse de contact utilisée sur la page « Adhérer ». */
+  email: "contact@example.org", // À COMPLÉTER
+
+  /* ---------------------------------------------------------------
+     Mode de l'espace membre.
+
+     "local"    : tout reste dans le navigateur de chaque visiteur
+                  (localStorage). Aucun serveur, aucun compte à créer,
+                  mais les comptes, documents et messages ne sont PAS
+                  partagés entre les personnes. Sert à essayer le site.
+
+     "supabase" : comptes, base documentaire et chat réellement
+                  partagés, hébergés sur Supabase (offre gratuite).
+                  Renseignez les deux valeurs ci-dessous, puis suivez
+                  site/SUPABASE.md pour créer les tables.
+     --------------------------------------------------------------- */
+  modeMembre: "local",
+
+  supabase: {
+    url: "",      // ex. "https://xxxxxxxx.supabase.co"
+    cleAnon: "",  // clé « anon public » du projet Supabase
+  },
+
+  /* Code remis aux adhérents pour créer leur compte.
+     En mode "local" il est vérifié dans le navigateur : il filtre les
+     curieux, il ne protège rien. En mode "supabase", la vraie
+     protection vient des règles RLS décrites dans SUPABASE.md. */
+  codeInscription: "ORION2026",
+
+  /* Salons du chat entre membres. */
+  salons: [
+    { id: "general",   nom: "Général" },
+    { id: "sorties",   nom: "Sorties & météo" },
+    { id: "materiel",  nom: "Matériel" },
+    { id: "images",    nom: "Nos images" },
+  ],
+};
+
+</script>
+<script>
+/* =========================================================
+   Agenda du club — source unique des évènements du site.
+   Pour ajouter une séance : copier un bloc, changer les valeurs.
+   date : "AAAA-MM-JJ" | heure : texte libre | type : observation
+   | atelier | conference | initiation | sortie
+   ========================================================= */
+window.EVENEMENTS = [
+  {
+    date: "2026-09-12",
+    heure: "21h00 – 00h00",
+    titre: "Soirée d'observation de rentrée",
+    type: "observation",
+    lieu: "Site d'observation — à confirmer",
+    resume:
+      "Première sortie de la saison : prise en main des instruments du club, " +
+      "repérage des constellations d'automne, observation de Saturne et de la " +
+      "Voie lactée si le ciel le permet. Ouverte aux non-adhérents.",
+    public: "Tout public, à partir de 8 ans",
+  },
+  {
+    date: "2026-09-26",
+    heure: "18h30 – 20h30",
+    titre: "Atelier : régler et utiliser son télescope",
+    type: "atelier",
+    lieu: "MJC de Douai — salle du club",
+    resume:
+      "Collimation, mise en station, choix des oculaires, calcul du " +
+      "grossissement utile. Venez avec votre instrument, même celui qui " +
+      "dort dans un placard depuis des années.",
+    public: "Adhérents et futurs adhérents",
+  },
+  {
+    date: "2026-10-10",
+    heure: "20h00 – 22h00",
+    titre: "Conférence : la vie des étoiles",
+    type: "conference",
+    lieu: "MJC de Douai — grande salle",
+    resume:
+      "De la nébuleuse qui s'effondre à la naine blanche : le cycle complet " +
+      "d'une étoile, illustré par les objets que l'on peut pointer soi-même " +
+      "depuis le Douaisis.",
+    public: "Tout public, entrée libre",
+  },
+  {
+    date: "2026-10-24",
+    heure: "20h30 – 23h30",
+    titre: "Ciel profond d'automne",
+    type: "observation",
+    lieu: "Site d'observation — à confirmer",
+    resume:
+      "Nouvelle Lune : la meilleure fenêtre du mois pour la galaxie " +
+      "d'Andromède (M31), le Double Amas de Persée et la nébuleuse " +
+      "Dumbbell (M27).",
+    public: "Adhérents",
+  },
+  {
+    date: "2026-11-14",
+    heure: "14h00 – 17h00",
+    titre: "Initiation à l'astrophotographie",
+    type: "initiation",
+    lieu: "MJC de Douai — salle du club",
+    resume:
+      "Poses courtes, empilement, traitement : les bases pour obtenir une " +
+      "première image du ciel profond avec un appareil photo et un simple " +
+      "trépied.",
+    public: "Adhérents, 12 places",
+  },
+  {
+    date: "2026-12-05",
+    heure: "19h00 – 22h00",
+    titre: "Soirée Lune et planètes",
+    type: "observation",
+    lieu: "MJC de Douai — parvis",
+    resume:
+      "Observation de la Lune au premier quartier — cratères, mers et " +
+      "terminateur — puis Jupiter et ses satellites galiléens. Séance " +
+      "courte, idéale pour les familles.",
+    public: "Tout public, à partir de 6 ans",
+  },
+];
+
+</script>
+<script>
+/* =========================================================
+   Comportements communs à toutes les pages du site.
+   Aucun framework, aucune étape de compilation.
+   ========================================================= */
+(function () {
+  "use strict";
+
+  /* --- Menu mobile ------------------------------------------------------ */
+  var burger = document.querySelector("[data-burger]");
+  var nav = document.querySelector("[data-nav]");
+
+  if (burger && nav) {
+    var petitEcran = window.matchMedia("(max-width: 880px)");
+
+    function appliquerEtatNav() {
+      if (petitEcran.matches) {
+        nav.hidden = burger.getAttribute("aria-expanded") !== "true";
+      } else {
+        nav.hidden = false;
+      }
+    }
+
+    burger.addEventListener("click", function () {
+      var ouvert = burger.getAttribute("aria-expanded") === "true";
+      burger.setAttribute("aria-expanded", String(!ouvert));
+      appliquerEtatNav();
+    });
+
+    petitEcran.addEventListener("change", function () {
+      burger.setAttribute("aria-expanded", "false");
+      appliquerEtatNav();
+    });
+
+    appliquerEtatNav();
+  }
+
+  /* --- Année courante dans le pied de page ------------------------------ */
+  document.querySelectorAll("[data-annee]").forEach(function (el) {
+    el.textContent = String(new Date().getFullYear());
+  });
+
+  /* --- Ciel étoilé du héros --------------------------------------------- */
+
+  // Exposé : la version mono-fichier (apercu.html) redessine le ciel de la
+  // section qu'elle vient d'afficher, un canvas masqué ayant une taille nulle.
+  window.redessinerCiels = function () {
+    document.querySelectorAll("[data-ciel]").forEach(function (cvs) {
+      if (cvs.getContext) dessinerCiel(cvs);
+    });
+  };
+
+  window.redessinerCiels();
+
+  var minuteur;
+  window.addEventListener("resize", function () {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(window.redessinerCiels, 200);
+  });
+
+  function dessinerCiel(cvs) {
+    var parent = cvs.parentElement;
+    var largeur = parent.offsetWidth;
+    var hauteur = parent.offsetHeight;
+    if (!largeur || !hauteur) return;
+
+    var ratio = Math.min(window.devicePixelRatio || 1, 2);
+    cvs.width = largeur * ratio;
+    cvs.height = hauteur * ratio;
+    cvs.style.width = largeur + "px";
+    cvs.style.height = hauteur + "px";
+
+    var ctx = cvs.getContext("2d");
+    ctx.scale(ratio, ratio);
+    ctx.clearRect(0, 0, largeur, hauteur);
+
+    // Densité constante quelle que soit la taille de l'écran.
+    var nombre = Math.round((largeur * hauteur) / 5200);
+    for (var i = 0; i < nombre; i++) {
+      var x = Math.random() * largeur;
+      var y = Math.random() * hauteur;
+      var r = Math.random() * 1.25 + 0.25;
+      var a = Math.random() * 0.65 + 0.18;
+
+      // Quelques étoiles légèrement colorées, comme dans un vrai champ.
+      var teinte = Math.random();
+      var couleur = teinte > 0.93 ? "255, 214, 170"
+                  : teinte > 0.86 ? "190, 214, 255"
+                  : "255, 255, 255";
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(" + couleur + "," + a + ")";
+      ctx.fill();
+
+      // Halo sur les plus brillantes.
+      if (r > 1.2) {
+        ctx.beginPath();
+        ctx.arc(x, y, r * 3.4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(" + couleur + ",0.06)";
+        ctx.fill();
+      }
+    }
+  }
+
+  /* --- Agenda : rendu partagé accueil / page agenda --------------------- */
+  var MOIS = ["janv.", "févr.", "mars", "avril", "mai", "juin",
+              "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+  var TYPES = {
+    observation: { libelle: "Observation", classe: "etiquette--or" },
+    atelier:     { libelle: "Atelier",     classe: "etiquette--violet" },
+    conference:  { libelle: "Conférence",  classe: "" },
+    initiation:  { libelle: "Initiation",  classe: "etiquette--vert" },
+    sortie:      { libelle: "Sortie",      classe: "etiquette--vert" },
+  };
+
+  window.Agenda = {
+    /**
+     * Rend les évènements dans un conteneur.
+     * @param {HTMLElement} cible
+     * @param {{limite?: number, passes?: boolean}} options
+     *        passes = true : uniquement les séances déjà écoulées,
+     *        de la plus récente à la plus ancienne.
+     */
+    rendre: function (cible, options) {
+      options = options || {};
+      var tous = (window.EVENEMENTS || []).slice();
+
+      var maintenant = new Date();
+
+      var liste = tous.filter(function (ev) {
+        var termine = new Date(ev.date + "T23:59:59") < maintenant;
+        return options.passes ? termine : !termine;
+      });
+
+      liste.sort(function (a, b) {
+        if (a.date === b.date) return 0;
+        // À venir : du plus proche au plus lointain. Passées : l'inverse.
+        return (a.date < b.date ? -1 : 1) * (options.passes ? -1 : 1);
+      });
+
+      if (options.limite) liste = liste.slice(0, options.limite);
+
+      if (!liste.length) {
+        cible.innerHTML = options.passes
+          ? '<p class="texte-doux">Aucune séance passée à afficher pour cette saison.</p>'
+          : '<p class="texte-doux">Aucune date programmée pour le moment. ' +
+            'Le programme de la saison est publié à chaque rentrée — ' +
+            '<a href="adherer.html">écrivez-nous</a> pour être prévenu.</p>';
+        return;
+      }
+
+      cible.innerHTML = liste.map(carteEvenement).join("");
+    },
+  };
+
+  function carteEvenement(ev) {
+    var d = new Date(ev.date + "T12:00:00");
+    var type = TYPES[ev.type] || { libelle: ev.type || "Séance", classe: "" };
+    var passe = d < new Date();
+
+    return (
+      '<article class="evenement' + (passe ? " evenement--passe" : "") + '">' +
+        '<div class="evenement__date">' +
+          '<div class="evenement__jour">' + d.getDate() + "</div>" +
+          '<div class="evenement__mois">' + MOIS[d.getMonth()] + "</div>" +
+          '<div class="evenement__annee">' + d.getFullYear() + "</div>" +
+        "</div>" +
+        "<div>" +
+          '<span class="etiquette ' + type.classe + '">' + type.libelle + "</span>" +
+          "<h3>" + echapper(ev.titre) + "</h3>" +
+          '<div class="evenement__infos">' +
+            "<span>🕘 " + echapper(ev.heure || "horaire à préciser") + "</span>" +
+            "<span>📍 " + echapper(ev.lieu || "lieu à préciser") + "</span>" +
+            (ev.public ? "<span>👥 " + echapper(ev.public) + "</span>" : "") +
+          "</div>" +
+          '<p class="texte-doux mb-0">' + echapper(ev.resume || "") + "</p>" +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  function echapper(txt) {
+    return String(txt).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  window.echapperHtml = echapper;
+
+  /* --- Rendu automatique là où un conteneur est présent ----------------- */
+  document.querySelectorAll("[data-agenda]").forEach(function (el) {
+    window.Agenda.rendre(el, {
+      limite: el.dataset.agendaLimite ? parseInt(el.dataset.agendaLimite, 10) : 0,
+      passes: el.dataset.agendaPasses === "true",
+    });
+  });
+})();
+
+</script>
+<script>
+/* =========================================================
+   Couche d'accès de l'espace membre.
+
+   Une seule interface, deux implémentations :
+     • BackendLocal    — localStorage, pour essayer le site sans serveur
+     • BackendSupabase — comptes et données réellement partagés
+
+   Le reste du code (membres.js) ne connaît que cette interface :
+     connexion(email, mdp)              -> Promise<membre>
+     inscription({nom, email, mdp, code})-> Promise<membre>
+     deconnexion()                      -> Promise
+     membreCourant()                    -> Promise<membre|null>
+     listerDocuments()                  -> Promise<doc[]>
+     ajouterDocument(doc)               -> Promise<doc>
+     supprimerDocument(id)              -> Promise
+     listerMessages(salon)              -> Promise<message[]>
+     envoyerMessage(salon, texte)       -> Promise<message>
+     ecouterMessages(salon, rappel)     -> fonction d'arrêt
+   ========================================================= */
+(function () {
+  "use strict";
+
+  var CFG = window.CONFIG || {};
+
+  /* ==== Utilitaires partagés ============================================ */
+
+  function identifiant() {
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 9);
+  }
+
+  function normaliserEmail(email) {
+    return String(email || "").trim().toLowerCase();
+  }
+
+  function ErreurMembre(message) {
+    var e = new Error(message);
+    e.attendue = true; // erreur destinée à être affichée telle quelle
+    return e;
+  }
+
+  /* ==== Implémentation locale (localStorage) ============================ */
+
+  var BackendLocal = (function () {
+    var CLE_MEMBRES = "mjc-astro:membres";
+    var CLE_SESSION = "mjc-astro:session";
+    var CLE_DOCS = "mjc-astro:documents";
+    var CLE_MESSAGES = "mjc-astro:messages";
+
+    function lire(cle, defaut) {
+      try {
+        var brut = localStorage.getItem(cle);
+        return brut ? JSON.parse(brut) : defaut;
+      } catch (e) {
+        return defaut;
+      }
+    }
+
+    function ecrire(cle, valeur) {
+      try {
+        localStorage.setItem(cle, JSON.stringify(valeur));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /* Empreinte du mot de passe.
+       PBKDF2-SHA256 via WebCrypto quand il est disponible (page servie en
+       https ou en localhost). Sur une page ouverte en file://, crypto.subtle
+       n'existe pas : on retombe sur une empreinte simple, suffisante pour la
+       démo mais qui ne protège rien — d'où l'avertissement affiché. */
+    var CRYPTO_DISPO = !!(window.crypto && window.crypto.subtle);
+
+    function octetsVersHex(buffer) {
+      return Array.prototype.map
+        .call(new Uint8Array(buffer), function (o) {
+          return ("00" + o.toString(16)).slice(-2);
+        })
+        .join("");
+    }
+
+    function empreinte(motDePasse, sel) {
+      if (!CRYPTO_DISPO) {
+        // Repli non cryptographique, uniquement pour le mode démo hors https.
+        var h = 5381;
+        var chaine = sel + "|" + motDePasse;
+        for (var i = 0; i < chaine.length; i++) {
+          h = ((h << 5) + h + chaine.charCodeAt(i)) | 0;
+        }
+        return Promise.resolve("repli:" + (h >>> 0).toString(16));
+      }
+
+      var encodeur = new TextEncoder();
+      return window.crypto.subtle
+        .importKey("raw", encodeur.encode(motDePasse), "PBKDF2", false, ["deriveBits"])
+        .then(function (cle) {
+          return window.crypto.subtle.deriveBits(
+            {
+              name: "PBKDF2",
+              salt: encodeur.encode(sel),
+              iterations: 150000,
+              hash: "SHA-256",
+            },
+            cle,
+            256
+          );
+        })
+        .then(octetsVersHex);
+    }
+
+    function membrePublic(m) {
+      if (!m) return null;
+      return { id: m.id, nom: m.nom, email: m.email, inscritLe: m.inscritLe };
+    }
+
+    function documentsParDefaut() {
+      var maintenant = new Date().toISOString();
+      return [
+        {
+          id: "doc-demo-1",
+          titre: "Carte du ciel du mois",
+          categorie: "Cartes du ciel",
+          description:
+            "Carte tournante à imprimer et repères de la voûte céleste pour le mois en cours.",
+          url: "https://www.stelvision.com/astro/carte-du-ciel/",
+          auteur: "Le club",
+          creeLe: maintenant,
+          protege: true,
+        },
+        {
+          id: "doc-demo-2",
+          titre: "Catalogue Messier commenté",
+          categorie: "Catalogues",
+          description:
+            "Les 110 objets Messier, leur constellation, leur magnitude et la saison où les chercher.",
+          url: "https://fr.wikipedia.org/wiki/Objet_du_catalogue_de_Messier",
+          auteur: "Le club",
+          creeLe: maintenant,
+          protege: true,
+        },
+        {
+          id: "doc-demo-3",
+          titre: "Stellarium — logiciel de planétarium",
+          categorie: "Logiciels",
+          description:
+            "Planétarium libre et gratuit : préparer une séance, identifier un objet, simuler le ciel d'une date.",
+          url: "https://stellarium.org/fr/",
+          auteur: "Le club",
+          creeLe: maintenant,
+          protege: true,
+        },
+        {
+          id: "doc-demo-4",
+          titre: "Fiche : préparer sa première soirée",
+          categorie: "Fiches pratiques",
+          description:
+            "Vêtements, lampe rouge, adaptation à l'obscurité, liste d'objets faciles pour débuter. Document interne du club.",
+          url: "",
+          auteur: "Le club",
+          creeLe: maintenant,
+          protege: true,
+        },
+      ];
+    }
+
+    function messagesParDefaut() {
+      return [];
+    }
+
+    return {
+      nom: "local",
+
+      init: function () {
+        if (lire(CLE_DOCS, null) === null) ecrire(CLE_DOCS, documentsParDefaut());
+        if (lire(CLE_MESSAGES, null) === null) ecrire(CLE_MESSAGES, messagesParDefaut());
+        return Promise.resolve();
+      },
+
+      /* --- Comptes ------------------------------------------------------ */
+      inscription: function (donnees) {
+        var email = normaliserEmail(donnees.email);
+        var nom = String(donnees.nom || "").trim();
+
+        if (nom.length < 2) return Promise.reject(ErreurMembre("Indiquez votre nom (2 caractères minimum)."));
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Promise.reject(ErreurMembre("Adresse e-mail invalide."));
+        if (String(donnees.mdp || "").length < 8) return Promise.reject(ErreurMembre("Le mot de passe doit faire au moins 8 caractères."));
+        if (String(donnees.code || "").trim().toUpperCase() !== String(CFG.codeInscription || "").toUpperCase()) {
+          return Promise.reject(ErreurMembre("Code d'accès incorrect. Il est remis aux adhérents lors de l'inscription."));
+        }
+
+        var membres = lire(CLE_MEMBRES, []);
+        if (membres.some(function (m) { return m.email === email; })) {
+          return Promise.reject(ErreurMembre("Un compte existe déjà pour cette adresse."));
+        }
+
+        var sel = identifiant();
+        return empreinte(donnees.mdp, sel).then(function (hash) {
+          var membre = {
+            id: identifiant(),
+            nom: nom,
+            email: email,
+            sel: sel,
+            hash: hash,
+            inscritLe: new Date().toISOString(),
+          };
+          membres.push(membre);
+          if (!ecrire(CLE_MEMBRES, membres)) {
+            throw ErreurMembre("Le navigateur refuse d'enregistrer les données (mode privé ?).");
+          }
+          ecrire(CLE_SESSION, membre.id);
+          return membrePublic(membre);
+        });
+      },
+
+      connexion: function (email, mdp) {
+        var cible = normaliserEmail(email);
+        var membres = lire(CLE_MEMBRES, []);
+        var membre = membres.filter(function (m) { return m.email === cible; })[0];
+
+        // Message volontairement identique dans les deux cas.
+        if (!membre) return Promise.reject(ErreurMembre("Adresse ou mot de passe incorrect."));
+
+        return empreinte(mdp, membre.sel).then(function (hash) {
+          if (hash !== membre.hash) throw ErreurMembre("Adresse ou mot de passe incorrect.");
+          ecrire(CLE_SESSION, membre.id);
+          return membrePublic(membre);
+        });
+      },
+
+      deconnexion: function () {
+        try { localStorage.removeItem(CLE_SESSION); } catch (e) {}
+        return Promise.resolve();
+      },
+
+      membreCourant: function () {
+        var id = lire(CLE_SESSION, null);
+        if (!id) return Promise.resolve(null);
+        var membre = lire(CLE_MEMBRES, []).filter(function (m) { return m.id === id; })[0];
+        return Promise.resolve(membrePublic(membre));
+      },
+
+      /* --- Base documentaire -------------------------------------------- */
+      listerDocuments: function () {
+        var docs = lire(CLE_DOCS, []).slice();
+        docs.sort(function (a, b) { return a.creeLe < b.creeLe ? 1 : -1; });
+        return Promise.resolve(docs);
+      },
+
+      ajouterDocument: function (doc) {
+        return this.membreCourant().then(function (membre) {
+          if (!membre) throw ErreurMembre("Connectez-vous pour ajouter un document.");
+          if (!String(doc.titre || "").trim()) throw ErreurMembre("Le titre est obligatoire.");
+
+          var docs = lire(CLE_DOCS, []);
+          var nouveau = {
+            id: identifiant(),
+            titre: String(doc.titre).trim(),
+            categorie: String(doc.categorie || "Divers").trim(),
+            description: String(doc.description || "").trim(),
+            url: String(doc.url || "").trim(),
+            auteur: membre.nom,
+            auteurId: membre.id,
+            creeLe: new Date().toISOString(),
+          };
+          docs.push(nouveau);
+          ecrire(CLE_DOCS, docs);
+          return nouveau;
+        });
+      },
+
+      supprimerDocument: function (id) {
+        return this.membreCourant().then(function (membre) {
+          if (!membre) throw ErreurMembre("Connectez-vous d'abord.");
+          var docs = lire(CLE_DOCS, []);
+          var cible = docs.filter(function (d) { return d.id === id; })[0];
+          if (!cible) return;
+          if (cible.protege || (cible.auteurId && cible.auteurId !== membre.id)) {
+            throw ErreurMembre("Vous ne pouvez retirer que les documents que vous avez déposés.");
+          }
+          ecrire(CLE_DOCS, docs.filter(function (d) { return d.id !== id; }));
+        });
+      },
+
+      /* --- Chat ---------------------------------------------------------- */
+      listerMessages: function (salon) {
+        var messages = lire(CLE_MESSAGES, []).filter(function (m) { return m.salon === salon; });
+        messages.sort(function (a, b) { return a.creeLe < b.creeLe ? -1 : 1; });
+        return Promise.resolve(messages);
+      },
+
+      envoyerMessage: function (salon, texte) {
+        return this.membreCourant().then(function (membre) {
+          if (!membre) throw ErreurMembre("Connectez-vous pour écrire.");
+          var contenu = String(texte || "").trim();
+          if (!contenu) throw ErreurMembre("Message vide.");
+          if (contenu.length > 2000) throw ErreurMembre("Message trop long (2000 caractères maximum).");
+
+          var messages = lire(CLE_MESSAGES, []);
+          var message = {
+            id: identifiant(),
+            salon: salon,
+            texte: contenu,
+            auteur: membre.nom,
+            auteurId: membre.id,
+            creeLe: new Date().toISOString(),
+          };
+          messages.push(message);
+          // On borne l'historique local pour ne pas saturer le stockage.
+          if (messages.length > 500) messages = messages.slice(-500);
+          ecrire(CLE_MESSAGES, messages);
+          return message;
+        });
+      },
+
+      /* Synchronisation entre les onglets d'un même navigateur : c'est tout
+         ce qu'un site sans serveur peut offrir. */
+      ecouterMessages: function (salon, rappel) {
+        function surStockage(e) {
+          if (e.key === CLE_MESSAGES) rappel();
+        }
+        window.addEventListener("storage", surStockage);
+        return function () { window.removeEventListener("storage", surStockage); };
+      },
+    };
+  })();
+
+  /* ==== Implémentation Supabase ========================================= */
+
+  var BackendSupabase = (function () {
+    var client = null;
+
+    function chargerSdk() {
+      if (window.supabase && window.supabase.createClient) return Promise.resolve();
+      return new Promise(function (resoudre, rejeter) {
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+        s.onload = resoudre;
+        s.onerror = function () { rejeter(ErreurMembre("Impossible de charger la bibliothèque Supabase.")); };
+        document.head.appendChild(s);
+      });
+    }
+
+    function membrePublic(user) {
+      if (!user) return null;
+      var meta = user.user_metadata || {};
+      return {
+        id: user.id,
+        nom: meta.nom || (user.email || "").split("@")[0],
+        email: user.email,
+        inscritLe: user.created_at,
+      };
+    }
+
+    function verifier(reponse) {
+      if (reponse.error) {
+        var e = ErreurMembre(reponse.error.message);
+        throw e;
+      }
+      return reponse.data;
+    }
+
+    return {
+      nom: "supabase",
+
+      init: function () {
+        return chargerSdk().then(function () {
+          client = window.supabase.createClient(CFG.supabase.url, CFG.supabase.cleAnon);
+        });
+      },
+
+      inscription: function (donnees) {
+        if (String(donnees.code || "").trim().toUpperCase() !== String(CFG.codeInscription || "").toUpperCase()) {
+          return Promise.reject(ErreurMembre("Code d'accès incorrect."));
+        }
+        return client.auth
+          .signUp({
+            email: normaliserEmail(donnees.email),
+            password: donnees.mdp,
+            options: { data: { nom: String(donnees.nom || "").trim() } },
+          })
+          .then(verifier)
+          .then(function (data) {
+            if (!data.session) {
+              throw ErreurMembre(
+                "Compte créé. Confirmez votre adresse via l'e-mail reçu, puis connectez-vous."
+              );
+            }
+            return membrePublic(data.user);
+          });
+      },
+
+      connexion: function (email, mdp) {
+        return client.auth
+          .signInWithPassword({ email: normaliserEmail(email), password: mdp })
+          .then(verifier)
+          .then(function (data) { return membrePublic(data.user); });
+      },
+
+      deconnexion: function () {
+        return client.auth.signOut();
+      },
+
+      membreCourant: function () {
+        return client.auth.getUser().then(function (r) {
+          return r.data && r.data.user ? membrePublic(r.data.user) : null;
+        });
+      },
+
+      listerDocuments: function () {
+        return client
+          .from("documents")
+          .select("*")
+          .order("cree_le", { ascending: false })
+          .then(verifier)
+          .then(function (lignes) { return (lignes || []).map(depuisLigneDoc); });
+      },
+
+      ajouterDocument: function (doc) {
+        return this.membreCourant().then(function (membre) {
+          if (!membre) throw ErreurMembre("Connectez-vous pour ajouter un document.");
+          return client
+            .from("documents")
+            .insert({
+              titre: String(doc.titre || "").trim(),
+              categorie: String(doc.categorie || "Divers").trim(),
+              description: String(doc.description || "").trim(),
+              url: String(doc.url || "").trim(),
+              auteur: membre.nom,
+              auteur_id: membre.id,
+            })
+            .select()
+            .single()
+            .then(verifier)
+            .then(depuisLigneDoc);
+        });
+      },
+
+      supprimerDocument: function (id) {
+        return client.from("documents").delete().eq("id", id).then(verifier);
+      },
+
+      listerMessages: function (salon) {
+        return client
+          .from("messages")
+          .select("*")
+          .eq("salon", salon)
+          .order("cree_le", { ascending: true })
+          .limit(200)
+          .then(verifier)
+          .then(function (lignes) { return (lignes || []).map(depuisLigneMessage); });
+      },
+
+      envoyerMessage: function (salon, texte) {
+        return this.membreCourant().then(function (membre) {
+          if (!membre) throw ErreurMembre("Connectez-vous pour écrire.");
+          var contenu = String(texte || "").trim();
+          if (!contenu) throw ErreurMembre("Message vide.");
+          return client
+            .from("messages")
+            .insert({ salon: salon, texte: contenu, auteur: membre.nom, auteur_id: membre.id })
+            .select()
+            .single()
+            .then(verifier)
+            .then(depuisLigneMessage);
+        });
+      },
+
+      ecouterMessages: function (salon, rappel) {
+        var canal = client
+          .channel("messages-" + salon)
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "messages", filter: "salon=eq." + salon },
+            function () { rappel(); }
+          )
+          .subscribe();
+        return function () { client.removeChannel(canal); };
+      },
+    };
+
+    function depuisLigneDoc(l) {
+      return {
+        id: l.id,
+        titre: l.titre,
+        categorie: l.categorie,
+        description: l.description,
+        url: l.url,
+        auteur: l.auteur,
+        auteurId: l.auteur_id,
+        creeLe: l.cree_le,
+      };
+    }
+
+    function depuisLigneMessage(l) {
+      return {
+        id: l.id,
+        salon: l.salon,
+        texte: l.texte,
+        auteur: l.auteur,
+        auteurId: l.auteur_id,
+        creeLe: l.cree_le,
+      };
+    }
+  })();
+
+  /* ==== Sélection du backend ============================================ */
+
+  var supabaseConfigure =
+    CFG.modeMembre === "supabase" &&
+    CFG.supabase &&
+    CFG.supabase.url &&
+    CFG.supabase.cleAnon;
+
+  var choisi = supabaseConfigure ? BackendSupabase : BackendLocal;
+
+  window.Backend = choisi;
+
+  // Promesse d'initialisation : membres.js attend `window.BackendPret` avant
+  // de toucher à `window.Backend`, qui peut encore changer ci-dessous.
+  window.BackendPret = choisi
+    .init()
+    .catch(function (e) {
+      // Si Supabase est injoignable, la page reste utilisable en local
+      // plutôt que de rester bloquée sur un écran vide.
+      console.error("Espace membre : bascule en mode local.", e);
+      window.Backend = BackendLocal;
+      return BackendLocal.init();
+    })
+    .then(function () { return window.Backend; });
+})();
+
+</script>
+<script>
+/* =========================================================
+   Espace membre : connexion, base documentaire, chat.
+   S'appuie uniquement sur l'interface exposée par backend.js.
+   ========================================================= */
+(function () {
+  "use strict";
+
+  var CFG = window.CONFIG || {};
+  var ech = window.echapperHtml;
+
+  var $ = function (sel) { return document.querySelector(sel); };
+
+  var vueConnexion = $("[data-vue-connexion]");
+  var vueEspace = $("[data-vue-espace]");
+  if (!vueConnexion || !vueEspace) return;
+
+  var membre = null;
+  var salonCourant = (CFG.salons && CFG.salons[0] && CFG.salons[0].id) || "general";
+  var arreterEcoute = null;
+
+  /* --- Petits helpers d'affichage --------------------------------------- */
+
+  function afficherMessage(el, texte, type) {
+    if (!el) return;
+    el.textContent = texte;
+    el.className = "message message--" + (type || "info");
+    el.hidden = !texte;
+  }
+
+  function initiales(nom) {
+    return String(nom || "?")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map(function (mot) { return mot.charAt(0).toUpperCase(); })
+      .join("");
+  }
+
+  function heure(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return "";
+    var aujourdhui = new Date();
+    var memeJour =
+      d.getDate() === aujourdhui.getDate() &&
+      d.getMonth() === aujourdhui.getMonth() &&
+      d.getFullYear() === aujourdhui.getFullYear();
+    var h = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    return memeJour ? h : d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + " · " + h;
+  }
+
+  function dateCourte(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function erreurLisible(e) {
+    if (!e) return "Une erreur est survenue.";
+    return e.attendue ? e.message : (e.message || "Une erreur est survenue.");
+  }
+
+  /* --- Bandeau expliquant le mode en cours ------------------------------ */
+
+  function majBandeauMode() {
+    var partage = window.Backend.nom === "supabase";
+    var texte = partage
+      ? "<strong>Espace partagé.</strong> Les comptes, les documents et les " +
+        "messages sont hébergés sur le serveur du club : ce que vous publiez " +
+        "est visible par les autres adhérents."
+      : "<strong>Mode démonstration.</strong> Faute de serveur configuré, le " +
+        "compte, les documents et les messages restent dans <em>ce " +
+        "navigateur</em> : ils ne sont visibles par personne d'autre et " +
+        "disparaissent si vous effacez les données du site. Voir " +
+        "<code>site/SUPABASE.md</code> pour activer le partage réel.";
+
+    // Le bandeau est présent dans les deux vues (connexion et espace).
+    document.querySelectorAll("[data-bandeau-mode]").forEach(function (el) {
+      el.innerHTML = texte;
+    });
+  }
+
+  /* --- Bascule connexion / espace --------------------------------------- */
+
+  function montrerEspace() {
+    vueConnexion.hidden = true;
+    vueEspace.hidden = false;
+
+    $("[data-membre-nom]").textContent = membre.nom;
+    $("[data-membre-email]").textContent = membre.email;
+    $("[data-membre-avatar]").textContent = initiales(membre.nom);
+
+    chargerDocuments();
+    construireSalons();
+    chargerMessages();
+    brancherEcoute();
+  }
+
+  function montrerConnexion() {
+    vueEspace.hidden = true;
+    vueConnexion.hidden = false;
+    if (arreterEcoute) { arreterEcoute(); arreterEcoute = null; }
+  }
+
+  /* --- Onglets connexion / inscription ---------------------------------- */
+
+  document.querySelectorAll("[data-onglet-auth]").forEach(function (bouton) {
+    bouton.addEventListener("click", function () {
+      var cible = bouton.dataset.ongletAuth;
+      document.querySelectorAll("[data-onglet-auth]").forEach(function (b) {
+        b.setAttribute("aria-selected", String(b === bouton));
+      });
+      document.querySelectorAll("[data-panneau-auth]").forEach(function (p) {
+        p.hidden = p.dataset.panneauAuth !== cible;
+      });
+    });
+  });
+
+  /* --- Formulaires ------------------------------------------------------ */
+
+  var formConnexion = $("[data-form-connexion]");
+  var msgConnexion = $("[data-msg-connexion]");
+
+  formConnexion.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var bouton = formConnexion.querySelector("button[type=submit]");
+    bouton.disabled = true;
+    afficherMessage(msgConnexion, "", "info");
+
+    window.Backend
+      .connexion(formConnexion.email.value, formConnexion.motdepasse.value)
+      .then(function (m) {
+        membre = m;
+        formConnexion.reset();
+        montrerEspace();
+      })
+      .catch(function (err) { afficherMessage(msgConnexion, erreurLisible(err), "erreur"); })
+      .then(function () { bouton.disabled = false; });
+  });
+
+  var formInscription = $("[data-form-inscription]");
+  var msgInscription = $("[data-msg-inscription]");
+
+  formInscription.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var bouton = formInscription.querySelector("button[type=submit]");
+    bouton.disabled = true;
+    afficherMessage(msgInscription, "", "info");
+
+    window.Backend
+      .inscription({
+        nom: formInscription.nom.value,
+        email: formInscription.email.value,
+        mdp: formInscription.motdepasse.value,
+        code: formInscription.code.value,
+      })
+      .then(function (m) {
+        membre = m;
+        formInscription.reset();
+        montrerEspace();
+      })
+      .catch(function (err) { afficherMessage(msgInscription, erreurLisible(err), "erreur"); })
+      .then(function () { bouton.disabled = false; });
+  });
+
+  $("[data-deconnexion]").addEventListener("click", function () {
+    window.Backend.deconnexion().then(function () {
+      membre = null;
+      montrerConnexion();
+    });
+  });
+
+  /* --- Base documentaire ------------------------------------------------ */
+
+  var listeDocs = $("[data-liste-docs]");
+  var champRecherche = $("[data-recherche-docs]");
+  var filtreCategorie = $("[data-filtre-categorie]");
+  var tousLesDocs = [];
+
+  function chargerDocuments() {
+    listeDocs.innerHTML = '<p class="texte-faible">Chargement…</p>';
+    window.Backend
+      .listerDocuments()
+      .then(function (docs) {
+        tousLesDocs = docs;
+        remplirCategories(docs);
+        rendreDocuments();
+      })
+      .catch(function (err) {
+        listeDocs.innerHTML = '<p class="texte-faible">' + ech(erreurLisible(err)) + "</p>";
+      });
+  }
+
+  function remplirCategories(docs) {
+    var categories = [];
+    docs.forEach(function (d) {
+      if (d.categorie && categories.indexOf(d.categorie) === -1) categories.push(d.categorie);
+    });
+    categories.sort();
+    var actuelle = filtreCategorie.value;
+    filtreCategorie.innerHTML =
+      '<option value="">Toutes les catégories</option>' +
+      categories.map(function (c) { return '<option value="' + ech(c) + '">' + ech(c) + "</option>"; }).join("");
+    if (categories.indexOf(actuelle) !== -1) filtreCategorie.value = actuelle;
+  }
+
+  function rendreDocuments() {
+    var recherche = champRecherche.value.trim().toLowerCase();
+    var categorie = filtreCategorie.value;
+
+    var visibles = tousLesDocs.filter(function (d) {
+      if (categorie && d.categorie !== categorie) return false;
+      if (!recherche) return true;
+      return (d.titre + " " + d.description + " " + d.categorie).toLowerCase().indexOf(recherche) !== -1;
+    });
+
+    if (!visibles.length) {
+      listeDocs.innerHTML =
+        '<p class="texte-faible">Aucun document ne correspond à cette recherche.</p>';
+      return;
+    }
+
+    listeDocs.innerHTML = visibles.map(carteDoc).join("");
+
+    listeDocs.querySelectorAll("[data-supprimer-doc]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("Retirer « " + b.dataset.titre + " » de la base documentaire ?")) return;
+        window.Backend
+          .supprimerDocument(b.dataset.supprimerDoc)
+          .then(chargerDocuments)
+          .catch(function (err) { window.alert(erreurLisible(err)); });
+      });
+    });
+  }
+
+  function carteDoc(d) {
+    var sien = d.auteurId && membre && d.auteurId === membre.id;
+    var icone = d.url ? "🔗" : "📄";
+
+    return (
+      '<article class="doc">' +
+        '<div class="doc__icone" aria-hidden="true">' + icone + "</div>" +
+        '<div class="doc__corps">' +
+          '<div class="doc__titre">' +
+            (d.url
+              ? '<a href="' + ech(d.url) + '" target="_blank" rel="noopener noreferrer">' + ech(d.titre) + " ↗</a>"
+              : ech(d.titre)) +
+          "</div>" +
+          (d.description ? '<div class="doc__desc">' + ech(d.description) + "</div>" : "") +
+          '<div class="doc__meta">' +
+            '<span class="etiquette">' + ech(d.categorie || "Divers") + "</span>" +
+            "<span>Déposé par " + ech(d.auteur || "le club") + "</span>" +
+            (d.creeLe ? "<span>" + ech(dateCourte(d.creeLe)) + "</span>" : "") +
+            (sien
+              ? '<button class="btn btn--danger btn--petit" data-supprimer-doc="' + ech(d.id) +
+                '" data-titre="' + ech(d.titre) + '">Retirer</button>'
+              : "") +
+          "</div>" +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  champRecherche.addEventListener("input", rendreDocuments);
+  filtreCategorie.addEventListener("change", rendreDocuments);
+
+  var formDoc = $("[data-form-doc]");
+  var msgDoc = $("[data-msg-doc]");
+
+  formDoc.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var bouton = formDoc.querySelector("button[type=submit]");
+    bouton.disabled = true;
+
+    window.Backend
+      .ajouterDocument({
+        titre: formDoc.titre.value,
+        categorie: formDoc.categorie.value,
+        description: formDoc.description.value,
+        url: formDoc.url.value,
+      })
+      .then(function () {
+        formDoc.reset();
+        afficherMessage(msgDoc, "Document ajouté à la base.", "succes");
+        setTimeout(function () { afficherMessage(msgDoc, "", "info"); }, 4000);
+        chargerDocuments();
+      })
+      .catch(function (err) { afficherMessage(msgDoc, erreurLisible(err), "erreur"); })
+      .then(function () { bouton.disabled = false; });
+  });
+
+  /* --- Chat -------------------------------------------------------------- */
+
+  var zoneSalons = $("[data-salons]");
+  var fil = $("[data-fil]");
+  var formChat = $("[data-form-chat]");
+  var champMessage = formChat.querySelector("textarea");
+
+  function construireSalons() {
+    var salons = CFG.salons || [{ id: "general", nom: "Général" }];
+    zoneSalons.innerHTML = salons
+      .map(function (s) {
+        return (
+          '<button type="button" class="chat__salon" data-salon="' + ech(s.id) + '" ' +
+          'aria-pressed="' + (s.id === salonCourant) + '">' + ech(s.nom) + "</button>"
+        );
+      })
+      .join("");
+
+    zoneSalons.querySelectorAll("[data-salon]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        salonCourant = b.dataset.salon;
+        zoneSalons.querySelectorAll("[data-salon]").forEach(function (autre) {
+          autre.setAttribute("aria-pressed", String(autre === b));
+        });
+        chargerMessages();
+        brancherEcoute();
+      });
+    });
+  }
+
+  function chargerMessages(garderPosition) {
+    var enBas = !garderPosition || fil.scrollTop + fil.clientHeight >= fil.scrollHeight - 60;
+
+    window.Backend
+      .listerMessages(salonCourant)
+      .then(function (messages) {
+        if (!messages.length) {
+          fil.innerHTML =
+            '<p class="chat__vide">Aucun message dans ce salon.<br>' +
+            "Lancez la discussion — la prochaine éclaircie ne s'annonce pas toute seule.</p>";
+          return;
+        }
+        fil.innerHTML = messages.map(bulle).join("");
+        if (enBas) fil.scrollTop = fil.scrollHeight;
+      })
+      .catch(function (err) {
+        fil.innerHTML = '<p class="chat__vide">' + ech(erreurLisible(err)) + "</p>";
+      });
+  }
+
+  function bulle(m) {
+    var moi = membre && m.auteurId === membre.id;
+    return (
+      '<div class="msg' + (moi ? " msg--moi" : "") + '">' +
+        '<div class="avatar msg__avatar" aria-hidden="true">' + ech(initiales(m.auteur)) + "</div>" +
+        '<div class="msg__bulle">' +
+          '<div class="msg__auteur">' + ech(moi ? "Vous" : m.auteur) + "</div>" +
+          '<div class="msg__texte">' + ech(m.texte) + "</div>" +
+          '<div class="msg__heure">' + ech(heure(m.creeLe)) + "</div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function brancherEcoute() {
+    if (arreterEcoute) arreterEcoute();
+    arreterEcoute = window.Backend.ecouterMessages(salonCourant, function () {
+      chargerMessages(true);
+    });
+  }
+
+  formChat.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var texte = champMessage.value;
+    if (!texte.trim()) return;
+
+    champMessage.value = "";
+    window.Backend
+      .envoyerMessage(salonCourant, texte)
+      .then(function () { chargerMessages(); })
+      .catch(function (err) {
+        champMessage.value = texte; // on ne perd pas ce qui a été écrit
+        window.alert(erreurLisible(err));
+      });
+  });
+
+  // Entrée envoie, Maj+Entrée passe à la ligne.
+  champMessage.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      formChat.requestSubmit ? formChat.requestSubmit() : formChat.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+
+  /* --- Démarrage --------------------------------------------------------- */
+
+  window.BackendPret
+    .then(function () {
+      majBandeauMode();
+      return window.Backend.membreCourant();
+    })
+    .then(function (m) {
+      if (m) {
+        membre = m;
+        montrerEspace();
+      } else {
+        montrerConnexion();
+      }
+    })
+    .catch(function (err) {
+      afficherMessage(msgConnexion, erreurLisible(err), "erreur");
+      montrerConnexion();
+    });
+})();
+
+</script>
+<script>
+/* Navigation entre les pages du fichier unique, par ancre. */
+(function () {
+  "use strict";
+  var pages = document.querySelectorAll("[data-page]");
+  var liens = document.querySelectorAll(".nav a, .pied a, .marque");
+
+  function afficher(cle) {
+    var connue = false;
+    pages.forEach(function (p) {
+      var visible = p.dataset.page === cle;
+      p.hidden = !visible;
+      if (visible) connue = true;
+    });
+    if (!connue) return afficher("index");
+
+    liens.forEach(function (a) {
+      var vise = (a.getAttribute("href") || "").replace("#", "");
+      if (vise === cle && a.classList.contains("nav__membre") === (cle === "membres")) {
+        a.setAttribute("aria-current", "page");
+      } else {
+        a.removeAttribute("aria-current");
+      }
+    });
+
+    // Un canvas masqué a une taille nulle : on le redessine une fois visible.
+    if (window.redessinerCiels) window.redessinerCiels();
+    window.scrollTo(0, 0);
+  }
+
+  function depuisAdresse() {
+    afficher((location.hash || "#index").slice(1).split("-")[0]);
+  }
+
+  window.addEventListener("hashchange", depuisAdresse);
+  document.querySelector(".marque").setAttribute("href", "#index");
+  depuisAdresse();
+})();
+</script>
+</body>
+</html>

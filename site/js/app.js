@@ -40,15 +40,22 @@
   });
 
   /* --- Ciel étoilé du héros --------------------------------------------- */
-  var canvas = document.querySelector("[data-ciel]");
-  if (canvas && canvas.getContext) {
-    dessinerCiel(canvas);
-    var minuteur;
-    window.addEventListener("resize", function () {
-      clearTimeout(minuteur);
-      minuteur = setTimeout(function () { dessinerCiel(canvas); }, 200);
+
+  // Exposé : la version mono-fichier (apercu.html) redessine le ciel de la
+  // section qu'elle vient d'afficher, un canvas masqué ayant une taille nulle.
+  window.redessinerCiels = function () {
+    document.querySelectorAll("[data-ciel]").forEach(function (cvs) {
+      if (cvs.getContext) dessinerCiel(cvs);
     });
-  }
+  };
+
+  window.redessinerCiels();
+
+  var minuteur;
+  window.addEventListener("resize", function () {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(window.redessinerCiels, 200);
+  });
 
   function dessinerCiel(cvs) {
     var parent = cvs.parentElement;
