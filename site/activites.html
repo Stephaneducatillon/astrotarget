@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nos activités — Club d'astronomie de la MJC de Douai</title>
+<meta name="description" content="Soirées d'observation, ateliers, initiation à l'astrophotographie, conférences et animations scolaires du club d'astronomie de la MJC de Douai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+<a class="saut-contenu" href="#contenu">Aller au contenu</a>
+
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="index.html">
+      <span class="marque__logo" aria-hidden="true">🔭</span>
+      <span class="marque__texte">
+        <span class="marque__nom">Club d'astronomie</span>
+        <span class="marque__lieu">MJC de Douai</span>
+      </span>
+    </a>
+    <button class="burger" data-burger aria-expanded="false" aria-controls="menu-principal" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav" id="menu-principal" data-nav aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="club.html">Le club</a>
+      <a href="activites.html" aria-current="page">Activités</a>
+      <a href="agenda.html">Agenda</a>
+      <a href="galerie.html">Galerie</a>
+      <a href="adherer.html">Nous rejoindre</a>
+      <a href="membres.html" class="nav__membre">🔒 Espace membres</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Activités</span>
+      <h1>Cinq façons de pratiquer</h1>
+      <p class="heros__accroche">
+        On peut venir pour une seule de ces activités. La plupart des
+        adhérents finissent par toutes les essayer.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="grille grille--2">
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🌌</div>
+          <span class="etiquette etiquette--or">1 à 2 fois par mois</span>
+          <h3>Soirées d'observation</h3>
+          <p class="texte-doux">
+            Le cœur du club. On installe les instruments à la tombée de la
+            nuit, on repère les constellations de la saison, puis on pointe :
+            planètes, amas, nébuleuses, galaxies selon la période et la
+            qualité du ciel.
+          </p>
+          <p class="texte-doux mb-0">
+            Les séances en ville sont courtes et familiales ; celles à la
+            campagne durent plus longtemps et visent le ciel profond.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🛠️</div>
+          <span class="etiquette etiquette--violet">En salle</span>
+          <h3>Ateliers matériel</h3>
+          <p class="texte-doux">
+            Beaucoup de télescopes dorment dans les placards parce que
+            personne n'a montré comment s'en servir. Ces ateliers réparent
+            cela : mise en station, collimation, alignement du chercheur,
+            grossissement utile, entretien.
+          </p>
+          <p class="texte-doux mb-0">
+            Venez avec votre instrument, quel qu'il soit et quel que soit son
+            âge.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">📷</div>
+          <span class="etiquette etiquette--vert">Progressif</span>
+          <h3>Initiation à l'astrophotographie</h3>
+          <p class="texte-doux">
+            On commence avec ce que vous avez : un appareil photo, un
+            trépied, quelques poses de quelques secondes. Puis viennent
+            l'empilement, le suivi, le prétraitement et le traitement.
+          </p>
+          <p class="texte-doux mb-0">
+            Les images du club sont commentées entre membres — c'est de loin
+            la manière la plus rapide de progresser.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🎓</div>
+          <span class="etiquette">Ouvert à tous</span>
+          <h3>Conférences et soirées à thème</h3>
+          <p class="texte-doux">
+            Une heure sur un sujet : la vie des étoiles, l'exploration
+            martienne, les exoplanètes, la mesure des distances dans
+            l'Univers. Accessible sans bagage scientifique, suivie de
+            questions autant que le public en a.
+          </p>
+          <p class="texte-doux mb-0">Entrée libre, adhésion non nécessaire.</p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">🏫</div>
+          <span class="etiquette">Sur demande</span>
+          <h3>Animations scolaires et périscolaires</h3>
+          <p class="texte-doux">
+            Le club intervient auprès des écoles, collèges et centres de
+            loisirs du Douaisis : séances de découverte, observation du
+            Soleil en toute sécurité, ateliers cartes du ciel.
+          </p>
+          <p class="texte-doux mb-0">
+            Les demandes se font via
+            <a href="adherer.html#contact">la page contact</a> ou l'accueil de
+            la MJC.
+          </p>
+        </article>
+
+        <article class="carte">
+          <div class="carte__icone" aria-hidden="true">☀️</div>
+          <span class="etiquette etiquette--or">Ponctuel</span>
+          <h3>Observation solaire</h3>
+          <p class="texte-doux">
+            En journée, avec les filtres adaptés du club — jamais autrement :
+            taches, granulation, protubérances. Une activité de plein jour
+            appréciée lors des fêtes de quartier et des portes ouvertes.
+          </p>
+          <p class="texte-doux mb-0">
+            <strong>Jamais d'observation du Soleil sans le matériel de
+            protection du club.</strong>
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur centre">
+      <h2>Envie d'essayer ?</h2>
+      <p class="texte-doux">
+        Les prochaines dates sont dans l'agenda. Les deux premières séances
+        sont sans engagement.
+      </p>
+      <div class="boutons" style="justify-content:center">
+        <a class="btn btn--principal" href="agenda.html">Voir l'agenda</a>
+        <a class="btn btn--secondaire" href="adherer.html">Nous rejoindre</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h4>Le club</h4>
+        <p class="texte-doux">
+          Un club d'astronomie ouvert à tous, hébergé par la MJC de Douai.
+          Observation, initiation et partage du ciel, du débutant curieux à
+          l'astrophotographe patient.
+        </p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul class="liste-nue">
+          <li><a href="club.html">Le club</a></li>
+          <li><a href="activites.html">Nos activités</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous rejoindre</h4>
+        <ul class="liste-nue">
+          <li><a href="adherer.html">Adhérer au club</a></li>
+          <li><a href="adherer.html#contact">Nous écrire</a></li>
+          <li><a href="membres.html">Espace membres</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous trouver</h4>
+        <p class="texte-doux mb-0">
+          MJC de Douai<br>
+          <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+          59500 Douai<br>
+          <span class="a-completer" title="À compléter">téléphone à compléter</span>
+        </p>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <span>© <span data-annee>2026</span> Club d'astronomie — MJC de Douai</span>
+      <span>Site réalisé par les membres du club · <a href="https://github.com/Stephaneducatillon/astrotarget">code source</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="data/evenements.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

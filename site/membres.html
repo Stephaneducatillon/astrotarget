@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace membres — Club d'astronomie de la MJC de Douai</title>
+<meta name="description" content="Espace réservé aux adhérents : base documentaire et chat entre membres du club d'astronomie de la MJC de Douai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+<a class="saut-contenu" href="#contenu">Aller au contenu</a>
+
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="index.html">
+      <span class="marque__logo" aria-hidden="true">🔭</span>
+      <span class="marque__texte">
+        <span class="marque__nom">Club d'astronomie</span>
+        <span class="marque__lieu">MJC de Douai</span>
+      </span>
+    </a>
+    <button class="burger" data-burger aria-expanded="false" aria-controls="menu-principal" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav" id="menu-principal" data-nav aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="club.html">Le club</a>
+      <a href="activites.html">Activités</a>
+      <a href="agenda.html">Agenda</a>
+      <a href="galerie.html">Galerie</a>
+      <a href="adherer.html">Nous rejoindre</a>
+      <a href="membres.html" class="nav__membre" aria-current="page">🔒 Espace membres</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Espace membres</span>
+      <h1>La base documentaire et le chat du club</h1>
+      <p class="heros__accroche">
+        Réservé aux adhérents. Le code d'accès est remis lors de
+        l'inscription au club.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ Vue « non connecté » ============ -->
+  <section class="section" data-vue-connexion hidden>
+    <div class="conteneur">
+      <div class="panneau-connexion">
+        <div class="bandeau-mode" data-bandeau-mode></div>
+
+        <div class="onglets" role="tablist">
+          <button type="button" role="tab" aria-selected="true"
+                  data-onglet-auth="connexion">Se connecter</button>
+          <button type="button" role="tab" aria-selected="false"
+                  data-onglet-auth="inscription">Créer un compte</button>
+        </div>
+
+        <div data-panneau-auth="connexion">
+          <form data-form-connexion novalidate>
+            <div class="message" data-msg-connexion hidden></div>
+            <div class="champ">
+              <label for="cx-email">Adresse e-mail</label>
+              <input type="email" id="cx-email" name="email" autocomplete="email" required>
+            </div>
+            <div class="champ">
+              <label for="cx-mdp">Mot de passe</label>
+              <input type="password" id="cx-mdp" name="motdepasse" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn--principal btn--bloc">Se connecter</button>
+          </form>
+        </div>
+
+        <div data-panneau-auth="inscription" hidden>
+          <form data-form-inscription novalidate>
+            <div class="message" data-msg-inscription hidden></div>
+            <div class="champ">
+              <label for="in-nom">Nom affiché</label>
+              <input type="text" id="in-nom" name="nom" autocomplete="name" required>
+              <p class="aide">C'est le nom que verront les autres membres dans le chat.</p>
+            </div>
+            <div class="champ">
+              <label for="in-email">Adresse e-mail</label>
+              <input type="email" id="in-email" name="email" autocomplete="email" required>
+            </div>
+            <div class="champ">
+              <label for="in-mdp">Mot de passe</label>
+              <input type="password" id="in-mdp" name="motdepasse" autocomplete="new-password" required>
+              <p class="aide">8 caractères minimum.</p>
+            </div>
+            <div class="champ">
+              <label for="in-code">Code d'accès du club</label>
+              <input type="text" id="in-code" name="code" required>
+              <p class="aide">Remis aux adhérents lors de l'inscription au club.</p>
+            </div>
+            <button type="submit" class="btn btn--principal btn--bloc">Créer mon compte</button>
+          </form>
+        </div>
+
+        <p class="texte-faible" style="margin-top:22px">
+          Pas encore adhérent ? <a href="adherer.html">Voir comment nous rejoindre</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Vue « connecté » ============ -->
+  <section class="section" data-vue-espace hidden>
+    <div class="conteneur">
+      <div class="bandeau-mode" data-bandeau-mode></div>
+
+      <div class="barre-membre">
+        <div class="barre-membre__identite">
+          <div class="avatar" data-membre-avatar aria-hidden="true">?</div>
+          <div>
+            <strong data-membre-nom></strong><br>
+            <span class="texte-faible" data-membre-email></span>
+          </div>
+        </div>
+        <button type="button" class="btn btn--discret btn--petit" data-deconnexion>Se déconnecter</button>
+      </div>
+
+      <div class="membre-grille">
+
+        <!-- ---- Base documentaire ---- -->
+        <div>
+          <h2>Base documentaire</h2>
+          <p class="texte-doux">
+            Cartes, fiches pratiques, tutoriels et comptes rendus rassemblés
+            par le club. Chacun peut y ajouter une ressource utile.
+          </p>
+
+          <div class="doc-outils">
+            <label class="visuellement-cache" for="doc-recherche">Rechercher un document</label>
+            <input type="search" id="doc-recherche" placeholder="Rechercher un document…" data-recherche-docs>
+            <label class="visuellement-cache" for="doc-categorie">Filtrer par catégorie</label>
+            <select id="doc-categorie" data-filtre-categorie>
+              <option value="">Toutes les catégories</option>
+            </select>
+          </div>
+
+          <div data-liste-docs></div>
+
+          <details class="carte" style="margin-top:22px">
+            <summary style="cursor:pointer;font-weight:600">➕ Ajouter un document</summary>
+            <form data-form-doc style="margin-top:18px" novalidate>
+              <div class="message" data-msg-doc hidden></div>
+              <div class="champ">
+                <label for="doc-titre">Titre</label>
+                <input type="text" id="doc-titre" name="titre" required>
+              </div>
+              <div class="champ">
+                <label for="doc-cat">Catégorie</label>
+                <input type="text" id="doc-cat" name="categorie" list="categories-connues"
+                       placeholder="Fiches pratiques, Cartes du ciel, Logiciels…">
+                <datalist id="categories-connues">
+                  <option value="Cartes du ciel"></option>
+                  <option value="Catalogues"></option>
+                  <option value="Fiches pratiques"></option>
+                  <option value="Logiciels"></option>
+                  <option value="Astrophotographie"></option>
+                  <option value="Comptes rendus"></option>
+                </datalist>
+              </div>
+              <div class="champ">
+                <label for="doc-url">Lien (facultatif)</label>
+                <input type="url" id="doc-url" name="url" placeholder="https://…">
+                <p class="aide">
+                  Lien vers une page, un PDF ou un fichier partagé. Laissez vide
+                  pour un document consultable au local du club.
+                </p>
+              </div>
+              <div class="champ">
+                <label for="doc-desc">Description</label>
+                <textarea id="doc-desc" name="description" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn--principal">Ajouter à la base</button>
+            </form>
+          </details>
+        </div>
+
+        <!-- ---- Chat ---- -->
+        <div>
+          <h2>Chat entre membres</h2>
+          <p class="texte-doux">
+            Pour organiser une sortie quand le ciel se dégage, demander un
+            conseil ou partager une image.
+          </p>
+
+          <div class="chat">
+            <div class="chat__entete">
+              <div class="chat__salons" data-salons></div>
+            </div>
+            <div class="chat__fil" data-fil aria-live="polite"></div>
+            <form class="chat__saisie" data-form-chat>
+              <label class="visuellement-cache" for="chat-message">Votre message</label>
+              <textarea id="chat-message" rows="1" placeholder="Écrire un message… (Entrée pour envoyer)"></textarea>
+              <button type="submit" class="btn btn--principal">Envoyer</button>
+            </form>
+          </div>
+
+          <p class="texte-faible" style="margin-top:14px">
+            Les messages sont visibles par tous les membres connectés. Merci
+            d'y rester courtois : c'est le salon du club, pas un réseau social.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h4>Le club</h4>
+        <p class="texte-doux">
+          Un club d'astronomie ouvert à tous, hébergé par la MJC de Douai.
+          Observation, initiation et partage du ciel, du débutant curieux à
+          l'astrophotographe patient.
+        </p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul class="liste-nue">
+          <li><a href="club.html">Le club</a></li>
+          <li><a href="activites.html">Nos activités</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous rejoindre</h4>
+        <ul class="liste-nue">
+          <li><a href="adherer.html">Adhérer au club</a></li>
+          <li><a href="adherer.html#contact">Nous écrire</a></li>
+          <li><a href="membres.html">Espace membres</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous trouver</h4>
+        <p class="texte-doux mb-0">
+          MJC de Douai<br>
+          <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+          59500 Douai<br>
+          <span class="a-completer" title="À compléter">téléphone à compléter</span>
+        </p>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <span>© <span data-annee>2026</span> Club d'astronomie — MJC de Douai</span>
+      <span>Site réalisé par les membres du club · <a href="https://github.com/Stephaneducatillon/astrotarget">code source</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="data/evenements.js"></script>
+<script src="js/app.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/membres.js"></script>
+</body>
+</html>

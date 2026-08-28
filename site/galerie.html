@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galerie — Club d'astronomie de la MJC de Douai</title>
+<meta name="description" content="Images réalisées par les membres du club d'astronomie de la MJC de Douai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+<a class="saut-contenu" href="#contenu">Aller au contenu</a>
+
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="index.html">
+      <span class="marque__logo" aria-hidden="true">🔭</span>
+      <span class="marque__texte">
+        <span class="marque__nom">Club d'astronomie</span>
+        <span class="marque__lieu">MJC de Douai</span>
+      </span>
+    </a>
+    <button class="burger" data-burger aria-expanded="false" aria-controls="menu-principal" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav" id="menu-principal" data-nav aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="club.html">Le club</a>
+      <a href="activites.html">Activités</a>
+      <a href="agenda.html">Agenda</a>
+      <a href="galerie.html" aria-current="page">Galerie</a>
+      <a href="adherer.html">Nous rejoindre</a>
+      <a href="membres.html" class="nav__membre">🔒 Espace membres</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Galerie</span>
+      <h1>Ce que nous avons vu</h1>
+      <p class="heros__accroche">
+        Des images prises par les membres, depuis le Douaisis ou en sortie.
+        Elles ne rivalisent pas avec Hubble — elles ont l'avantage d'avoir
+        été faites par nous, avec du matériel accessible.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="message message--info">
+        <strong>Emplacements à remplir.</strong> Déposez les photos dans
+        <code>site/img/</code>, puis remplacez chaque bloc
+        <code>galerie__vignette</code> ci-dessous par
+        <code>&lt;img src="img/mon-image.jpg" alt="description"&gt;</code>.
+        Pensez à créditer l'auteur et à indiquer le matériel utilisé.
+      </div>
+
+      <div class="galerie">
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🌕</div>
+          <figcaption class="galerie__legende">
+            <strong>La Lune au premier quartier</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🪐</div>
+          <figcaption class="galerie__legende">
+            <strong>Saturne et ses anneaux</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🌌</div>
+          <figcaption class="galerie__legende">
+            <strong>M31, la galaxie d'Andromède</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">✨</div>
+          <figcaption class="galerie__legende">
+            <strong>M42, la nébuleuse d'Orion</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">☀️</div>
+          <figcaption class="galerie__legende">
+            <strong>Taches solaires</strong>
+            <span>Auteur et matériel à compléter</span>
+          </figcaption>
+        </figure>
+        <figure class="galerie__item">
+          <div class="galerie__vignette" aria-hidden="true">🔭</div>
+          <figcaption class="galerie__legende">
+            <strong>Soirée d'observation du club</strong>
+            <span>Auteur à compléter</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <p class="texte-faible" style="margin-top:26px">
+        Vous êtes adhérent et souhaitez voir une de vos images ici ?
+        Partagez-la dans le salon « Nos images » de
+        <a href="membres.html">l'espace membres</a>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h4>Le club</h4>
+        <p class="texte-doux">
+          Un club d'astronomie ouvert à tous, hébergé par la MJC de Douai.
+          Observation, initiation et partage du ciel, du débutant curieux à
+          l'astrophotographe patient.
+        </p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul class="liste-nue">
+          <li><a href="club.html">Le club</a></li>
+          <li><a href="activites.html">Nos activités</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous rejoindre</h4>
+        <ul class="liste-nue">
+          <li><a href="adherer.html">Adhérer au club</a></li>
+          <li><a href="adherer.html#contact">Nous écrire</a></li>
+          <li><a href="membres.html">Espace membres</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous trouver</h4>
+        <p class="texte-doux mb-0">
+          MJC de Douai<br>
+          <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+          59500 Douai<br>
+          <span class="a-completer" title="À compléter">téléphone à compléter</span>
+        </p>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <span>© <span data-annee>2026</span> Club d'astronomie — MJC de Douai</span>
+      <span>Site réalisé par les membres du club · <a href="https://github.com/Stephaneducatillon/astrotarget">code source</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="data/evenements.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

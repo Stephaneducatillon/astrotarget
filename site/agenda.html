@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda — Club d'astronomie de la MJC de Douai</title>
+<meta name="description" content="Prochaines soirées d'observation, ateliers et conférences du club d'astronomie de la MJC de Douai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+<a class="saut-contenu" href="#contenu">Aller au contenu</a>
+
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="index.html">
+      <span class="marque__logo" aria-hidden="true">🔭</span>
+      <span class="marque__texte">
+        <span class="marque__nom">Club d'astronomie</span>
+        <span class="marque__lieu">MJC de Douai</span>
+      </span>
+    </a>
+    <button class="burger" data-burger aria-expanded="false" aria-controls="menu-principal" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav" id="menu-principal" data-nav aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="club.html">Le club</a>
+      <a href="activites.html">Activités</a>
+      <a href="agenda.html" aria-current="page">Agenda</a>
+      <a href="galerie.html">Galerie</a>
+      <a href="adherer.html">Nous rejoindre</a>
+      <a href="membres.html" class="nav__membre">🔒 Espace membres</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <section class="heros heros--court">
+    <canvas class="heros__ciel" data-ciel aria-hidden="true"></canvas>
+    <div class="conteneur heros__inner">
+      <span class="surtitre">Agenda</span>
+      <h1>Les prochains rendez-vous</h1>
+      <p class="heros__accroche">
+        Les rendez-vous en salle ont lieu quoi qu'il arrive. Les séances
+        d'observation sont confirmées 48 heures avant, une fois la météo
+        connue : les adhérents sont prévenus dans l'espace membres.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>À venir</h2>
+        <p>Saison en cours, de septembre à juin.</p>
+      </div>
+      <div data-agenda></div>
+
+      <div class="carte" style="margin-top:32px">
+        <h3>Comment savoir si une observation est maintenue ?</h3>
+        <p class="texte-doux mb-0">
+          Une séance d'observation dépend de trois choses : la couverture
+          nuageuse, la Lune et le froid. La décision est annoncée dans le
+          salon <strong>« Sorties &amp; météo »</strong> de
+          <a href="membres.html">l'espace membres</a>. En cas d'annulation,
+          la séance est reportée à la fenêtre favorable suivante.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="conteneur">
+      <div class="section__entete">
+        <h2>Séances passées</h2>
+        <p>Ce que nous avons observé récemment — l'historique de la saison.</p>
+      </div>
+      <div data-agenda data-agenda-passes="true"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied__grille">
+      <div>
+        <h4>Le club</h4>
+        <p class="texte-doux">
+          Un club d'astronomie ouvert à tous, hébergé par la MJC de Douai.
+          Observation, initiation et partage du ciel, du débutant curieux à
+          l'astrophotographe patient.
+        </p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul class="liste-nue">
+          <li><a href="club.html">Le club</a></li>
+          <li><a href="activites.html">Nos activités</a></li>
+          <li><a href="agenda.html">Agenda</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous rejoindre</h4>
+        <ul class="liste-nue">
+          <li><a href="adherer.html">Adhérer au club</a></li>
+          <li><a href="adherer.html#contact">Nous écrire</a></li>
+          <li><a href="membres.html">Espace membres</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Nous trouver</h4>
+        <p class="texte-doux mb-0">
+          MJC de Douai<br>
+          <span class="a-completer" title="À compléter">adresse à compléter</span><br>
+          59500 Douai<br>
+          <span class="a-completer" title="À compléter">téléphone à compléter</span>
+        </p>
+      </div>
+    </div>
+    <div class="pied__bas">
+      <span>© <span data-annee>2026</span> Club d'astronomie — MJC de Douai</span>
+      <span>Site réalisé par les membres du club · <a href="https://github.com/Stephaneducatillon/astrotarget">code source</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="data/evenements.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
