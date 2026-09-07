@@ -111,8 +111,18 @@ function reglage(libelle, controle, note) {
 
 export function appliquerTheme() {
   const t = store.prefs().theme || 'auto';
-  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', t);
+  const racine = document.documentElement;
+  // « auto » ne retire le tampon que si c'est nous qui l'avons posé : un hôte
+  // peut avoir tamponné data-theme lui-même, et ce n'est pas à nous de l'effacer.
+  if (t === 'auto') {
+    if (racine.dataset.themeParNous) {
+      racine.removeAttribute('data-theme');
+      delete racine.dataset.themeParNous;
+    }
+    return;
+  }
+  racine.setAttribute('data-theme', t);
+  racine.dataset.themeParNous = '1';
 }
 
 export function appliquerMotifs() {

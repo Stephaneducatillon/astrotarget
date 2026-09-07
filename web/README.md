@@ -178,6 +178,30 @@ scoring. Il a vocation à être remplacé par l'Elo pilote/écurie de la phase 2
 backtesté sur trois saisons avant ouverture des pronostics. L'interface de
 sortie (`probas`, `parPilote`, `evenements`, `duels`) ne changera pas.
 
+## Version de démonstration en un fichier
+
+Le site normal a besoin d'un serveur : modules ES, feuille de style et
+référentiel JSON sont servis par HTTP. Pour les contextes qui n'en ont pas
+— aperçu en bac à sable, envoi par fichier, ouverture en local — un script
+produit un HTML autonome contenant tout.
+
+```bash
+npm install          # esbuild, uniquement pour ce build
+npm run demo         # → web/demo.html
+```
+
+Trois adaptations, et seulement trois : le référentiel circuits est intégré au
+bundle, le service worker n'est pas enregistré, et le mode démonstration est
+forcé — aucun appel vers Jolpica, OpenF1 ou Open-Meteo ne peut aboutir depuis
+un fichier local. L'interface le dit au lieu d'échouer en silence.
+
+Les sources du site ne sont jamais modifiées : les substitutions vivent dans
+`build-demo.mjs`, et chacune est vérifiée. Si le code source change et qu'un
+motif ne correspond plus, le build s'arrête au lieu de produire un fichier
+silencieusement cassé.
+
+Le site lui-même n'a aucune dépendance : `esbuild` ne sert qu'à ce build.
+
 ## Vérification
 
 ```bash

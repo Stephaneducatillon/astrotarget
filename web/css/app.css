@@ -36,15 +36,20 @@
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+/* Conception sombre d'abord : le :root ci-dessus porte la palette sombre
+   complète. Le clair ne redéfinit que les jetons.
+   Deux jeux de valeurs sont acceptés sur data-theme — les valeurs internes
+   (`sombre` / `clair`) et celles qu'un hôte peut tamponner (`dark` / `light`) —
+   pour que la page suive le thème du lecteur où qu'elle soit affichée. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme='sombre']) {
+  :root:not([data-theme='sombre']):not([data-theme='dark']) {
     --fond: #f4f6fa; --fond-2: #eaeef5; --carte: #ffffff; --carte-haut: #f7f9fc;
     --bord: #dde3ec; --bord-fort: #c3ccda;
     --texte: #10141c; --texte-2: #475161; --texte-3: #5d6675;
     --ombre: 0 1px 2px rgba(16,20,28,.06), 0 8px 24px rgba(16,20,28,.08);
   }
 }
-:root[data-theme='clair'] {
+:root[data-theme='clair'], :root[data-theme='light'] {
   --fond: #f4f6fa; --fond-2: #eaeef5; --carte: #ffffff; --carte-haut: #f7f9fc;
   --bord: #dde3ec; --bord-fort: #c3ccda;
   --texte: #10141c; --texte-2: #475161; --texte-3: #5d6675;
