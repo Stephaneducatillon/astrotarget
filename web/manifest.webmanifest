@@ -1,0 +1,21 @@
+{
+  "name": "Paddock — hub F1 et pronostics",
+  "short_name": "Paddock",
+  "description": "Horaires, météo et pronostics pondérés à la difficulté pour chaque Grand Prix.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0d11",
+  "theme_color": "#0b0d11",
+  "lang": "fr",
+  "categories": ["sports", "utilities"],
+  "icons": [
+    { "src": "icons/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icone-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Pronostiquer", "url": "./index.html#/pronostic" },
+    { "name": "Calendrier", "url": "./index.html#/calendrier" }
+  ]
+}

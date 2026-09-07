@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Paddock">
+  <rect width="512" height="512" fill="#0b0d11"/>
+  <g transform="translate(178 166)">
+    <rect x="0" y="0" width="38" height="180" rx="8" fill="#ff2e3f"/>
+    <rect x="58" y="0" width="38" height="180" rx="8" fill="#ff6b78" opacity=".85"/>
+    <rect x="116" y="0" width="38" height="180" rx="8" fill="#ff2e3f" opacity=".55"/>
+  </g>
+</svg>

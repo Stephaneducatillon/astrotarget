@@ -1,0 +1,202 @@
+{
+  "_meta": {
+    "livrable": "Livrable 1 §2 — entité `circuit`",
+    "statut": "a_valider",
+    "note": "Champs MAN saisis en back-office. Les champs CALC (pit_loss_s, taux_sc_historique, depassements_moyens, degradation) sont des valeurs de pré-remplissage a recalculer par le batch de la phase 2. L'UI les affiche avec leur fenêtre de calcul et leur statut.",
+    "fenetre_stats": 5
+  },
+  "circuits": {
+    "bahrain": {
+      "id": "bahrain", "nom": "Bahrain International Circuit", "pays": "Bahreïn", "ville": "Sakhir",
+      "lat": 26.0325, "lon": 50.5106, "tz": "Asia/Bahrain",
+      "altitude_m": 7, "longueur_m": 5412, "nb_tours": 57, "nb_virages": 15, "zones_drs": 3,
+      "sens": "horaire", "type_appui": "moyen", "abrasivite": "forte",
+      "pit_loss_s": 23.1, "taux_sc_historique": 0.4, "depassements_moyens": 43, "ecart_pole_p2_s": 0.19, "arrets_vainqueur": 2.6,
+      "degradation": { "SOFT": 0.14, "MEDIUM": 0.09, "HARD": 0.06 }
+    },
+    "jeddah": {
+      "id": "jeddah", "nom": "Jeddah Corniche Circuit", "pays": "Arabie saoudite", "ville": "Djeddah",
+      "lat": 21.6319, "lon": 39.1044, "tz": "Asia/Riyadh",
+      "altitude_m": 15, "longueur_m": 6174, "nb_tours": 50, "nb_virages": 27, "zones_drs": 3,
+      "sens": "antihoraire", "type_appui": "faible", "abrasivite": "faible",
+      "pit_loss_s": 20.4, "taux_sc_historique": 0.8, "depassements_moyens": 26, "ecart_pole_p2_s": 0.14, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.09, "MEDIUM": 0.06, "HARD": 0.04 }
+    },
+    "albert_park": {
+      "id": "albert_park", "nom": "Albert Park Circuit", "pays": "Australie", "ville": "Melbourne",
+      "lat": -37.8497, "lon": 144.968, "tz": "Australia/Melbourne",
+      "altitude_m": 10, "longueur_m": 5278, "nb_tours": 58, "nb_virages": 14, "zones_drs": 4,
+      "sens": "antihoraire", "type_appui": "moyen", "abrasivite": "faible",
+      "pit_loss_s": 21.0, "taux_sc_historique": 0.8, "depassements_moyens": 22, "ecart_pole_p2_s": 0.28, "arrets_vainqueur": 1.4,
+      "degradation": { "SOFT": 0.11, "MEDIUM": 0.07, "HARD": 0.05 }
+    },
+    "suzuka": {
+      "id": "suzuka", "nom": "Suzuka International Racing Course", "pays": "Japon", "ville": "Suzuka",
+      "lat": 34.8431, "lon": 136.5406, "tz": "Asia/Tokyo",
+      "altitude_m": 45, "longueur_m": 5807, "nb_tours": 53, "nb_virages": 18, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "forte",
+      "pit_loss_s": 22.5, "taux_sc_historique": 0.6, "depassements_moyens": 20, "ecart_pole_p2_s": 0.18, "arrets_vainqueur": 2.0,
+      "degradation": { "SOFT": 0.15, "MEDIUM": 0.10, "HARD": 0.07 }
+    },
+    "shanghai": {
+      "id": "shanghai", "nom": "Shanghai International Circuit", "pays": "Chine", "ville": "Shanghai",
+      "lat": 31.3389, "lon": 121.2198, "tz": "Asia/Shanghai",
+      "altitude_m": 5, "longueur_m": 5451, "nb_tours": 56, "nb_virages": 16, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "moyen", "abrasivite": "moyenne",
+      "pit_loss_s": 23.4, "taux_sc_historique": 0.4, "depassements_moyens": 39, "ecart_pole_p2_s": 0.22, "arrets_vainqueur": 1.8,
+      "degradation": { "SOFT": 0.13, "MEDIUM": 0.08, "HARD": 0.05 }
+    },
+    "miami": {
+      "id": "miami", "nom": "Miami International Autodrome", "pays": "États-Unis", "ville": "Miami",
+      "lat": 25.9581, "lon": -80.2389, "tz": "America/New_York",
+      "altitude_m": 3, "longueur_m": 5412, "nb_tours": 57, "nb_virages": 19, "zones_drs": 3,
+      "sens": "antihoraire", "type_appui": "moyen", "abrasivite": "faible",
+      "pit_loss_s": 20.9, "taux_sc_historique": 0.5, "depassements_moyens": 34, "ecart_pole_p2_s": 0.16, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.10, "MEDIUM": 0.07, "HARD": 0.05 }
+    },
+    "imola": {
+      "id": "imola", "nom": "Autodromo Enzo e Dino Ferrari", "pays": "Italie", "ville": "Imola",
+      "lat": 44.3439, "lon": 11.7167, "tz": "Europe/Rome",
+      "altitude_m": 37, "longueur_m": 4909, "nb_tours": 63, "nb_virages": 19, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "eleve", "abrasivite": "moyenne",
+      "pit_loss_s": 26.5, "taux_sc_historique": 0.6, "depassements_moyens": 12, "ecart_pole_p2_s": 0.15, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.12, "MEDIUM": 0.08, "HARD": 0.05 }
+    },
+    "monaco": {
+      "id": "monaco", "nom": "Circuit de Monaco", "pays": "Monaco", "ville": "Monte-Carlo",
+      "lat": 43.7347, "lon": 7.4206, "tz": "Europe/Monaco",
+      "altitude_m": 7, "longueur_m": 3337, "nb_tours": 78, "nb_virages": 19, "zones_drs": 1,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "faible",
+      "pit_loss_s": 18.0, "taux_sc_historique": 0.8, "depassements_moyens": 6, "ecart_pole_p2_s": 0.11, "arrets_vainqueur": 1.6,
+      "degradation": { "SOFT": 0.07, "MEDIUM": 0.05, "HARD": 0.03 }
+    },
+    "villeneuve": {
+      "id": "villeneuve", "nom": "Circuit Gilles-Villeneuve", "pays": "Canada", "ville": "Montréal",
+      "lat": 45.5, "lon": -73.5228, "tz": "America/Montreal",
+      "altitude_m": 13, "longueur_m": 4361, "nb_tours": 70, "nb_virages": 14, "zones_drs": 3,
+      "sens": "horaire", "type_appui": "faible", "abrasivite": "faible",
+      "pit_loss_s": 17.6, "taux_sc_historique": 0.7, "depassements_moyens": 31, "ecart_pole_p2_s": 0.16, "arrets_vainqueur": 1.4,
+      "degradation": { "SOFT": 0.10, "MEDIUM": 0.06, "HARD": 0.04 }
+    },
+    "catalunya": {
+      "id": "catalunya", "nom": "Circuit de Barcelona-Catalunya", "pays": "Espagne", "ville": "Montmeló",
+      "lat": 41.57, "lon": 2.2611, "tz": "Europe/Madrid",
+      "altitude_m": 133, "longueur_m": 4657, "nb_tours": 66, "nb_virages": 14, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "forte",
+      "pit_loss_s": 21.4, "taux_sc_historique": 0.3, "depassements_moyens": 18, "ecart_pole_p2_s": 0.24, "arrets_vainqueur": 2.0,
+      "degradation": { "SOFT": 0.16, "MEDIUM": 0.10, "HARD": 0.07 }
+    },
+    "red_bull_ring": {
+      "id": "red_bull_ring", "nom": "Red Bull Ring", "pays": "Autriche", "ville": "Spielberg",
+      "lat": 47.2197, "lon": 14.7647, "tz": "Europe/Vienna",
+      "altitude_m": 678, "longueur_m": 4318, "nb_tours": 71, "nb_virages": 10, "zones_drs": 3,
+      "sens": "horaire", "type_appui": "faible", "abrasivite": "moyenne",
+      "pit_loss_s": 19.8, "taux_sc_historique": 0.6, "depassements_moyens": 42, "ecart_pole_p2_s": 0.13, "arrets_vainqueur": 1.8,
+      "degradation": { "SOFT": 0.13, "MEDIUM": 0.08, "HARD": 0.06 }
+    },
+    "silverstone": {
+      "id": "silverstone", "nom": "Silverstone Circuit", "pays": "Royaume-Uni", "ville": "Silverstone",
+      "lat": 52.0786, "lon": -1.0169, "tz": "Europe/London",
+      "altitude_m": 153, "longueur_m": 5891, "nb_tours": 52, "nb_virages": 18, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "forte",
+      "pit_loss_s": 20.1, "taux_sc_historique": 0.7, "depassements_moyens": 29, "ecart_pole_p2_s": 0.17, "arrets_vainqueur": 1.6,
+      "degradation": { "SOFT": 0.15, "MEDIUM": 0.10, "HARD": 0.07 }
+    },
+    "hungaroring": {
+      "id": "hungaroring", "nom": "Hungaroring", "pays": "Hongrie", "ville": "Mogyoród",
+      "lat": 47.5789, "lon": 19.2486, "tz": "Europe/Budapest",
+      "altitude_m": 249, "longueur_m": 4381, "nb_tours": 70, "nb_virages": 14, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "moyenne",
+      "pit_loss_s": 20.6, "taux_sc_historique": 0.4, "depassements_moyens": 14, "ecart_pole_p2_s": 0.15, "arrets_vainqueur": 1.8,
+      "degradation": { "SOFT": 0.14, "MEDIUM": 0.09, "HARD": 0.06 }
+    },
+    "spa": {
+      "id": "spa", "nom": "Circuit de Spa-Francorchamps", "pays": "Belgique", "ville": "Stavelot",
+      "lat": 50.4372, "lon": 5.9714, "tz": "Europe/Brussels",
+      "altitude_m": 401, "longueur_m": 7004, "nb_tours": 44, "nb_virages": 19, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "moyen", "abrasivite": "forte",
+      "pit_loss_s": 18.4, "taux_sc_historique": 0.6, "depassements_moyens": 38, "ecart_pole_p2_s": 0.23, "arrets_vainqueur": 1.4,
+      "degradation": { "SOFT": 0.11, "MEDIUM": 0.07, "HARD": 0.05 }
+    },
+    "zandvoort": {
+      "id": "zandvoort", "nom": "Circuit Zandvoort", "pays": "Pays-Bas", "ville": "Zandvoort",
+      "lat": 52.3888, "lon": 4.5409, "tz": "Europe/Amsterdam",
+      "altitude_m": 6, "longueur_m": 4259, "nb_tours": 72, "nb_virages": 14, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "moyenne",
+      "pit_loss_s": 20.8, "taux_sc_historique": 0.5, "depassements_moyens": 11, "ecart_pole_p2_s": 0.13, "arrets_vainqueur": 1.6,
+      "degradation": { "SOFT": 0.13, "MEDIUM": 0.09, "HARD": 0.06 }
+    },
+    "monza": {
+      "id": "monza", "nom": "Autodromo Nazionale di Monza", "pays": "Italie", "ville": "Monza",
+      "lat": 45.6156, "lon": 9.2811, "tz": "Europe/Rome",
+      "altitude_m": 162, "longueur_m": 5793, "nb_tours": 53, "nb_virages": 11, "zones_drs": 2,
+      "sens": "horaire", "type_appui": "faible", "abrasivite": "faible",
+      "pit_loss_s": 21.7, "taux_sc_historique": 0.4, "depassements_moyens": 33, "ecart_pole_p2_s": 0.15, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.09, "MEDIUM": 0.06, "HARD": 0.04 }
+    },
+    "baku": {
+      "id": "baku", "nom": "Baku City Circuit", "pays": "Azerbaïdjan", "ville": "Bakou",
+      "lat": 40.3725, "lon": 49.8533, "tz": "Asia/Baku",
+      "altitude_m": -25, "longueur_m": 6003, "nb_tours": 51, "nb_virages": 20, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "faible", "abrasivite": "faible",
+      "pit_loss_s": 19.2, "taux_sc_historique": 0.9, "depassements_moyens": 36, "ecart_pole_p2_s": 0.12, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.09, "MEDIUM": 0.06, "HARD": 0.04 }
+    },
+    "marina_bay": {
+      "id": "marina_bay", "nom": "Marina Bay Street Circuit", "pays": "Singapour", "ville": "Singapour",
+      "lat": 1.2914, "lon": 103.864, "tz": "Asia/Singapore",
+      "altitude_m": 5, "longueur_m": 4940, "nb_tours": 62, "nb_virages": 19, "zones_drs": 3,
+      "sens": "antihoraire", "type_appui": "eleve", "abrasivite": "moyenne",
+      "pit_loss_s": 25.3, "taux_sc_historique": 0.9, "depassements_moyens": 15, "ecart_pole_p2_s": 0.14, "arrets_vainqueur": 1.4,
+      "degradation": { "SOFT": 0.12, "MEDIUM": 0.08, "HARD": 0.05 }
+    },
+    "americas": {
+      "id": "americas", "nom": "Circuit of the Americas", "pays": "États-Unis", "ville": "Austin",
+      "lat": 30.1328, "lon": -97.6411, "tz": "America/Chicago",
+      "altitude_m": 160, "longueur_m": 5513, "nb_tours": 56, "nb_virages": 20, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "moyen", "abrasivite": "forte",
+      "pit_loss_s": 21.3, "taux_sc_historique": 0.5, "depassements_moyens": 41, "ecart_pole_p2_s": 0.20, "arrets_vainqueur": 1.8,
+      "degradation": { "SOFT": 0.15, "MEDIUM": 0.09, "HARD": 0.06 }
+    },
+    "rodriguez": {
+      "id": "rodriguez", "nom": "Autódromo Hermanos Rodríguez", "pays": "Mexique", "ville": "Mexico",
+      "lat": 19.4042, "lon": -99.0907, "tz": "America/Mexico_City",
+      "altitude_m": 2238, "longueur_m": 4304, "nb_tours": 71, "nb_virages": 17, "zones_drs": 3,
+      "sens": "antihoraire", "type_appui": "eleve", "abrasivite": "faible",
+      "pit_loss_s": 21.9, "taux_sc_historique": 0.6, "depassements_moyens": 27, "ecart_pole_p2_s": 0.21, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.10, "MEDIUM": 0.07, "HARD": 0.05 }
+    },
+    "interlagos": {
+      "id": "interlagos", "nom": "Autódromo José Carlos Pace", "pays": "Brésil", "ville": "São Paulo",
+      "lat": -23.7036, "lon": -46.6997, "tz": "America/Sao_Paulo",
+      "altitude_m": 785, "longueur_m": 4309, "nb_tours": 71, "nb_virages": 15, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "moyen", "abrasivite": "moyenne",
+      "pit_loss_s": 20.5, "taux_sc_historique": 0.8, "depassements_moyens": 47, "ecart_pole_p2_s": 0.17, "arrets_vainqueur": 1.8,
+      "degradation": { "SOFT": 0.13, "MEDIUM": 0.08, "HARD": 0.06 }
+    },
+    "vegas": {
+      "id": "vegas", "nom": "Las Vegas Strip Circuit", "pays": "États-Unis", "ville": "Las Vegas",
+      "lat": 36.1147, "lon": -115.1728, "tz": "America/Los_Angeles",
+      "altitude_m": 610, "longueur_m": 6201, "nb_tours": 50, "nb_virages": 17, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "faible", "abrasivite": "faible",
+      "pit_loss_s": 20.2, "taux_sc_historique": 0.7, "depassements_moyens": 30, "ecart_pole_p2_s": 0.13, "arrets_vainqueur": 1.2,
+      "degradation": { "SOFT": 0.08, "MEDIUM": 0.05, "HARD": 0.04 }
+    },
+    "losail": {
+      "id": "losail", "nom": "Lusail International Circuit", "pays": "Qatar", "ville": "Lusail",
+      "lat": 25.49, "lon": 51.4536, "tz": "Asia/Qatar",
+      "altitude_m": 12, "longueur_m": 5419, "nb_tours": 57, "nb_virages": 16, "zones_drs": 1,
+      "sens": "horaire", "type_appui": "eleve", "abrasivite": "forte",
+      "pit_loss_s": 23.8, "taux_sc_historique": 0.4, "depassements_moyens": 24, "ecart_pole_p2_s": 0.16, "arrets_vainqueur": 2.8,
+      "degradation": { "SOFT": 0.18, "MEDIUM": 0.12, "HARD": 0.08 }
+    },
+    "yas_marina": {
+      "id": "yas_marina", "nom": "Yas Marina Circuit", "pays": "Émirats arabes unis", "ville": "Abu Dhabi",
+      "lat": 24.4672, "lon": 54.6031, "tz": "Asia/Dubai",
+      "altitude_m": 3, "longueur_m": 5281, "nb_tours": 58, "nb_virages": 16, "zones_drs": 2,
+      "sens": "antihoraire", "type_appui": "moyen", "abrasivite": "faible",
+      "pit_loss_s": 21.1, "taux_sc_historique": 0.5, "depassements_moyens": 21, "ecart_pole_p2_s": 0.14, "arrets_vainqueur": 1.4,
+      "degradation": { "SOFT": 0.11, "MEDIUM": 0.07, "HARD": 0.05 }
+    }
+  }
+}
