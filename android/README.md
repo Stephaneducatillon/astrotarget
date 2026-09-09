@@ -1,7 +1,8 @@
 # CielScore — application Android
 
 Portage natif Android de **CielScore**, planificateur d'observation
-astronomique, conforme à la documentation fonctionnelle et technique v0.6.4.
+astronomique, conforme à la documentation fonctionnelle et technique v0.6.4 et
+aux **règles de scoring v2.0** du 09/09/2026.
 
 L'application répond à la question du document : *que puis-je observer ce soir,
 avec mon instrument, depuis mon jardin ?* Elle croise instrument, lieu, météo et

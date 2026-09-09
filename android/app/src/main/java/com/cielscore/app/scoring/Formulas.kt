@@ -16,15 +16,50 @@ object Formulas {
     /** Diametre, en millimetres, au-dela duquel on considere un instrument optique (RG-I-01). */
     const val NAKED_EYE_MAX_DIAMETER_MM = 7.0
 
-    // ------------------------------------------------- 5.1 / 5.3 Magnitude limite
+    /**
+     * Tolerance de brillance de surface, en mag/arcsec carre (regles v2.0, § 1).
+     *
+     * Un objet reste observable jusqu'a sb_limite + 3.5, avec une attenuation
+     * lineaire du score de brillance au-dela de la limite du site.
+     */
+    const val SB_TOLERANCE = 3.5
+
+    // ------------------------------------------------- Magnitude limite (v2.0)
 
     /**
-     * Section 5.1 — magnitude limite d'un instrument :
+     * Correction de pollution lumineuse appliquee a la magnitude limite,
+     * en magnitudes (regles v2.0, tableau de reference).
      *
-     *     mag_limite = 2.1 + 5 * log10(D_mm)
+     * Le ciel peri-urbain (Bortle 5-6) sert de reference : la correction y est
+     * nulle et la formule se reduit a 2.1 + 5*log10(D).
+     *
+     *   Bortle 1-2  +1.2      Bortle 7-8  -0.8
+     *   Bortle 3-4  +0.6      Bortle 9    -1.0
+     *   Bortle 5-6   0.0
+     *
+     * NOTE — les exemples chiffres de la page 3 du document donnent la formule
+     * de base sans ce terme, alors meme qu'ils annoncent un indice de Bortle.
+     * Le tableau de reference, lui, est coherent d'un diametre a l'autre : c'est
+     * lui qui fait foi (arbitrage valide).
      */
-    fun instrumentLimitingMagnitude(diameterMm: Double): Double =
-        2.1 + 5.0 * log10(diameterMm)
+    fun bortlePollutionCorrection(bortle: Int): Double = when (bortle.coerceIn(1, 9)) {
+        1, 2 -> 1.2
+        3, 4 -> 0.6
+        5, 6 -> 0.0
+        7, 8 -> -0.8
+        else -> -1.0
+    }
+
+    /**
+     * Magnitude limite d'un instrument visuel (regles v2.0, § 2) :
+     *
+     *     mag_limite = 2.1 + 5 * log10(D_mm) + correction_pollution(Bortle)
+     *
+     * Changement notable par rapport a la version precedente : la limite depend
+     * desormais du ciel, et plus seulement du diametre.
+     */
+    fun instrumentLimitingMagnitude(diameterMm: Double, bortle: Int): Double =
+        2.1 + 5.0 * log10(diameterMm) + bortlePollutionCorrection(bortle)
 
     /**
      * Section 5.2 — magnitude limite a l'oeil nu (NELM) selon l'indice de Bortle.
@@ -60,13 +95,13 @@ object Formulas {
      *     Oeil nu (D <= 7 mm)   : mag_limite = NELM(Bortle)
      *     Instrument (D > 7 mm) : mag_limite = 2.1 + 5 * log10(D_mm)
      *
-     * Pour un instrument optique la limite ne depend que du diametre (RG-I-02) ;
-     * l'effet du ciel pollue est traite separement par la brillance de surface
-     * (RG-I-03).
+     * En v2.0 la limite instrumentale tient compte du ciel : RG-I-02, qui la
+     * faisait dependre du seul diametre, est abrogee. La brillance de surface
+     * (RG-I-03) reste traitee separement.
      */
     fun limitingMagnitude(diameterMm: Double, bortle: Int): Double =
         if (diameterMm <= NAKED_EYE_MAX_DIAMETER_MM) nakedEyeLimitingMagnitude(bortle)
-        else instrumentLimitingMagnitude(diameterMm)
+        else instrumentLimitingMagnitude(diameterMm, bortle)
 
     // ------------------------------------------------- 5.4 / 5.5 Brillance de surface
 
@@ -204,19 +239,39 @@ object Formulas {
     // --------------------------------------------------- 5.9 Smart telescopes
 
     /**
-     * Section 5.9 — magnitude limite d'un smart telescope :
+     * Magnitude limite d'un smart telescope (regles v2.0, § 2) :
      *
-     *     mag_limite = 2.1 + 5*log10(D_mm) + 2.5*log10(T_sec/60) - (Bortle-1)*0.55
+     *     mag_limite = 2.1 + 5*log10(D_mm) + correction_pollution(Bortle)
+     *                + 1.25 * log10(duree_pose_minutes / 60)
      *
-     * @param exposureSeconds duree de pose cumulee, en secondes (RG-I-05).
+     * La duree de pose cumulee remplace la duree de session : c'est
+     * l'integration du capteur qui repousse la limite (RG-I-05). Le terme est
+     * nul a une heure de pose, et vaut environ +0.88 magnitude a cinq heures.
      */
     fun smartTelescopeLimitingMagnitude(
         diameterMm: Double,
-        exposureSeconds: Double,
+        exposureMinutes: Double,
         bortle: Int,
     ): Double = 2.1 + 5.0 * log10(diameterMm) +
-        2.5 * log10(max(exposureSeconds, 1.0) / 60.0) -
-        (bortle.coerceIn(1, 9) - 1) * 0.55
+        bortlePollutionCorrection(bortle) +
+        1.25 * log10(max(exposureMinutes, 1.0) / 60.0)
+
+    // ---------------------------------------- Brillance de surface (v2.0)
+
+    /**
+     * Facteur de brillance de surface (regles v2.0, § 1 et § 6).
+     *
+     *     f_sb = clip((sb_limite + SB_TOLERANCE - sb) / SB_TOLERANCE, 0, 1)
+     *
+     * Vaut 1 tant que l'objet est plus contraste que le fond de ciel du site,
+     * decroit lineairement dans la zone de tolerance, et s'annule au-dela.
+     * Il multiplie le score visuel final, sauf pour les objets rattrapes par le
+     * correctif des objets brillants etendus.
+     */
+    fun surfaceBrightnessFactor(surfaceBrightness: Double, bortle: Int): Double {
+        val limit = surfaceBrightnessLimit(bortle)
+        return clip((limit + SB_TOLERANCE - surfaceBrightness) / SB_TOLERANCE)
+    }
 
     // ------------------------------------------- 4.2 Filtrage dynamique nocturne
 

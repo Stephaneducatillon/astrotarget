@@ -64,7 +64,7 @@ class SmartTelescopeCatalogTest {
     @Test
     fun `la magnitude limite ne depend que du diametre, de la pose et du Bortle`() {
         // Deux modeles de meme diametre partagent la meme magnitude limite,
-        // quelles que soient leur focale et leur optique (section 5.9).
+        // quelles que soient leur focale et leur optique (regles v2.0, § 2).
         val s50 = catalog.first { it.model == "Seestar S50" }
         val s50Pro = catalog.first { it.model == "Seestar S50 Pro" }
         assertEquals(
@@ -72,9 +72,10 @@ class SmartTelescopeCatalogTest {
             s50Pro.limitingMagnitude(60.0, 6),
             1e-9,
         )
-        // Valeur de reference : 2.1 + 5*log10(50) + 2.5*log10(60) - 5*0.55
+        // Valeur de reference : 2.1 + 5*log10(50) + correction_Bortle(6)
+        // + 1.25*log10(60/60), la pose etant exprimee en minutes (regles v2.0).
         assertEquals(
-            Formulas.smartTelescopeLimitingMagnitude(50.0, 3600.0, 6),
+            Formulas.smartTelescopeLimitingMagnitude(50.0, 60.0, 6),
             s50Pro.limitingMagnitude(60.0, 6),
             1e-9,
         )

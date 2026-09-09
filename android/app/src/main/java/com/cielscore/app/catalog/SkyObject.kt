@@ -19,6 +19,13 @@ enum class ObjectType(val label: String) {
     GLOBULAR_CLUSTER("Amas globulaire"),
     OTHER("Autre");
 
+    /**
+     * TYPES_RESOLUS des regles v2.0 (§ 1) : les amas sont resolus en etoiles
+     * individuelles, la notion de brillance de surface moyenne y est sans
+     * objet. Ces types sont donc exemptes du critere SB.
+     */
+    val isResolved: Boolean get() = this == OPEN_CLUSTER || this == GLOBULAR_CLUSTER
+
     companion object {
         fun fromAsset(raw: String): ObjectType = when (raw.trim()) {
             "Nebuleuse" -> NEBULA

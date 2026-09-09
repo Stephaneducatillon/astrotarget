@@ -4,6 +4,7 @@ import com.cielscore.app.astro.AstroMath
 import com.cielscore.app.astro.SolarSystem
 import com.cielscore.app.astro.Twilight
 import com.cielscore.app.catalog.Catalog
+import com.cielscore.app.catalog.ObjectType
 import com.cielscore.app.catalog.SkyObject
 import com.cielscore.app.model.MoonState
 import com.cielscore.app.model.SessionParams
@@ -18,7 +19,7 @@ object ScoringEngine {
     /** Codes des filtres eliminatoires de la section 4.1. */
     enum class Rejection(val code: String, val reason: String) {
         LOW_ALTITUDE("RG-F-01", "Altitude inferieure a 5 degres"),
-        SURFACE_BRIGHTNESS("RG-F-02", "Objet trop diffus pour ce ciel"),
+        SURFACE_BRIGHTNESS("RG-F-02", "Objet trop diffus pour emerger du fond de ciel"),
         MAGNITUDE("RG-F-03", "Trop faible pour l'instrument ou le ciel"),
         CLOUDS("RG-F-04", "Couverture nuageuse superieure a 90 %"),
         NO_ANGULAR_SIZE("RG-F-02", "Dimensions angulaires inconnues"),
@@ -190,21 +191,33 @@ object ScoringEngine {
         // mais n'entre pas dans le classement du Dashboard.
         if (sb == null) return rejected(Rejection.NO_ANGULAR_SIZE)
 
-        // RG-F-02 : objet trop diffus, noye dans le fond de ciel.
-        val sbLimit = Formulas.surfaceBrightnessLimit(ctx.params.site.bortle)
-        if (sb > sbLimit) return rejected(Rejection.SURFACE_BRIGHTNESS)
-
-        // RG-F-03 : filtrage dynamique selon l'obscurite (section 4.2).
+        // RG-F-03 : filtrage dynamique selon l'obscurite (section 4.2), conserve
+        // en v2.0 : la magnitude limite retenue depend de la hauteur du Soleil.
         val magLimit = ctx.limits.deepSkyLimit ?: return rejected(Rejection.MAGNITUDE)
         val mag = target.magnitude ?: return rejected(Rejection.MAGNITUDE)
         if (mag > magLimit) return rejected(Rejection.MAGNITUDE)
 
+        // RG-F-02, reecrit par les regles v2.0 (§ 4 et § 7) : un objet diffus
+        // n'est ecarte que s'il est a la fois noye dans le fond de ciel et hors
+        // d'atteinte en magnitude integree. Le correctif des objets brillants
+        // etendus (M31, M42, M45) tient dans cette seule conjonction.
+        val sbAssessment = assessSurfaceBrightness(
+            type = target.type,
+            surfaceBrightness = sb,
+            magnitude = mag,
+            limitingMagnitude = ctx.params.limitingMagnitude,
+            bortle = ctx.params.site.bortle,
+        )
+        if (sbAssessment.factor <= 0.0 && !sbAssessment.magnitudeAccessible) {
+            return rejected(Rejection.SURFACE_BRIGHTNESS)
+        }
+
         val windowMinutes = observationWindowMinutes(target, ctx)
 
         return if (ctx.params.isSmartMode) {
-            smartScore(target, ctx, alt, az, moonDistance, sb, windowMinutes)
+            smartScore(target, ctx, alt, az, moonDistance, sb, sbAssessment, windowMinutes)
         } else {
-            visualScore(target, ctx, alt, az, moonDistance, sb, windowMinutes)
+            visualScore(target, ctx, alt, az, moonDistance, sb, sbAssessment, windowMinutes)
         }
     }
 
@@ -221,6 +234,7 @@ object ScoringEngine {
         az: Double,
         moonDistance: Double,
         sb: Double,
+        sbAssessment: SurfaceBrightnessAssessment,
         windowMinutes: Double,
     ): Scored {
         val b = Breakdown(
@@ -230,12 +244,13 @@ object ScoringEngine {
             transparency = transparencyScore(ctx.conditions),
             bortle = bortleScore(ctx.params.site.bortle),
             moon = moonScore(ctx.moon, moonDistance),
-            surfaceBrightness = surfaceBrightnessScore(sb, ctx.params.site.bortle),
+            surfaceBrightness = sbAssessment.score,
             night = Twilight.nightScore(ctx.sunAltitudeDeg),
         )
-        val score = 0.25 * b.altitude + 0.15 * b.window + 0.11 * b.seeing +
+        val weighted = 0.25 * b.altitude + 0.15 * b.window + 0.11 * b.seeing +
             0.13 * b.transparency + 0.08 * b.bortle + 0.06 * b.moon +
             0.15 * b.surfaceBrightness + 0.07 * b.night
+        val score = weighted * sbAssessment.factor
         return Scored(target, score.coerceIn(0.0, 100.0), alt, az, windowMinutes, sb, moonDistance, b)
     }
 
@@ -244,6 +259,10 @@ object ScoringEngine {
      *
      *     Score = 0.25*alt + 0.20*transp. + 0.15*seeing + 0.15*bortle
      *           + 0.15*lune + 0.05*F/D + 0.05*champ
+     *
+     * Regles v2.0, § 6 — en mode smart telescope le filtre de brillance de
+     * surface reste applique en amont, mais f_sb n'intervient pas comme
+     * multiplicateur du score final : la pose longue integre le flux.
      */
     private fun smartScore(
         target: SkyObject,
@@ -252,6 +271,7 @@ object ScoringEngine {
         az: Double,
         moonDistance: Double,
         sb: Double,
+        sbAssessment: SurfaceBrightnessAssessment,
         windowMinutes: Double,
     ): Scored {
         val scope = ctx.params.smartTelescope!!
@@ -263,7 +283,7 @@ object ScoringEngine {
             moon = moonScore(ctx.moon, moonDistance),
             focalRatio = focalRatioScore(scope.focalRatio),
             fieldMatch = fieldMatchScore(target.sizeArcmin, scope.fieldWidthArcmin),
-            surfaceBrightness = surfaceBrightnessScore(sb, ctx.params.site.bortle),
+            surfaceBrightness = sbAssessment.score,
             window = windowScore(windowMinutes),
             night = Twilight.nightScore(ctx.sunAltitudeDeg),
         )
@@ -370,10 +390,78 @@ object ScoringEngine {
         return ((1.0 - moon.phasePercent / 100.0 * (1.0 - d / 180.0)) * 100.0).coerceIn(0.0, 100.0)
     }
 
-    /** Brillance de surface, 15 % : clip((SB_lim - SB)/5, 0, 1) * 100. */
-    fun surfaceBrightnessScore(surfaceBrightness: Double, bortle: Int): Double {
-        val limit = Formulas.surfaceBrightnessLimit(bortle)
-        return Formulas.clip((limit - surfaceBrightness) / 5.0) * 100.0
+    /**
+     * Resultat du critere de brillance de surface des regles v2.0 (§ 7).
+     *
+     * @param score  sous-score s_sb, sur 100, pesant 15 % du score visuel.
+     * @param factor multiplicateur f_sb applique au score visuel final ; il vaut
+     *   toujours 1 pour un amas resolu ou un objet rattrape par le correctif des
+     *   objets brillants etendus.
+     * @param magnitudeAccessible vrai si la magnitude integree suffit a elle
+     *   seule a rendre l'objet visible (mag < mag_limite - 2).
+     */
+    data class SurfaceBrightnessAssessment(
+        val score: Double,
+        val factor: Double,
+        val magnitudeAccessible: Boolean,
+    )
+
+    /**
+     * Critere de brillance de surface, 15 % — regles v2.0, § 7.
+     *
+     * Le probleme corrige : la brillance de surface repartit le flux sur toute
+     * l'etendue angulaire de l'objet. Pour M31 (190' x 60'), la SB calculee
+     * atteint 22.2 mag/arcsec2, au-dela du plafond d'un ciel Bortle 7 ; l'oeil,
+     * lui, integre le flux total et la galaxie reste visible. La version 1.0
+     * lui attribuait donc un score nul.
+     *
+     *     f_sb        = clip((sb_lim + 3.5 - sb) / 3.5, 0, 1)
+     *     mag_access. = magnitude < mag_lim - 2
+     *
+     *     amas resolu    ->  s_sb = 100, f_sb = 1  (TYPES_RESOLUS, § 1)
+     *     sinon          ->  s_sb_diff = clip((sb_lim + 3.5 - sb) / 8.5, 0, 1) * 100
+     *       si mag_access.  s_sb_mag  = clip((mag_lim - magnitude) / 6, 0, 1) * 100
+     *                       poids_mag = clip((mag_lim - 2 - magnitude) / (mag_lim - 2), 0, 1)
+     *                       s_sb      = s_sb_diff * (1 - poids) + s_sb_mag * poids
+     *                       f_sb      = 1
+     *       sinon           s_sb = s_sb_diff, f_sb conserve sa valeur
+     *
+     * @param limitingMagnitude magnitude limite INSTRUMENTALE, et non la limite
+     *   crepusculaire de la section 4.2 : le correctif juge de ce que
+     *   l'instrument peut atteindre, le filtrage nocturne restant un filtre
+     *   d'exclusion distinct, applique en amont.
+     */
+    fun assessSurfaceBrightness(
+        type: ObjectType,
+        surfaceBrightness: Double,
+        magnitude: Double?,
+        limitingMagnitude: Double,
+        bortle: Int,
+    ): SurfaceBrightnessAssessment {
+        val magnitudeAccessible = magnitude != null && magnitude < limitingMagnitude - 2.0
+
+        // TYPES_RESOLUS : un amas est resolu en etoiles, la SB moyenne est sans objet.
+        if (type.isResolved) {
+            return SurfaceBrightnessAssessment(100.0, 1.0, magnitudeAccessible)
+        }
+
+        val sbLimit = Formulas.surfaceBrightnessLimit(bortle)
+        val ceiling = sbLimit + Formulas.SB_TOLERANCE
+        val diffuseScore = Formulas.clip(
+            (ceiling - surfaceBrightness) / (5.0 + Formulas.SB_TOLERANCE)
+        ) * 100.0
+        val factor = Formulas.surfaceBrightnessFactor(surfaceBrightness, bortle)
+
+        if (!magnitudeAccessible) {
+            return SurfaceBrightnessAssessment(diffuseScore, factor, false)
+        }
+
+        val mag = magnitude!!
+        val magScore = Formulas.clip((limitingMagnitude - mag) / 6.0) * 100.0
+        val threshold = limitingMagnitude - 2.0
+        val weight = if (threshold <= 0.0) 1.0 else Formulas.clip((threshold - mag) / threshold)
+        val blended = diffuseScore * (1.0 - weight) + magScore * weight
+        return SurfaceBrightnessAssessment(blended, 1.0, true)
     }
 
     /**
@@ -448,6 +536,71 @@ object ScoringEngine {
         out.sortByDescending { it.score }
         return if (out.size > limit) out.subList(0, limit).toList() else out
     }
+
+    // ------------------------------------------- Validation deterministe (v2.0)
+
+    /**
+     * Motifs de rejet de la validation deterministe des regles v2.0 (§ 8).
+     *
+     * Ces criteres sont volontairement plus severes que les filtres
+     * eliminatoires : ils ne decident pas de l'observabilite d'un objet, mais
+     * de son eligibilite a etre propose comme cible du soir a l'assistant IA.
+     */
+    enum class AiVeto(val reason: String) {
+        LOW_ALTITUDE("Altitude inferieure a 20 degres : trop d'atmosphere a traverser"),
+        MAGNITUDE("Magnitude au-dela de la limite instrumentale"),
+        CLOUDS("Plus de 80 % de couverture nuageuse"),
+        MOON_GLARE("Lune a moins de 30 degres et eclairee a plus de 60 %"),
+        SURFACE_BRIGHTNESS("Fond de ciel plus lumineux que l'objet (SB > sb_lim + 3.5)"),
+    }
+
+    /**
+     * Regles v2.0, § 8 — valider_top_ia().
+     *
+     * Verifie qu'une cible retenue tient debout independamment du score : c'est
+     * ce garde-fou qui empeche l'assistant de recommander un objet rasant
+     * l'horizon, noye dans les nuages ou colle a une Lune brillante.
+     *
+     * @return la liste des motifs de rejet ; vide si la cible est validee.
+     */
+    fun aiVetoes(scored: Scored, ctx: Context): List<AiVeto> {
+        val vetoes = ArrayList<AiVeto>(2)
+        if (scored.altitudeDeg < 20.0) vetoes.add(AiVeto.LOW_ALTITUDE)
+
+        val mag = scored.target.magnitude
+        if (mag == null || mag.isNaN() || mag > ctx.params.limitingMagnitude) {
+            vetoes.add(AiVeto.MAGNITUDE)
+        }
+        if (ctx.conditions.ok && ctx.conditions.cloudCoverPercent > 80.0) {
+            vetoes.add(AiVeto.CLOUDS)
+        }
+        if (!ctx.moon.isBelowHorizon &&
+            scored.moonDistanceDeg < 30.0 &&
+            ctx.moon.phasePercent > 60.0
+        ) {
+            vetoes.add(AiVeto.MOON_GLARE)
+        }
+
+        val sb = scored.surfaceBrightness
+        if (sb != null && !scored.target.type.isResolved) {
+            val ceiling = Formulas.surfaceBrightnessLimit(ctx.params.site.bortle) +
+                Formulas.SB_TOLERANCE
+            if (sb > ceiling) vetoes.add(AiVeto.SURFACE_BRIGHTNESS)
+        }
+        return vetoes
+    }
+
+    /** Vrai si la cible passe la validation deterministe des regles v2.0 (§ 8). */
+    fun validateForAi(scored: Scored, ctx: Context): Boolean = aiVetoes(scored, ctx).isEmpty()
+
+    /**
+     * Cibles du Top validees par le § 8, dans l'ordre du score.
+     *
+     * Utilisee pour construire le contexte envoye a l'assistant : celui-ci ne
+     * doit proposer que des objets reellement confortables a observer.
+     */
+    fun validatedTargets(targets: List<Scored>, ctx: Context): List<Scored> =
+        targets.filter { validateForAi(it, ctx) }
 
     /** Courbe d'altitude d'un objet sur les 10 heures suivantes (section 2.2). */
     fun altitudeCurve(

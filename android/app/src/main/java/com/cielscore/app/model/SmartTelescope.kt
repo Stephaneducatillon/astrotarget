@@ -37,9 +37,9 @@ data class SmartTelescope(
     val samplingArcsecPerPixel: Double
         get() = Formulas.samplingArcsecPerPixel(pixelSizeUm, focalMm)
 
-    /** Section 5.9 — magnitude limite selon la duree de pose et le Bortle. */
+    /** Regles v2.0, § 2 — magnitude limite selon la duree de pose et le Bortle. */
     fun limitingMagnitude(exposureMinutes: Double, bortle: Int): Double =
-        Formulas.smartTelescopeLimitingMagnitude(diameterMm, exposureMinutes * 60.0, bortle)
+        Formulas.smartTelescopeLimitingMagnitude(diameterMm, exposureMinutes, bortle)
 
     companion object {
         /**

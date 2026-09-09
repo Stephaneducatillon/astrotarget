@@ -73,13 +73,13 @@ data class SessionParams(
         get() = smartTelescope?.focalMm ?: focalMm
 
     /**
-     * Magnitude limite de l'instrument (section 5.3), majoree pour un smart
+     * Magnitude limite de l'instrument (regles v2.0, § 2), majoree pour un smart
      * telescope selon la duree de pose cumulee (RG-I-05).
      */
     val limitingMagnitude: Double
         get() = smartTelescope?.let {
             Formulas.smartTelescopeLimitingMagnitude(
-                it.diameterMm, smartExposureMinutes * 60.0, site.bortle
+                it.diameterMm, smartExposureMinutes, site.bortle
             )
         } ?: Formulas.limitingMagnitude(effectiveDiameterMm, site.bortle)
 

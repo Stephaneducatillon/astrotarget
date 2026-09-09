@@ -1,9 +1,20 @@
 # Conformité à la documentation CielScore
 
-Ce document recense, point par point, ce que l'application Android reprend du
-document *CielScore — Documentation fonctionnelle et technique* (version UX
-v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
-écart est soit une décision validée, soit une zone que le document ne couvre pas.
+Ce document recense, point par point, ce que l'application Android reprend de
+la documentation CielScore, et **tout ce qui s'en écarte**. Rien n'est laissé
+implicite : chaque écart est soit une décision validée, soit une zone que le
+document ne couvre pas.
+
+Deux documents font référence :
+
+| Document | Rôle |
+|---|---|
+| *CielScore — Documentation fonctionnelle et technique* (version UX v0.6.4) | Le socle : onglets, règles de gestion, catalogues, interfaces externes. |
+| *CielScore — Moteur de scoring, règles et formules* v2.0 (09/09/2026) | **Remplace** les §5.1, §5.3, §5.9, §7.2 et le critère de brillance de surface du §6.1. Voir la section 4. |
+
+En cas de contradiction entre les deux, **les règles v2.0 l'emportent** : elles
+sont postérieures et corrigent explicitement des défauts remontés par les
+testeurs.
 
 ---
 
@@ -22,11 +33,11 @@ v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
 | 4.4 | RG-L-01 à RG-L-04 | `scoring/ScoringEngine.moonScore` |
 | 4.5 | RG-I-01 à RG-I-05 | `scoring/Formulas.kt`, `model/SessionParams` |
 | 4.6 | Durées de vie et clés de cache | `data/cache/TtlCache.kt` |
-| 5.1 → 5.9 | Toutes les formules | `scoring/Formulas.kt` |
+| 5.1 → 5.9 | Toutes les formules, hors celles réécrites par les règles v2.0 (voir 4) | `scoring/Formulas.kt` |
 | 6.1 / 6.3 / 6.4 | Les trois formules de score et leurs pondérations | `scoring/ScoringEngine.kt` |
 | 6.2 | Barème du seeing déduit du vent | `scoring/Formulas.seeingIndex` |
 | 6.5 | Lecture du score | `scoring/Formulas.scoreInterpretation` |
-| 7.1 → 7.5 | Phases, score de nuit, couleurs, nuits d'été | `astro/Twilight.kt` |
+| 7.1 → 7.5 | Phases, couleurs, nuits d'été ; le score de nuit est celui des règles v2.0 | `astro/Twilight.kt` |
 | 8.1 | Messier 110, Caldwell 109, NGC/IC 13 308, 6 corps | `assets/`, `tools/build_catalogs.py` |
 | 8.1 | 34 869 communes françaises, Bortle automatique France entière | `assets/communes_bortle.csv`, `catalog/CommuneIndex.kt` |
 | 8.2 | Les 8 interfaces externes | `data/net/` |
@@ -36,9 +47,11 @@ v0.6.4), et **tout ce qui s'en écarte**. Rien n'est laissé implicite : chaque
 | 9.4 | Format et niveaux de journalisation | `util/Log.kt` |
 | 10.2 | L'exemple complet M57 est rejoué en test | `DocumentationConformanceTest.kt` |
 
-Les valeurs chiffrées du document (tableaux 5.1, 5.2, 5.5, 5.6, 6.2, 7.2, 10.2)
-sont vérifiées automatiquement par **36 tests unitaires**. Le score final de
-l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé.
+Les valeurs chiffrées des deux documents (tableaux 5.2, 5.5, 5.6, 6.2, 10.2 du
+premier ; tableaux des pages 6 et 7 des règles v2.0) sont vérifiées
+automatiquement par **32 tests de conformité**, sur **70 tests unitaires** au
+total. Le tableau de validation de la page 6 des règles v2.0 est reproduit à
+**1,4 point près** au pire des cas.
 
 ---
 
@@ -53,7 +66,9 @@ l'exemple 10.2 est reproduit à 78,4 / 100, pour « environ 78 / 100 » annoncé
 | Smart télescopes | Les **7 modèles détaillés** au tableau 5.9, plus les 2 Seestar Pro ajoutés ensuite (voir 3.5). |
 | Carte du ciel | Figures de constellations **complètes** (358 étoiles, 239 segments) plutôt que les 174 / 113 du §3.3. |
 | Objets sans dimensions | Consultables dans l'Explorer, exclus du Top du Dashboard. |
-| Formule du §5.9 | La **formule** fait foi, pas le tableau qui l'accompagne (voir 3.1). |
+| Formule du §5.9 | Caduque : les règles v2.0 réécrivent la magnitude limite (voir 4). |
+| Tableau de la p. 7 des règles v2.0 | Il **fait foi** face aux exemples chiffrés de la p. 3, qui omettent la correction de pollution. |
+| Filtrage crépusculaire du §4.2 | **Conservé** : il reste appliqué en amont du scoring v2.0. |
 | Seuil des planètes brillantes | **−3°** de hauteur du Soleil, valeur de RG-P-03 (voir 3.1). |
 | Critères non définis | Définitions retenues pour « Fenêtre », F/D et champ (voir 3.2). |
 
@@ -66,24 +81,9 @@ sont ceux retenus dans l'application, et non des options ouvertes.
 
 ### 3.1 Incohérences internes au document
 
-**Le tableau du §5.9 ne découle pas de sa propre formule.**
-La formule énoncée est :
-
-```
-mag_limite = 2.1 + 5×log10(D_mm) + 2.5×log10(T_sec/60) − (Bortle−1)×0.55
-```
-
-Appliquée au Seestar S50 (50 mm, 60 min, Bortle 7), elle donne **11,7** alors que
-le tableau annonce **12,6**. L'écart est d'environ **+0,9 magnitude** sur tous les
-modèles (+1,3 pour le S30). Le terme constant qui reproduirait le tableau serait
-≈ 2,95 au lieu de 2,1.
-
-→ **Arbitrage retenu : l'application applique la formule**, qui est l'élément
-normatif. Les magnitudes limites affichées sont donc inférieures d'environ 0,9 à
-celles du tableau du §5.9, qui est à considérer comme illustratif.
-
-Pour mémoire, si ce choix devait un jour être revu : porter la constante `2.1` à
-≈ 2,95 dans `Formulas.smartTelescopeLimitingMagnitude` reproduirait le tableau.
+**Le tableau du §5.9 ne découlait pas de sa propre formule.** Ce point est
+**caduc** : les règles v2.0 réécrivent la magnitude limite des smart télescopes,
+tableau et formule compris. Voir la section 4.
 
 **Le §2.5 annonce 12 smart télescopes, le §5.9 n'en détaille que 7.**
 → Les 7 documentés ont d'abord été intégrés seuls (décision validée), puis
@@ -186,18 +186,169 @@ obtenue, 12,85 mm, correspond exactement au format 1/1,2 pouce annoncé par le
 fabricant — la déduction est donc vérifiable, et un test la verrouille.
 
 Conséquence sur le scoring : **aucune approximation ne pèse sur la magnitude
-limite**, qui ne dépend que du diamètre (§5.9). La focale et le capteur ne
-servent qu'aux deux critères à 5 % du score smart télescope (§6.4) et à
-l'affichage.
+limite**, qui ne dépend que du diamètre, du Bortle et de la durée de pose
+(règles v2.0, § 2). La focale et le capteur ne servent qu'aux deux critères à
+5 % du score smart télescope (§6.4) et à l'affichage.
 
 Le catalogue compte donc 9 modèles, dont 7 documentés. Il reste une entrée
 incertaine, héritée de la première version : les dimensions du capteur du
 **Vespera II**, non vérifiées, et dont la référence est laissée vide dans le
 code plutôt que devinée.
 
+
 ---
 
-## 4. Précision des éphémérides
+## 4. Règles de scoring v2.0 (09/09/2026)
+
+Le document *Moteur de scoring — règles et formules* v2.0 corrige, à la suite
+des retours de testeurs, cinq points du scoring. Tout ce qu'il ne mentionne pas
+reste régi par la documentation v0.6.4.
+
+### 4.1 Magnitude limite : le ciel entre dans la formule
+
+```
+mag_limite = 2.1 + 5×log10(D_mm) + correction_pollution(Bortle)
+```
+
+| Bortle | 1–2 | 3–4 | 5–6 | 7–8 | 9 |
+|---|---|---|---|---|---|
+| Correction | +1,2 | +0,6 | 0,0 | −0,8 | −1,0 |
+
+La règle **RG-I-02** du premier document — « la limite instrumentale ne dépend
+que du diamètre » — est donc **abrogée**. Un 130 mm passe de 12,7 partout à 11,9
+depuis un site Bortle 7 et 13,9 depuis un site Bortle 1.
+
+**Écart documenté et arbitré.** Les exemples chiffrés de la page 3 des règles
+v2.0 (« D = 60 mm, Bortle 9 → 11,0 ») appliquent la formule *sans* la correction
+de pollution, alors même qu'ils annoncent un indice de Bortle ; le tableau de
+référence de la page 7, lui, est cohérent d'un diamètre à l'autre.
+→ **Arbitrage retenu (validé) : le tableau de la page 7 fait foi.** Il est
+rejoué en test, à 0,12 magnitude près — la précision de ses propres arrondis.
+
+Pour les smart télescopes, la durée de pose s'ajoute et s'exprime désormais **en
+minutes**, une heure servant de référence :
+
+```
+mag_limite_smart = 2.1 + 5×log10(D_mm) + correction_pollution(Bortle)
+                 + 1.25×log10(T_min / 60)
+```
+
+Voir `Formulas.bortlePollutionCorrection`, `instrumentLimitingMagnitude`,
+`smartTelescopeLimitingMagnitude`.
+
+### 4.2 Correctif des objets brillants étendus
+
+C'est la correction principale de la v2.0, et celle qui motivait les retours.
+
+**Le défaut.** M31 (magnitude 3,4, étendue 190′ × 60′) a une brillance de surface
+calculée de 22,2 mag/arcsec², au-delà du plafond d'un ciel Bortle 7 (18,5 + 3,5
+de tolérance = 22,0). L'ancien facteur `f_sb` tombait à zéro et **M31 obtenait un
+score nul**, alors qu'elle se voit à l'œil nu. La cause est structurelle : la
+brillance de surface répartit le flux sur toute l'étendue angulaire, quand l'œil,
+lui, intègre le flux total.
+
+**La correction, en trois temps :**
+
+1. Les **amas** (ouverts et globulaires — `TYPES_RESOLUS`) sont exemptés du
+   critère : résolus en étoiles individuelles, la brillance moyenne n'a pas de
+   sens pour eux. `s_sb = 100`, `f_sb = 1`.
+2. Un objet dont la magnitude intégrée est **nettement accessible**
+   (`magnitude < mag_limite − 2`) n'est plus éliminé, et son sous-score mélange
+   les deux lectures :
+
+   ```
+   s_sb_diff = clip((sb_lim + 3.5 − sb) / 8.5, 0, 1) × 100
+   s_sb_mag  = clip((mag_lim − magnitude) / 6, 0, 1) × 100
+   poids     = clip((mag_lim − 2 − magnitude) / (mag_lim − 2), 0, 1)
+   s_sb      = s_sb_diff × (1 − poids) + s_sb_mag × poids
+   ```
+
+3. Le multiplicateur `f_sb` n'est plus appliqué à ces objets rattrapés
+   (`f_sb = 1`), sans quoi le score retomberait à zéro malgré le sous-score.
+
+**Reproduction du tableau de validation** (page 6 : Bortle 7, D = 114 mm,
+altitude 55°, Lune au plus mauvais) :
+
+| Objet | Document | Application |
+|---|---|---|
+| M45 Pléiades | 88 | 88,0 |
+| M42 Orion | 83 | 82,7 |
+| M31 Andromède | 83 | 82,7 |
+| M13 Hercule | 88 | 88,0 |
+| M33 Triangle | 80 | 79,0 |
+| M101 Pinwheel | 76 | 74,6 |
+| NGC 891 | 74 | 73,0 |
+
+Écart maximal **1,4 point**, imputable aux arrondis à l'entier du document et
+aux dimensions angulaires, qu'il ne fournit que pour certains objets.
+
+Voir `ScoringEngine.assessSurfaceBrightness` et `Formulas.surfaceBrightnessFactor`.
+
+### 4.3 Filtre d'exclusion RG-F-02 réécrit
+
+L'ancien filtre écartait tout objet dont la brillance dépassait le plafond du
+site. Le nouveau n'écarte que la **conjonction** des deux échecs :
+
+```
+f_sb <= 0  ET  magnitude non accessible   →   score = 0
+```
+
+Les trois autres filtres éliminatoires (altitude < 5°, magnitude > limite,
+nuages > 90 %) sont inchangés.
+
+**Arbitrage retenu (validé) : le filtrage crépusculaire du §4.2 est conservé.**
+Les règles v2.0 ne le mentionnent pas, mais ne le contredisent pas non plus : il
+reste appliqué en amont, et c'est la magnitude limite *instrumentale* — non la
+limite crépusculaire — qui sert à juger `magnitude accessible`, faute de quoi un
+objet changerait de catégorie au fil du crépuscule.
+
+### 4.4 Score de nuit progressif
+
+```
+s_nuit = clip(−altitude_soleil / 18, 0, 1) × 100
+```
+
+Les quatre paliers du §7.2 (100 / 70 / 40 / 10 / 0) faisaient sauter le score
+global d'une phase crépusculaire à l'autre ; la progression est désormais
+continue du coucher du Soleil à la nuit noire. Voir `Twilight.nightScore`.
+
+### 4.5 Validation déterministe (`valider_top_ia`)
+
+Un garde-fou, plus sévère que les filtres éliminatoires, appliqué **avant
+d'envoyer les cibles à l'assistant IA** — il ne retire rien du Top affiché :
+
+| Motif de rejet | Seuil |
+|---|---|
+| Trop bas sur l'horizon | altitude < 20° |
+| Hors de portée | magnitude > magnitude limite |
+| Observation compromise | nuages > 80 % |
+| Éblouissement lunaire | séparation < 30° **et** phase > 60 % |
+| Fond de ciel trop lumineux | SB > sb_limite + 3,5 (hors amas) |
+
+Si aucune cible ne passe cette validation, le Top complet est transmis malgré
+tout, plutôt que de laisser l'assistant sans contexte. Voir
+`ScoringEngine.aiVetoes` et `validatedTargets`.
+
+### 4.6 Conséquence à connaître : le type de M42 dans le catalogue
+
+L'exemption des amas (`TYPES_RESOLUS`) rend le **type** de chaque objet
+directement déterminant pour son score. Or `messier.csv`, généré depuis OpenNGC
+par `tools/build_catalogs.py`, classe **M42 en « Amas ouvert »** — OpenNGC la
+code `Cl+N`, amas *et* nébuleuse, et la conversion retient l'amas.
+
+Conséquence : M42 est exemptée du critère de brillance et score **88** là où les
+règles v2.0 attendent **83**. Elle n'apparaît pas non plus sous le filtre
+« Nébuleuse » de l'Explorer.
+
+C'est la seule anomalie de ce genre dans le catalogue Messier. Elle **n'a pas été
+corrigée d'office** : le fichier est une donnée source régénérable, et le
+corriger à la main serait perdu à la prochaine régénération. La correction
+propre consiste à forcer le type de M42 dans `tools/build_catalogs.py`, puis à
+régénérer — à votre appréciation.
+
+---
+
+## 5. Précision des éphémérides
 
 Le moteur remplace Astropy et PyEphem. Précision constatée sur les cas de
 référence testés :

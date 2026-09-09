@@ -29,21 +29,17 @@ object Twilight {
     }
 
     /**
-     * Score de nuit, section 7.2 :
+     * Score de nuit (regles v2.0, § 5 — sous-score s_nuit).
      *
-     *     100 si alt <= -18   ->  nuit noire
-     *      70 si alt <= -12   ->  crepuscule astronomique
-     *      40 si alt <= -6    ->  crepuscule nautique
-     *      10 si alt <= 0     ->  crepuscule civil
-     *       0 si alt > 0      ->  jour
+     *     s_nuit = clip(-alt_soleil / 18, 0, 1) * 100
+     *
+     * La progression est desormais continue : le score croit lineairement du
+     * coucher du Soleil (0 %) a la nuit noire (100 % des -18 degres), au lieu
+     * des quatre paliers de la version precedente, qui faisaient sauter le
+     * score global d'une phase crepusculaire a l'autre.
      */
-    fun nightScore(sunAltitudeDeg: Double): Double = when {
-        sunAltitudeDeg <= -18.0 -> 100.0
-        sunAltitudeDeg <= -12.0 -> 70.0
-        sunAltitudeDeg <= -6.0 -> 40.0
-        sunAltitudeDeg <= 0.0 -> 10.0
-        else -> 0.0
-    }
+    fun nightScore(sunAltitudeDeg: Double): Double =
+        (-sunAltitudeDeg / 18.0).coerceIn(0.0, 1.0) * 100.0
 
     /** Intervalle horaire ; [startMillis] et [endMillis] sont nuls si l'evenement n'existe pas. */
     data class Window(val startMillis: Long?, val endMillis: Long?) {

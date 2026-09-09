@@ -6,8 +6,10 @@ Planificateur d'observation astronomique.
 
 Le dossier [`android/`](android/) contient l'application Android native
 **CielScore**, portage complet de la documentation fonctionnelle et technique
-v0.6.4 : les 8 onglets, la carte du ciel interactive, le moteur de score à huit
-critères et l'ensemble des formules et règles de gestion.
+v0.6.4 : les onglets, la carte du ciel interactive, le moteur de score à huit
+critères et l'ensemble des formules et règles de gestion. Le scoring suit les
+**règles v2.0 du 09/09/2026**, qui réécrivent la magnitude limite, le score de
+nuit et le traitement des objets brillants étendus.
 
 - [Documentation de l'application](android/README.md)
 - [Conformité au document et écarts assumés](android/CONFORMITE.md)

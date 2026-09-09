@@ -52,6 +52,13 @@ data class AppUiState(
 
     /** Top des cibles du Dashboard (section 2.2). */
     val topTargets: List<ScoringEngine.Scored> = emptyList(),
+    /**
+     * Sous-ensemble du Top retenu par la validation deterministe des regles
+     * v2.0 (§ 8). C'est cette liste qui est soumise a l'assistant IA ; si
+     * aucune cible ne passe cette validation plus severe, le Top complet est
+     * envoye a la place, plutot que de laisser l'assistant sans contexte.
+     */
+    val aiValidatedTargets: List<ScoringEngine.Scored> = emptyList(),
     val selected: ScoringEngine.Scored? = null,
     val altitudeCurve: List<Pair<Long, Double>> = emptyList(),
     val calculating: Boolean = false,
@@ -101,7 +108,7 @@ data class AppUiState(
         moonPhasePercent = moon?.phasePercent ?: 0.0,
         cloudCoverPercent = conditions.cloudCoverPercent,
         seeingLabel = conditions.seeingLabel,
-        topTargets = topTargets,
+        topTargets = aiValidatedTargets.ifEmpty { topTargets },
     )
 }
 
@@ -279,6 +286,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 ScoringEngine.topTargets(deepSky + solar, ctx, limit = 20) to ctx
             }
             val (top, ctx) = result
+            // Regles v2.0, § 8 : le Top affiche reste complet, mais l'assistant
+            // ne recoit que les cibles qui passent la validation deterministe.
+            val validated = ScoringEngine.validatedTargets(top, ctx)
             val selected = top.firstOrNull()
             val curve = selected?.let {
                 withContext(Dispatchers.Default) { ScoringEngine.altitudeCurve(it.target, ctx) }
@@ -287,6 +297,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = _state.value.copy(
                 conditions = conditions,
                 topTargets = top,
+                aiValidatedTargets = validated,
                 selected = selected,
                 altitudeCurve = curve,
                 calculating = false,
