@@ -329,22 +329,32 @@ Si aucune cible ne passe cette validation, le Top complet est transmis malgré
 tout, plutôt que de laisser l'assistant sans contexte. Voir
 `ScoringEngine.aiVetoes` et `validatedTargets`.
 
-### 4.6 Conséquence à connaître : le type de M42 dans le catalogue
+### 4.6 Conséquence corrigée : les amas avec nébulosité (`Cl+N`)
 
 L'exemption des amas (`TYPES_RESOLUS`) rend le **type** de chaque objet
-directement déterminant pour son score. Or `messier.csv`, généré depuis OpenNGC
-par `tools/build_catalogs.py`, classe **M42 en « Amas ouvert »** — OpenNGC la
-code `Cl+N`, amas *et* nébuleuse, et la conversion retient l'amas.
+directement déterminant pour son score. Elle a mis au jour un défaut de la
+conversion des catalogues, antérieur aux règles v2.0 mais jusque-là sans
+conséquence sur le calcul.
 
-Conséquence : M42 est exemptée du critère de brillance et score **88** là où les
-règles v2.0 attendent **83**. Elle n'apparaît pas non plus sous le filtre
-« Nébuleuse » de l'Explorer.
+`tools/build_catalogs.py` rattachait le type OpenNGC **`Cl+N`** — « amas *avec
+nébulosité* » — aux amas ouverts. M42 s'en trouvait classée en amas : absente du
+filtre « Nébuleuse » de l'Explorer, et désormais exemptée du critère de
+brillance, elle scorait **88** là où les règles v2.0 attendent **83**.
 
-C'est la seule anomalie de ce genre dans le catalogue Messier. Elle **n'a pas été
-corrigée d'office** : le fichier est une donnée source régénérable, et le
-corriger à la main serait perdu à la prochaine régénération. La correction
-propre consiste à forcer le type de M42 dans `tools/build_catalogs.py`, puis à
-régénérer — à votre appréciation.
+Ce n'était pas un cas isolé : **67 objets** de la source sont codés `Cl+N`, dont
+IC 5146 (Cocoon), IC 1396, IC 1805 (le Cœur), IC 1848 (l'Âme), NGC 1333 et
+IC 2944. Tous s'observent comme des nébuleuses, et c'est précisément leur
+brillance de surface qui décide si on les voit — les exempter du critère les
+aurait tous survalorisés.
+
+→ **Correction retenue : `Cl+N` est rattaché à « Nébuleuse »**, dans le
+générateur et non dans les fichiers, pour survivre à la prochaine régénération.
+Les catalogues sont régénérés : 70 objets changent de type (M42, C19, C100 et
+67 entrées NGC/IC), les effectifs restent inchangés (110 / 109 / 13 308), et
+M42 retombe à **82,7**.
+
+La classification `*Ass` (associations stellaires) reste rattachée aux amas
+ouverts : ces objets sont bien résolus en étoiles individuelles.
 
 ---
 

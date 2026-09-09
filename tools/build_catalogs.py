@@ -33,12 +33,22 @@ OUT_DIR = os.path.join(ROOT, "android", "app", "src", "main", "assets")
 HEADER = "id;name;type;ra_deg;dec_deg;mag;majax;minax;const;common"
 
 # --- Correspondance des types OpenNGC vers les 5 types CielScore (section 2.3) ---
+#
+# ATTENTION AU CAS "Cl+N" — amas *avec nebulosite*. Il etait rattache aux amas
+# ouverts, ce qui classait M42 en amas et la retirait du filtre « Nebuleuse »
+# de l'Explorer. Depuis les regles de scoring v2.0, le type decide en plus du
+# score : les amas, resolus en etoiles individuelles, sont exemptes du critere
+# de brillance de surface. Or ces 67 objets — M42, IC 5146 Cocoon, IC 1396,
+# IC 1805 le Coeur, IC 1848 l'Ame, NGC 1333... — s'observent comme des
+# nebuleuses, et c'est justement leur brillance de surface qui decide si on les
+# voit. Ils sont donc classes en nebuleuses.
 TYPE_MAP = {
     "G": "Galaxie", "GPair": "Galaxie", "GTrpl": "Galaxie", "GGroup": "Galaxie",
     "GCl": "Amas globulaire",
-    "OCl": "Amas ouvert", "Cl+N": "Amas ouvert", "*Ass": "Amas ouvert",
+    "OCl": "Amas ouvert", "*Ass": "Amas ouvert",
     "PN": "Nebuleuse", "Neb": "Nebuleuse", "HII": "Nebuleuse",
     "RfN": "Nebuleuse", "EmN": "Nebuleuse", "SNR": "Nebuleuse",
+    "Cl+N": "Nebuleuse",
     "*": "Autre", "**": "Autre", "Other": "Autre", "Nova": "Autre",
 }
 # Types exclus : doublons et objets inexistants

@@ -466,6 +466,9 @@ class DocumentationConformanceTest {
         // Le document arrondit a l'entier ; l'ecart maximal constate est de 1.4.
         val tolerance = 1.5
         assertEquals("M45", 88.0, v2Score(ObjectType.OPEN_CLUSTER, 1.5, 110.0, 110.0), tolerance)
+        // M42 est bien une nebuleuse : le type OpenNGC Cl+N, « amas avec
+        // nebulosite », est rattache aux nebuleuses par build_catalogs.py, sans
+        // quoi elle serait exempte du critere de brillance et scorerait 88.
         assertEquals("M42", 83.0, v2Score(ObjectType.NEBULA, 3.7, 65.0, 60.0), tolerance)
         assertEquals("M31", 83.0, v2Score(ObjectType.GALAXY, 3.4, 190.0, 60.0), tolerance)
         assertEquals("M13", 88.0, v2Score(ObjectType.GLOBULAR_CLUSTER, 5.8, 16.5, 16.5), tolerance)
