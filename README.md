@@ -13,6 +13,9 @@ nuit et le traitement des objets brillants étendus.
 
 - [Documentation de l'application](android/README.md)
 - [Conformité au document et écarts assumés](android/CONFORMITE.md)
+- [**Formules et règles de scoring**](docs/CielScore_Formules_et_Regles.pdf) — document de
+  référence en PDF, décrivant le moteur de calcul tel qu'il est codé
+  (régénérable par `tools/build_reference_pdf.py`)
 
 ```bash
 cd android && ./gradlew assembleDebug   # APK de débogage
