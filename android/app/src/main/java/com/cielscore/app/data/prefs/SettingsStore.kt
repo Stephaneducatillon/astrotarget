@@ -5,11 +5,12 @@ import android.content.SharedPreferences
 import com.cielscore.app.model.ApiKey
 import com.cielscore.app.model.InstrumentType
 import com.cielscore.app.model.ObservingSite
+import com.cielscore.app.model.SignedInUser
 import com.cielscore.app.util.Log
 
 /** Instantane de tout ce que l'application conserve entre deux lancements. */
 data class StoredSettings(
-    val currentUser: String? = null,
+    val signedInUser: SignedInUser? = null,
     val nasaApiKey: String? = null,
     val mistralApiKey: String? = null,
     val nightMode: Boolean = false,
@@ -49,6 +50,9 @@ class SettingsStore(context: Context) {
 
     private object Keys {
         const val CURRENT_USER = "current_user"
+        const val CURRENT_FIRST_NAME = "current_first_name"
+        const val CURRENT_LAST_NAME = "current_last_name"
+        const val CURRENT_CREATED_AT = "current_created_at"
         const val NASA_KEY = "nasa_api_key"
         const val MISTRAL_KEY = "mistral_api_key"
 
@@ -90,8 +94,17 @@ class SettingsStore(context: Context) {
             }
         }
 
+        val signedIn = prefs.getString(Keys.CURRENT_USER, null)?.let { username ->
+            SignedInUser(
+                username = username,
+                firstName = prefs.getString(Keys.CURRENT_FIRST_NAME, "").orEmpty(),
+                lastName = prefs.getString(Keys.CURRENT_LAST_NAME, "").orEmpty(),
+                createdAt = prefs.getLong(Keys.CURRENT_CREATED_AT, 0L),
+            )
+        }
+
         val stored = StoredSettings(
-            currentUser = prefs.getString(Keys.CURRENT_USER, null),
+            signedInUser = signedIn,
             nasaApiKey = prefs.getString(Keys.NASA_KEY, null),
             mistralApiKey = prefs.getString(Keys.MISTRAL_KEY, null),
             nightMode = prefs.getBoolean(Keys.NIGHT_MODE, false),
@@ -110,7 +123,7 @@ class SettingsStore(context: Context) {
         Log.i(
             "Reglages",
             "Preferences relues : ${prefs.all.size} entrees, " +
-                "compte=${stored.currentUser ?: "aucun"}, " +
+                "compte=${stored.signedInUser?.username ?: "aucun"}, " +
                 "lieu=${stored.site?.name ?: "aucun"}, " +
                 "cle NASA=${ApiKey.mask(stored.nasaApiKey).ifEmpty { "absente" }}, " +
                 "cle Mistral=${ApiKey.mask(stored.mistralApiKey).ifEmpty { "absente" }}"
@@ -118,9 +131,24 @@ class SettingsStore(context: Context) {
         return stored
     }
 
-    fun setCurrentUser(username: String?) = edit("compte") { editor ->
-        if (username == null) editor.remove(Keys.CURRENT_USER)
-        else editor.putString(Keys.CURRENT_USER, username)
+    /**
+     * Ouvre ou ferme la session. L'identite est conservee en entier pour que le
+     * lancement suivant la retablisse sans interroger la base.
+     */
+    fun setSignedInUser(user: SignedInUser?) = edit(
+        if (user == null) "deconnexion" else "session de ${user.username}"
+    ) { editor ->
+        if (user == null) {
+            editor.remove(Keys.CURRENT_USER)
+            editor.remove(Keys.CURRENT_FIRST_NAME)
+            editor.remove(Keys.CURRENT_LAST_NAME)
+            editor.remove(Keys.CURRENT_CREATED_AT)
+        } else {
+            editor.putString(Keys.CURRENT_USER, user.username)
+            editor.putString(Keys.CURRENT_FIRST_NAME, user.firstName)
+            editor.putString(Keys.CURRENT_LAST_NAME, user.lastName)
+            editor.putLong(Keys.CURRENT_CREATED_AT, user.createdAt)
+        }
     }
 
     fun setNasaApiKey(value: String) {

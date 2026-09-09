@@ -15,7 +15,6 @@ import com.cielscore.app.catalog.ObjectType
 import com.cielscore.app.catalog.SkyObject
 import com.cielscore.app.data.auth.AuthRepository
 import com.cielscore.app.data.db.ObservationEntity
-import com.cielscore.app.data.db.UserEntity
 import com.cielscore.app.data.net.ApodApi
 import com.cielscore.app.data.net.LaunchApi
 import com.cielscore.app.data.net.MistralApi
@@ -25,6 +24,7 @@ import com.cielscore.app.data.prefs.StoredSettings
 import com.cielscore.app.model.MoonState
 import com.cielscore.app.model.ObservingSite
 import com.cielscore.app.model.SessionParams
+import com.cielscore.app.model.SignedInUser
 import com.cielscore.app.model.SkyConditions
 import com.cielscore.app.model.SmartTelescope
 import com.cielscore.app.scoring.Formulas
@@ -39,7 +39,7 @@ import kotlinx.coroutines.withContext
 
 /** Etat global de l'application, partage par les huit onglets. */
 data class AppUiState(
-    val user: UserEntity? = null,
+    val user: SignedInUser? = null,
     val params: SessionParams = SessionParams(),
     val conditions: SkyConditions = SkyConditions.FALLBACK,
     val night: Twilight.NightInfo? = null,
@@ -120,15 +120,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         // avant que le premier ecran se compose. Plus aucune course entre la
         // restauration et l'onglet Informations, qui reclamait une cle d'API
         // alors qu'une cle etait bien enregistree.
-        val stored = restoreSettings()
-        // Seul le rattachement du compte touche la base et reste asynchrone.
-        stored.currentUser?.let { username ->
-            viewModelScope.launch {
-                val user = runCatching { container.auth.findUser(username) }.getOrNull()
-                if (user != null) _state.value = _state.value.copy(user = user)
-                else Log.w("Reglages", "Compte « $username » introuvable en base")
-            }
-        }
+        restoreSettings()
         refreshSkyState()
     }
 
@@ -137,6 +129,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private fun restoreSettings(): StoredSettings {
         val stored = container.settings.read()
         _state.value = _state.value.copy(
+            // La session est un fait local : elle est retablie ici meme, sans
+            // attendre la moindre lecture en base. L'utilisateur qui s'est
+            // connecte une fois reste connecte.
+            user = stored.signedInUser,
             params = SessionParams(
                 site = stored.site ?: ObservingSite.DEFAULT,
                 instrument = stored.instrument,
@@ -560,11 +556,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun login(username: String, password: String, onResult: (String?) -> Unit) {
         viewModelScope.launch {
             container.auth.login(username, password)
-                .onSuccess { user ->
+                .onSuccess { entity ->
+                    val session = SignedInUser(
+                        username = entity.username,
+                        firstName = entity.firstName,
+                        lastName = entity.lastName,
+                        createdAt = entity.createdAt,
+                    )
                     container.persistenceScope.launch {
-                        container.settings.setCurrentUser(user.username)
+                        container.settings.setSignedInUser(session)
                     }
-                    _state.value = _state.value.copy(user = user)
+                    _state.value = _state.value.copy(user = session)
                     onResult(null)
                 }
                 .onFailure { onResult(it.message) }
@@ -581,10 +583,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val result = container.auth.register(username, password, firstName, lastName)
             result.onSuccess { registration ->
+                val session = SignedInUser(
+                    username = registration.user.username,
+                    firstName = registration.user.firstName,
+                    lastName = registration.user.lastName,
+                    createdAt = registration.user.createdAt,
+                )
                 container.persistenceScope.launch {
-                    container.settings.setCurrentUser(registration.user.username)
+                    container.settings.setSignedInUser(session)
                 }
-                _state.value = _state.value.copy(user = registration.user)
+                _state.value = _state.value.copy(user = session)
             }
             onResult(result)
         }
@@ -604,7 +612,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun logout() {
-        container.persistenceScope.launch { container.settings.setCurrentUser(null) }
+        container.persistenceScope.launch { container.settings.setSignedInUser(null) }
         _state.value = _state.value.copy(user = null, chat = emptyList(), eveningPlan = null)
     }
 
