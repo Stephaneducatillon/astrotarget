@@ -43,8 +43,13 @@ android {
          * extractible par qui le decompile. Un client hors ligne doit porter le
          * secret qu'il utilise ; aucun procede n'y change rien.
          */
-        val nasaKey = System.getenv("NASA_API_KEY")
-            ?: (project.findProperty("nasaApiKey") as String?)
+        // ATTENTION AU VIDE, ET NON AU NUL — un secret d'Actions absent est
+        // transmis comme chaine VIDE, pas comme variable non definie :
+        // System.getenv rend alors "" et non null. Un simple ?: laisserait donc
+        // passer la chaine vide et l'APK partirait sans cle, avec une URL se
+        // terminant par « api_key= ». D'ou le takeIf sur chaque source.
+        val nasaKey = System.getenv("NASA_API_KEY")?.takeIf { it.isNotBlank() }
+            ?: (project.findProperty("nasaApiKey") as String?)?.takeIf { it.isNotBlank() }
             ?: "c6efjdlZrUkDkSnx4jN4wdif8lL3qKugu9cpoXZb"
         buildConfigField("String", "NASA_API_KEY", "\"$nasaKey\"")
     }

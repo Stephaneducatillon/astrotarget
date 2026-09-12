@@ -141,8 +141,8 @@ jobs:
             echo "Signe avec la cle de test du depot : les mises a jour s'installent"
             echo "par-dessus, sans desinstallation prealable."
             echo
-            echo "Les fonctions IA et l'image du jour demandent une cle d'API,"
-            echo "a renseigner dans l'onglet Profil. Le reste fonctionne sans."
+            echo "Aucune cle d'API n'est a saisir : celle de la NASA, pour l'image"
+            echo "du jour, est embarquee dans l'application."
           } > notes.md
 
           # La Release est recreee a chaque construction : le lien reste identique.

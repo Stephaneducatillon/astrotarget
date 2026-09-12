@@ -26,12 +26,22 @@ object ApodApi {
     /** Message de repli lorsque le service ne repond pas (section 8.4). */
     const val UNAVAILABLE_MESSAGE = "Image du jour indisponible pour le moment."
 
+    /**
+     * Message affiche si l'APK a ete construit sans cle. Il ne devrait jamais
+     * apparaitre : il signale une construction fautive, pas une panne de la
+     * NASA, et evite d'appeler le service avec « api_key= » vide.
+     */
+    const val MISSING_KEY_MESSAGE =
+        "Image du jour indisponible : cette version a ete construite sans cle NASA."
+
     private val cache = TtlCache<Apod>(TtlCache.APOD_TTL)
 
     suspend fun today(): Result<Apod> {
+        val apiKey = BuildConfig.NASA_API_KEY
+        if (apiKey.isBlank()) return Result.failure(IllegalStateException(MISSING_KEY_MESSAGE))
         val key = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.FRANCE)
             .format(java.util.Date())
-        val cached = cache.getOrPut(key) { fetch(BuildConfig.NASA_API_KEY) }
+        val cached = cache.getOrPut(key) { fetch(apiKey) }
         return cached?.let { Result.success(it) }
             ?: Result.failure(IllegalStateException(UNAVAILABLE_MESSAGE))
     }
