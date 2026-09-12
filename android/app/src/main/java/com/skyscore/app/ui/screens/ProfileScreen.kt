@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -28,10 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.skyscore.app.data.auth.AuthRepository
-import com.skyscore.app.model.ApiKey
 import com.skyscore.app.ui.AppUiState
 import com.skyscore.app.ui.AppViewModel
 import com.skyscore.app.ui.components.LabeledValue
@@ -57,7 +50,6 @@ fun ProfileScreen(viewModel: AppViewModel, state: AppUiState) {
         } else {
             item { AuthCard(viewModel) }
         }
-        item { KeysCard(viewModel, state) }
         item { DisplayCard(viewModel, state) }
         item { AboutCard() }
     }
@@ -249,71 +241,6 @@ private fun ResetForm(onSubmit: (String, String, String) -> Unit) {
             onClick = { onSubmit(username, code, password) },
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
         ) { Text("Reinitialiser le mot de passe") }
-    }
-}
-
-/** Cle d'API NASA APOD (section 8.2). */
-@Composable
-private fun KeysCard(viewModel: AppViewModel, state: AppUiState) {
-    SectionCard(
-        title = "Cle d'API",
-        subtitle = "Conservee sur l'appareil, jamais transmise ailleurs",
-    ) {
-        // Les cles sont enregistrees a la frappe : aucun bouton a presser, donc
-        // aucune saisie perdue en changeant d'onglet.
-        ApiKeyField(
-            label = "Cle NASA APOD",
-            hint = "Image du jour de l'onglet Informations",
-            value = state.nasaApiKey.orEmpty(),
-            onValueChange = viewModel::setNasaKey,
-        )
-        Text(
-            "Sans cle, le reste de l'application fonctionne normalement : seule " +
-                "l'image du jour affiche un message explicite.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 10.dp),
-        )
-    }
-}
-
-/** Champ de cle d'API : saisie masquable, enregistrement immediat, etat visible. */
-@Composable
-private fun ApiKeyField(
-    label: String,
-    hint: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var revealed by remember { mutableStateOf(false) }
-
-    Column(modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            supportingText = { Text(hint) },
-            singleLine = true,
-            visualTransformation = if (revealed) VisualTransformation.None
-            else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = { revealed = !revealed }) {
-                    Icon(
-                        if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = if (revealed) "Masquer la cle" else "Afficher la cle",
-                    )
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            ApiKey.statusLabel(value),
-            style = MaterialTheme.typography.labelSmall,
-            color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp),
-        )
     }
 }
 

@@ -15,6 +15,33 @@ android {
         targetSdk = 35
         versionCode = 3
         versionName = "1.0.0"
+
+        /*
+         * Cle API NASA embarquee dans l'APK (onglet Informations, image du
+         * jour). Elle n'est plus saisie par l'utilisateur.
+         *
+         * D'OU ELLE VIENT — de l'environnement de construction, jamais du
+         * depot : la variable NASA_API_KEY, ou a defaut la propriete Gradle
+         * nasaApiKey (utile en local, via ~/.gradle/gradle.properties, qui
+         * n'est pas versionne). A defaut des deux, on retombe sur DEMO_KEY,
+         * la cle publique que la NASA fournit pour les essais.
+         *
+         * POURQUOI PAS EN CLAIR ICI — ce depot est public. Une cle ecrite
+         * dans ce fichier serait indexee par GitHub et moissonnee en quelques
+         * heures par les robots qui scrutent les depots publics. Passer par un
+         * secret d'Actions donne le meme resultat dans l'APK, sans exposer la
+         * cle dans le code source.
+         *
+         * A SAVOIR — une cle embarquee dans un APK reste extractible par qui
+         * telecharge l'application : elle est protegee du moissonnage
+         * automatique, pas d'une analyse deliberee. C'est acceptable pour une
+         * cle NASA gratuite et limitee en debit ; il suffit d'en regenerer une
+         * sur api.nasa.gov si le quota venait a etre epuise par un tiers.
+         */
+        val nasaKey = System.getenv("NASA_API_KEY")
+            ?: (project.findProperty("nasaApiKey") as String?)
+            ?: "DEMO_KEY"
+        buildConfigField("String", "NASA_API_KEY", "\"$nasaKey\"")
     }
 
     /**

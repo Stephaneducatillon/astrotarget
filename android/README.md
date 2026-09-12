@@ -107,7 +107,7 @@ Kotlin, téléchargé depuis Maven Central :
 | **Explorer** | connecté | Recherche libre dans les catalogues, filtres par catalogue et par type |
 | **Sessions** | connecté | Feuille de route de la soirée, export PDF, enregistrement d'observation, carnet |
 | **Statistiques** | connecté | Compteurs, progression Messier et Caldwell, heatmap sur 12 mois, favoris |
-| **Profil** | public | Connexion, inscription, récupération, clé d'API, mode nuit |
+| **Profil** | public | Connexion, inscription, récupération, mode nuit |
 
 ### La carte du ciel
 
@@ -190,20 +190,63 @@ bien à leur source.
 
 ---
 
-## Clés d'API
+## Clé d'API NASA
 
-Une seule fonction nécessite une clé, à saisir dans l'onglet **Profil**. Elle
-reste sur l'appareil.
+**L'utilisateur n'a aucune clé à saisir** : celle de la NASA APOD, seul service
+qui en demande une, est embarquée dans l'APK à la construction.
 
 | Service | Usage | Obtention |
 |---|---|---|
-| NASA APOD | Image du jour | https://api.nasa.gov |
-
-Sans clé, le reste de l'application fonctionne normalement : seule l'image du
-jour affiche un message explicite.
+| NASA APOD | Image du jour de l'onglet Informations | https://api.nasa.gov |
 
 Les autres services — Open-Météo, GFZ Potsdam, NOAA SWPC, The Space Devs et
 CDS Strasbourg — sont gratuits et ne demandent aucune clé.
+
+### Comment la clé arrive dans l'APK
+
+Elle vient de l'environnement de construction, **jamais du dépôt**, qui est
+public. `build.gradle.kts` la lit dans cet ordre :
+
+1. la variable d'environnement `NASA_API_KEY` ;
+2. à défaut, la propriété Gradle `nasaApiKey` ;
+3. à défaut, `DEMO_KEY` — la clé publique d'essai de la NASA, limitée à
+   30 requêtes par heure et 50 par jour et par adresse IP.
+
+Elle devient ensuite `BuildConfig.NASA_API_KEY`.
+
+**En CI**, le workflow la passe depuis le secret de dépôt `NASA_API_KEY`. Pour
+le renseigner : *Settings → Secrets and variables → Actions → New repository
+secret*, nom `NASA_API_KEY`. Sans ce secret, la construction réussit quand même
+et l'APK embarque `DEMO_KEY`.
+
+**En local**, le plus simple est `~/.gradle/gradle.properties` — hors du dépôt :
+
+```properties
+nasaApiKey=VOTRE_CLE
+```
+
+ou, ponctuellement :
+
+```bash
+NASA_API_KEY=VOTRE_CLE ./gradlew assembleRelease
+```
+
+### Ce que cela protège, et ce que cela ne protège pas
+
+Passer par un secret évite que la clé soit **indexée dans un dépôt public** et
+moissonnée par les robots qui scrutent GitHub — c'est le risque réel et
+quotidien.
+
+En revanche, une clé embarquée dans un APK **reste extractible** par qui
+télécharge l'application et prend la peine de la décompiler. Aucun procédé ne
+change cela : un client hors ligne doit bien porter le secret qu'il utilise.
+C'est acceptable ici — la clé NASA est gratuite, limitée en débit, et sans
+valeur hors de ce seul usage. Si son quota venait à être épuisé par un tiers,
+il suffit d'en régénérer une sur api.nasa.gov et de reconstruire.
+
+Le journal applicatif n'enregistre que l'hôte et le code de statut des appels,
+jamais l'URL complète : la clé ne fuit donc pas dans les traces, alors qu'elle
+voyage dans la chaîne de requête de l'appel APOD.
 
 ---
 

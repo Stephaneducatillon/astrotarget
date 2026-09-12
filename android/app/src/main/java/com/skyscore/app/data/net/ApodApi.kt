@@ -1,14 +1,16 @@
 package com.skyscore.app.data.net
 
+import com.skyscore.app.BuildConfig
 import com.skyscore.app.data.cache.TtlCache
 import org.json.JSONObject
 
 /**
  * Image astronomique du jour de la NASA (sections 2.1 et 8.2).
  *
- * Une cle API est requise. Repli de la section 8.4 : lorsque la cle manque ou
- * que le service repond en erreur, l'application affiche un message invitant a
- * configurer la cle.
+ * La cle API est embarquee dans l'APK (voir build.gradle.kts) : l'utilisateur
+ * n'a rien a saisir. Repli de la section 8.4 : si le service repond en erreur
+ * ou si le quota est epuise, l'application affiche un message explicite et le
+ * reste continue de fonctionner.
  */
 object ApodApi {
 
@@ -21,19 +23,17 @@ object ApodApi {
         val date: String,
     )
 
-    /** Message affiche lorsque la cle NASA n'est pas renseignee (section 8.4). */
-    const val MISSING_KEY_MESSAGE =
-        "Image du jour indisponible : renseignez une cle API NASA dans le Profil."
+    /** Message de repli lorsque le service ne repond pas (section 8.4). */
+    const val UNAVAILABLE_MESSAGE = "Image du jour indisponible pour le moment."
 
     private val cache = TtlCache<Apod>(TtlCache.APOD_TTL)
 
-    suspend fun today(apiKey: String?): Result<Apod> {
-        if (apiKey.isNullOrBlank()) return Result.failure(IllegalStateException(MISSING_KEY_MESSAGE))
+    suspend fun today(): Result<Apod> {
         val key = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.FRANCE)
             .format(java.util.Date())
-        val cached = cache.getOrPut(key) { fetch(apiKey) }
+        val cached = cache.getOrPut(key) { fetch(BuildConfig.NASA_API_KEY) }
         return cached?.let { Result.success(it) }
-            ?: Result.failure(IllegalStateException("Service APOD indisponible."))
+            ?: Result.failure(IllegalStateException(UNAVAILABLE_MESSAGE))
     }
 
     private suspend fun fetch(apiKey: String): Apod? {

@@ -45,7 +45,7 @@ testeurs.
 | 7.1 → 7.5 | Phases, couleurs, nuits d'été ; le score de nuit est celui des règles v2.0 | `astro/Twilight.kt` |
 | 8.1 | Messier 110, Caldwell 109, NGC/IC 13 308, 6 corps | `assets/`, `tools/build_catalogs.py` |
 | 8.1 | 34 869 communes françaises, Bortle automatique France entière | `assets/communes_bortle.csv`, `catalog/CommuneIndex.kt` |
-| 8.2 | Les interfaces externes, hors Mistral (voir 3.6) | `data/net/` |
+| 8.2 | Les interfaces externes, hors Mistral (voir 3.6) ; la clé NASA est embarquée (voir 3.7) | `data/net/` |
 | 8.4 | Stratégie de repli service par service | `data/net/`, `model/SkyConditions` |
 | 9.1 | PBKDF2-SHA256, 260 000 itérations, sel 16 octets, comparaison à temps constant | `data/auth/PasswordHasher.kt` |
 | 9.2 | Tables `users` et `observations`, index | `data/db/Entities.kt` |
@@ -54,7 +54,7 @@ testeurs.
 
 Les valeurs chiffrées des deux documents (tableaux 5.2, 5.5, 5.6, 6.2, 10.2 du
 premier ; tableaux des pages 6 et 7 des règles v2.0) sont vérifiées
-automatiquement par **32 tests de conformité**, sur **70 tests unitaires** au
+automatiquement par **32 tests de conformité**, sur **65 tests unitaires** au
 total. Le tableau de validation de la page 6 des règles v2.0 est reproduit à
 **1,4 point près** au pire des cas.
 
@@ -67,7 +67,7 @@ total. Le tableau de validation de la page 6 des règles v2.0 est reproduit à
 | Architecture | Application Android native (Kotlin + Jetpack Compose), calculs embarqués. Aucune dépendance au code Python. |
 | Périmètre | Les onglets du document **et** la carte du ciel interactive. |
 | Lieu et Bortle | Fichier `communes_bortle.csv` embarqué : recherche et rattachement GPS hors ligne, indice de Bortle ajustable. |
-| Comptes | Compte et carnet 100 % locaux (Room), clé d'API saisie dans le Profil. |
+| Comptes | Compte et carnet 100 % locaux (Room). Plus aucune clé à saisir : celle de la NASA est embarquée à la construction (voir 3.7). |
 | Fonctions IA | **Retirées en version 1.0** : l'application ne dépend plus de Mistral (voir 3.6). |
 | Nom | L'application s'appelle **SkyScore** depuis la version 1.0.0. |
 | Smart télescopes | Les **7 modèles détaillés** au tableau 5.9, plus les 2 Seestar Pro ajoutés ensuite (voir 3.5). |
@@ -236,6 +236,32 @@ clé.
 
 L'application ne dialogue plus avec aucun service d'IA ; la règle
 `valider_top_ia` du § 4.5, qui lui était destinée, reste néanmoins implémentée.
+
+---
+
+### 3.7 Clé NASA embarquée dans l'APK
+
+Le §8.2 fait saisir les clés d'API par l'utilisateur, dans le Profil. À votre
+demande, **la clé NASA APOD est désormais embarquée dans l'application** : plus
+rien à saisir, et la carte « Clé d'API » du Profil disparaît.
+
+Elle n'est pas écrite dans le code source. Ce dépôt étant **public**, une clé
+committée y serait indexée par GitHub et moissonnée en quelques heures par les
+robots qui scrutent les dépôts publics — un risque bien plus concret que celui
+de la décompilation. Elle est donc injectée à la construction, depuis le secret
+d'Actions `NASA_API_KEY`, et devient `BuildConfig.NASA_API_KEY`. À défaut de
+secret, la construction retombe sur `DEMO_KEY`, la clé publique d'essai de la
+NASA.
+
+**Ce que cela ne protège pas.** Une clé embarquée dans un APK reste extractible
+par qui le décompile : aucun procédé n'y change rien, un client hors ligne doit
+porter le secret qu'il utilise. C'est un compromis assumé, acceptable pour une
+clé gratuite, limitée en débit et sans valeur hors de cet usage ; il suffit d'en
+régénérer une et de reconstruire si son quota était épuisé par un tiers.
+
+Conséquence de code : `model/ApiKey.kt` et ses tests disparaissent avec la
+dernière saisie de clé — plus rien à masquer ni à valider. Le projet compte donc
+**65 tests** au lieu de 70.
 
 ---
 

@@ -74,7 +74,6 @@ data class AppUiState(
     val launches: List<LaunchApi.Launch> = emptyList(),
 
     val nightMode: Boolean = false,
-    val nasaApiKey: String? = null,
     val message: String? = null,
 ) {
     val magnitudeLimit: Double get() = params.limitingMagnitude
@@ -121,7 +120,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 catalogs = decodeCatalogs(stored.catalogs),
             ),
             nightMode = stored.nightMode,
-            nasaApiKey = stored.nasaApiKey,
         )
         return stored
     }
@@ -158,17 +156,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setNightMode(enabled: Boolean) {
         _state.value = _state.value.copy(nightMode = enabled)
         container.persistenceScope.launch { container.settings.setNightMode(enabled) }
-    }
-
-    /**
-     * Les cles sont ecrites a chaque frappe, sans bouton a presser : une cle
-     * saisie puis oubliee au changement d'onglet etait perdue.
-     */
-    fun setNasaKey(value: String) {
-        val key = value.trim()
-        _state.value = _state.value.copy(nasaApiKey = key)
-        container.persistenceScope.launch { container.settings.setNasaApiKey(key) }
-        if (key.isNotBlank()) viewModelScope.launch { loadApod() }
     }
 
     fun dismissMessage() {
@@ -449,11 +436,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun loadApod() {
-        ApodApi.today(_state.value.nasaApiKey)
+        ApodApi.today()
             .onSuccess { _state.value = _state.value.copy(apod = it, apodError = null) }
             .onFailure {
                 _state.value = _state.value.copy(
-                    apod = null, apodError = it.message ?: ApodApi.MISSING_KEY_MESSAGE
+                    apod = null, apodError = it.message ?: ApodApi.UNAVAILABLE_MESSAGE
                 )
             }
     }

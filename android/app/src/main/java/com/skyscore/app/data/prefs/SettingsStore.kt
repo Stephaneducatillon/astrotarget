@@ -2,7 +2,6 @@ package com.skyscore.app.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.skyscore.app.model.ApiKey
 import com.skyscore.app.model.InstrumentType
 import com.skyscore.app.model.ObservingSite
 import com.skyscore.app.model.SignedInUser
@@ -11,7 +10,6 @@ import com.skyscore.app.util.Log
 /** Instantane de tout ce que l'application conserve entre deux lancements. */
 data class StoredSettings(
     val signedInUser: SignedInUser? = null,
-    val nasaApiKey: String? = null,
     val nightMode: Boolean = false,
     val site: ObservingSite? = null,
     val instrument: InstrumentType = InstrumentType.TELESCOPE,
@@ -26,8 +24,8 @@ data class StoredSettings(
 /**
  * Preferences locales : session en cours, lieu, instrument et cles d'API.
  *
- * La cle NASA APOD (section 8.2) est saisie par l'utilisateur depuis le Profil
- * et reste sur l'appareil.
+ * Aucune cle d'API n'y est conservee : celle de la NASA est embarquee dans
+ * l'APK a la construction (voir build.gradle.kts).
  *
  * POURQUOI SharedPreferences ET NON DataStore — la premiere version s'appuyait
  * sur DataStore Preferences, qui serialise ses donnees avec protobuf-lite et
@@ -52,7 +50,6 @@ class SettingsStore(context: Context) {
         const val CURRENT_FIRST_NAME = "current_first_name"
         const val CURRENT_LAST_NAME = "current_last_name"
         const val CURRENT_CREATED_AT = "current_created_at"
-        const val NASA_KEY = "nasa_api_key"
 
         const val SITE_NAME = "site_name"
         const val SITE_DEPARTMENT = "site_department"
@@ -103,7 +100,6 @@ class SettingsStore(context: Context) {
 
         val stored = StoredSettings(
             signedInUser = signedIn,
-            nasaApiKey = prefs.getString(Keys.NASA_KEY, null),
             nightMode = prefs.getBoolean(Keys.NIGHT_MODE, false),
             site = site,
             instrument = prefs.getString(Keys.INSTRUMENT, null)?.let { name ->
@@ -121,8 +117,7 @@ class SettingsStore(context: Context) {
             "Reglages",
             "Preferences relues : ${prefs.all.size} entrees, " +
                 "compte=${stored.signedInUser?.username ?: "aucun"}, " +
-                "lieu=${stored.site?.name ?: "aucun"}, " +
-                "cle NASA=${ApiKey.mask(stored.nasaApiKey).ifEmpty { "absente" }}"
+                "lieu=${stored.site?.name ?: "aucun"}"
         )
         return stored
     }
@@ -144,13 +139,6 @@ class SettingsStore(context: Context) {
             editor.putString(Keys.CURRENT_FIRST_NAME, user.firstName)
             editor.putString(Keys.CURRENT_LAST_NAME, user.lastName)
             editor.putLong(Keys.CURRENT_CREATED_AT, user.createdAt)
-        }
-    }
-
-    fun setNasaApiKey(value: String) {
-        val key = value.trim()
-        edit("cle NASA ${ApiKey.mask(key).ifEmpty { "effacee" }}") {
-            it.putString(Keys.NASA_KEY, key)
         }
     }
 

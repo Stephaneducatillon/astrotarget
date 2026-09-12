@@ -146,7 +146,7 @@ A(tableau(
      ["Regles de scoring", "v2.0 &mdash; 09/09/2026"],
      ["Implementation", "<font face='Courier'>com.skyscore.app.scoring</font>, "
                        "<font face='Courier'>com.skyscore.app.astro</font>"],
-     ["Verification", "70 tests unitaires, dont 32 de conformite documentaire"],
+     ["Verification", "65 tests unitaires, dont 32 de conformite documentaire"],
      ["Nom d'origine", "CielScore, jusqu'a la version 0.7.0"]],
     [46 * mm, LARGEUR - 46 * mm],
     [CELL_G, CELL]))
@@ -523,7 +523,7 @@ A(tableau(
      ["catalog/SkyObject.kt", "Types d'objets et exemption des types resolus"],
      ["tools/build_catalogs.py", "Generation des catalogues depuis OpenNGC, correspondance "
                                  "des types"],
-     ["tools/run_core_tests.sh", "Execution des 70 tests sans SDK Android"]],
+     ["tools/run_core_tests.sh", "Execution des 65 tests sans SDK Android"]],
     [56 * mm, LARGEUR - 56 * mm],
     [MONO, CELL]))
 
