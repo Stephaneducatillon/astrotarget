@@ -18,29 +18,34 @@ android {
 
         /*
          * Cle API NASA embarquee dans l'APK (onglet Informations, image du
-         * jour). Elle n'est plus saisie par l'utilisateur.
+         * jour). L'utilisateur n'a rien a saisir.
          *
-         * D'OU ELLE VIENT — de l'environnement de construction, jamais du
-         * depot : la variable NASA_API_KEY, ou a defaut la propriete Gradle
-         * nasaApiKey (utile en local, via ~/.gradle/gradle.properties, qui
-         * n'est pas versionne). A defaut des deux, on retombe sur DEMO_KEY,
-         * la cle publique que la NASA fournit pour les essais.
+         * D'OU ELLE VIENT — par ordre de priorite : la variable
+         * d'environnement NASA_API_KEY, puis la propriete Gradle nasaApiKey
+         * (via ~/.gradle/gradle.properties, hors depot), puis la valeur
+         * ci-dessous.
          *
-         * POURQUOI PAS EN CLAIR ICI — ce depot est public. Une cle ecrite
-         * dans ce fichier serait indexee par GitHub et moissonnee en quelques
-         * heures par les robots qui scrutent les depots publics. Passer par un
-         * secret d'Actions donne le meme resultat dans l'APK, sans exposer la
-         * cle dans le code source.
+         * LA VALEUR CI-DESSOUS EST EN CLAIR, ET C'EST DELIBERE. Le proprietaire
+         * du projet a choisi de la versionner plutot que de passer par un
+         * secret d'Actions, en connaissance des consequences :
          *
-         * A SAVOIR — une cle embarquee dans un APK reste extractible par qui
-         * telecharge l'application : elle est protegee du moissonnage
-         * automatique, pas d'une analyse deliberee. C'est acceptable pour une
-         * cle NASA gratuite et limitee en debit ; il suffit d'en regenerer une
-         * sur api.nasa.gov si le quota venait a etre epuise par un tiers.
+         *   - ce depot est public : la cle est lisible par tous, et les robots
+         *     qui scrutent GitHub la recoltent en quelques heures ;
+         *   - elle demeure dans l'historique git meme si on la retire ensuite ;
+         *   - un quota epuise par des tiers se corrige en regenerant une cle
+         *     sur api.nasa.gov, puis en reconstruisant.
+         *
+         * Le chemin par secret reste disponible et prioritaire : definir le
+         * secret de depot NASA_API_KEY suffit a ce que la cle ci-dessous ne
+         * serve plus, sans toucher au code.
+         *
+         * A SAVOIR AUSSI — une cle embarquee dans un APK est de toute facon
+         * extractible par qui le decompile. Un client hors ligne doit porter le
+         * secret qu'il utilise ; aucun procede n'y change rien.
          */
         val nasaKey = System.getenv("NASA_API_KEY")
             ?: (project.findProperty("nasaApiKey") as String?)
-            ?: "DEMO_KEY"
+            ?: "c6efjdlZrUkDkSnx4jN4wdif8lL3qKugu9cpoXZb"
         buildConfigField("String", "NASA_API_KEY", "\"$nasaKey\"")
     }
 

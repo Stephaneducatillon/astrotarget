@@ -204,24 +204,30 @@ CDS Strasbourg — sont gratuits et ne demandent aucune clé.
 
 ### Comment la clé arrive dans l'APK
 
-Elle vient de l'environnement de construction, **jamais du dépôt**, qui est
-public. `build.gradle.kts` la lit dans cet ordre :
+`build.gradle.kts` la lit dans cet ordre :
 
 1. la variable d'environnement `NASA_API_KEY` ;
 2. à défaut, la propriété Gradle `nasaApiKey` ;
-3. à défaut, `DEMO_KEY` — la clé publique d'essai de la NASA, limitée à
-   30 requêtes par heure et 50 par jour et par adresse IP.
+3. à défaut, **la clé versionnée en clair** dans `build.gradle.kts`.
 
 Elle devient ensuite `BuildConfig.NASA_API_KEY`.
 
-**En CI**, le workflow la passe depuis le secret de dépôt `NASA_API_KEY`. Pour
-le renseigner : *Settings → Secrets and variables → Actions → New repository
-secret*, nom `NASA_API_KEY`. Sans ce secret, la construction réussit quand même
-et l'APK embarque `DEMO_KEY`.
+> **La clé du projet est versionnée en clair, par choix du propriétaire.** Ce
+> dépôt étant public, elle est lisible par tous et sera récoltée par les robots
+> qui scrutent GitHub ; elle demeure par ailleurs dans l'historique git même si
+> on la retire par la suite. Si le quota venait à être épuisé par des tiers, il
+> suffit d'en régénérer une sur api.nasa.gov.
 
-**En local**, le plus simple est `~/.gradle/gradle.properties` — hors du dépôt :
+**Le chemin par secret reste disponible et prioritaire.** Définir le secret de
+dépôt `NASA_API_KEY` — *Settings → Secrets and variables → Actions → New
+repository secret* — suffit à ce que la clé versionnée ne serve plus, sans
+modifier une ligne de code. Le workflow transmet déjà ce secret aux deux étapes
+de construction.
+
+**En local**, pour utiliser une autre clé que celle du dépôt :
 
 ```properties
+# ~/.gradle/gradle.properties — hors du dépôt
 nasaApiKey=VOTRE_CLE
 ```
 
@@ -233,16 +239,12 @@ NASA_API_KEY=VOTRE_CLE ./gradlew assembleRelease
 
 ### Ce que cela protège, et ce que cela ne protège pas
 
-Passer par un secret évite que la clé soit **indexée dans un dépôt public** et
-moissonnée par les robots qui scrutent GitHub — c'est le risque réel et
-quotidien.
+Une clé embarquée dans un APK **reste extractible** par qui télécharge
+l'application et prend la peine de la décompiler. Aucun procédé ne change cela :
+un client hors ligne doit bien porter le secret qu'il utilise.
 
-En revanche, une clé embarquée dans un APK **reste extractible** par qui
-télécharge l'application et prend la peine de la décompiler. Aucun procédé ne
-change cela : un client hors ligne doit bien porter le secret qu'il utilise.
-C'est acceptable ici — la clé NASA est gratuite, limitée en débit, et sans
-valeur hors de ce seul usage. Si son quota venait à être épuisé par un tiers,
-il suffit d'en régénérer une sur api.nasa.gov et de reconstruire.
+Le compromis est acceptable ici — la clé NASA est gratuite, limitée en débit, et
+sans valeur hors de ce seul usage.
 
 Le journal applicatif n'enregistre que l'hôte et le code de statut des appels,
 jamais l'URL complète : la clé ne fuit donc pas dans les traces, alors qu'elle

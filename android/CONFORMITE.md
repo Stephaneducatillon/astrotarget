@@ -245,19 +245,26 @@ Le §8.2 fait saisir les clés d'API par l'utilisateur, dans le Profil. À votre
 demande, **la clé NASA APOD est désormais embarquée dans l'application** : plus
 rien à saisir, et la carte « Clé d'API » du Profil disparaît.
 
-Elle n'est pas écrite dans le code source. Ce dépôt étant **public**, une clé
-committée y serait indexée par GitHub et moissonnée en quelques heures par les
-robots qui scrutent les dépôts publics — un risque bien plus concret que celui
-de la décompilation. Elle est donc injectée à la construction, depuis le secret
-d'Actions `NASA_API_KEY`, et devient `BuildConfig.NASA_API_KEY`. À défaut de
-secret, la construction retombe sur `DEMO_KEY`, la clé publique d'essai de la
-NASA.
+`build.gradle.kts` la lit dans l'ordre : variable d'environnement
+`NASA_API_KEY`, propriété Gradle `nasaApiKey`, puis la valeur versionnée dans ce
+même fichier. Elle devient `BuildConfig.NASA_API_KEY`.
 
-**Ce que cela ne protège pas.** Une clé embarquée dans un APK reste extractible
-par qui le décompile : aucun procédé n'y change rien, un client hors ligne doit
-porter le secret qu'il utilise. C'est un compromis assumé, acceptable pour une
-clé gratuite, limitée en débit et sans valeur hors de cet usage ; il suffit d'en
-régénérer une et de reconstruire si son quota était épuisé par un tiers.
+**La clé est versionnée en clair, par votre choix explicite**, le mécanisme par
+secret d'Actions vous ayant été proposé et écarté. Les conséquences, énoncées
+avant la décision et rappelées ici pour mémoire : ce dépôt est public, la clé y
+est donc lisible par tous et sera récoltée par les robots qui scrutent GitHub ;
+elle demeure dans l'historique git même retirée par la suite. Le correctif, le
+jour où le quota serait épuisé par des tiers, tient en deux gestes : régénérer
+une clé sur api.nasa.gov, reconstruire.
+
+Le chemin par secret reste en place et **prioritaire** : définir le secret de
+dépôt `NASA_API_KEY` suffit à ce que la clé versionnée ne serve plus, sans
+toucher au code.
+
+**Ce qu'aucun des deux chemins ne protège.** Une clé embarquée dans un APK reste
+extractible par qui le décompile : un client hors ligne doit porter le secret
+qu'il utilise. C'est acceptable pour une clé gratuite, limitée en débit et sans
+valeur hors de cet usage.
 
 Conséquence de code : `model/ApiKey.kt` et ses tests disparaissent avec la
 dernière saisie de clé — plus rien à masquer ni à valider. Le projet compte donc
