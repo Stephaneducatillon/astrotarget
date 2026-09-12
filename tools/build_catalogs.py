@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CielScore — generation des catalogues embarques dans l'application Android.
+SkyScore — generation des catalogues embarques dans l'application Android.
 
 Source : NGC.csv (OpenNGC, delimiteur ';') present a la racine du depot.
 Sorties : android/app/src/main/assets/{messier,caldwell,ngcic}.csv
@@ -11,7 +11,7 @@ Format de sortie (delimiteur ';', 1 ligne d'en-tete) :
 
   id       identifiant court affiche (M31, C14, NGC0891...)
   name     designation OpenNGC (NGC0224, IC4715...)
-  type     type CielScore : Galaxie | Nebuleuse | Amas ouvert | Amas globulaire | Autre
+  type     type SkyScore : Galaxie | Nebuleuse | Amas ouvert | Amas globulaire | Autre
   ra_deg   ascension droite J2000 en degres decimaux
   dec_deg  declinaison J2000 en degres decimaux
   mag      magnitude (V-Mag si disponible, sinon B-Mag, sinon vide)
@@ -20,7 +20,7 @@ Format de sortie (delimiteur ';', 1 ligne d'en-tete) :
   const    constellation (abreviation IAU 3 lettres)
   common   nom usuel
 
-Reference : documentation CielScore, section 8.1 « Catalogues d'objets ».
+Reference : documentation SkyScore, section 8.1 « Catalogues d'objets ».
 """
 import csv
 import os
@@ -32,7 +32,7 @@ OUT_DIR = os.path.join(ROOT, "android", "app", "src", "main", "assets")
 
 HEADER = "id;name;type;ra_deg;dec_deg;mag;majax;minax;const;common"
 
-# --- Correspondance des types OpenNGC vers les 5 types CielScore (section 2.3) ---
+# --- Correspondance des types OpenNGC vers les 5 types SkyScore (section 2.3) ---
 #
 # ATTENTION AU CAS "Cl+N" — amas *avec nebulosite*. Il etait rattache aux amas
 # ouverts, ce qui classait M42 en amas et la retirait du filtre « Nebuleuse »

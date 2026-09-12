@@ -12,16 +12,16 @@
 
 # Ne pas obfusquer nos propres classes : un plantage remonte des noms parlants,
 # ce qui compte davantage que les quelques kilo-octets economises.
--keepnames class com.cielscore.app.** { *; }
+-keepnames class com.skyscore.app.** { *; }
 
 # Modeles de donnees et entites Room : champs conserves.
--keepclassmembers class com.cielscore.app.data.db.** { <fields>; }
--keepclassmembers class com.cielscore.app.model.** { <fields>; }
--keepclassmembers class com.cielscore.app.catalog.** { <fields>; }
+-keepclassmembers class com.skyscore.app.data.db.** { <fields>; }
+-keepclassmembers class com.skyscore.app.model.** { <fields>; }
+-keepclassmembers class com.skyscore.app.catalog.** { <fields>; }
 
 # Point d'entree declares dans le manifeste.
--keep class com.cielscore.app.CielScoreApplication
--keep class com.cielscore.app.MainActivity
+-keep class com.skyscore.app.SkyScoreApplication
+-keep class com.skyscore.app.MainActivity
 
 # La WebView Aladin appelle du JavaScript : conserver les interfaces exposees.
 -keepclassmembers class * {

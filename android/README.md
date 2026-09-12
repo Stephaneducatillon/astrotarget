@@ -1,8 +1,11 @@
-# CielScore — application Android
+# SkyScore — application Android
 
-Portage natif Android de **CielScore**, planificateur d'observation
+Portage natif Android de **SkyScore**, planificateur d'observation
 astronomique, conforme à la documentation fonctionnelle et technique v0.6.4 et
 aux **règles de scoring v2.0** du 09/09/2026.
+
+Version **1.0.0**. L'application s'appelait *CielScore* jusqu'à la 0.7.0 ; elle
+ne dépend d'aucun service d'intelligence artificielle.
 
 L'application répond à la question du document : *que puis-je observer ce soir,
 avec mon instrument, depuis mon jardin ?* Elle croise instrument, lieu, météo et
@@ -46,19 +49,19 @@ La Release est reconstruite à chaque push : le lien ne change jamais, et comme
 toutes les constructions partagent la même signature, les versions suivantes
 s'installent par-dessus sans rien perdre.
 
-L'onglet Actions expose aussi les APK comme artefacts (`cielscore-release-apk`
-et `cielscore-debug-apk`), mais ils exigent d'être connecté à GitHub et arrivent
+L'onglet Actions expose aussi les APK comme artefacts (`skyscore-release-apk`
+et `skyscore-debug-apk`), mais ils exigent d'être connecté à GitHub et arrivent
 sous forme de `.zip` à décompresser.
 
 ### Signature
 
 L'APK de release est signé avec la clé de **test** versionnée dans le dépôt,
-`keystore/cielscore-test.jks` :
+`keystore/skyscore-test.jks` :
 
 | | |
 |---|---|
-| Alias | `cielscore-test` |
-| Mot de passe du magasin et de la clé | `cielscore` |
+| Alias | `skyscore-test` |
+| Mot de passe du magasin et de la clé | `skyscore` |
 | Empreinte SHA-256 | `87:78:87:7B:AC:6F:8A:72:3C:D9:C4:89:2A:6B:D8:EA:68:22:56:DC:AA:91:41:35:41:D6:02:51:7A:A0:83:01` |
 
 Ses identifiants sont publics, exactement comme ceux du `debug.keystore` fourni
@@ -102,10 +105,9 @@ Kotlin, téléchargé depuis Maven Central :
 | **Informations** | public | Tableau de bord du jour : meilleure cible, image APOD, Soleil et Lune, nuit astronomique, indice Kp, calendrier sur 60 jours, prochains lancements |
 | **Dashboard** | connecté | Choix du lieu parmi 34 869 communes, réglage de l'instrument, calcul du Top 20 des cibles, fiche objet détaillée |
 | **Explorer** | connecté | Recherche libre dans les catalogues, filtres par catalogue et par type |
-| **Sessions** | connecté | Plan de soirée IA, export PDF, enregistrement d'observation, carnet |
+| **Sessions** | connecté | Feuille de route de la soirée, export PDF, enregistrement d'observation, carnet |
 | **Statistiques** | connecté | Compteurs, progression Messier et Caldwell, heatmap sur 12 mois, favoris |
-| **Assistant IA** | connecté | Chat avec injection du contexte réel de la session |
-| **Profil** | public | Connexion, inscription, récupération, clés d'API, mode nuit |
+| **Profil** | public | Connexion, inscription, récupération, clé d'API, mode nuit |
 
 ### La carte du ciel
 
@@ -151,13 +153,13 @@ android/app/src/main/
 │   ├── stars.csv              358 étoiles brillantes
 │   ├── constellations.csv     31 figures, 239 segments
 │   └── communes_bortle.csv    34 869 communes, Bortle estimé
-└── java/com/cielscore/app/
+└── java/com/skyscore/app/
     ├── astro/                 éphémérides, crépuscules, projection, calendrier
     ├── scoring/               formules (§5) et moteur de score (§4 et §6)
     ├── catalog/               modèle d'objet et chargement des catalogues
     ├── model/                 paramètres de session, smart télescopes
     ├── data/
-    │   ├── net/               Open-Météo, Kp, APOD, lancements, CDS, Mistral
+    │   ├── net/               Open-Météo, Kp, APOD, lancements, CDS
     │   ├── db/                Room : users, observations, statistiques
     │   ├── auth/              PBKDF2-SHA256, codes de récupération
     │   ├── cache/             cache à durée de vie (§4.6)
@@ -190,16 +192,15 @@ bien à leur source.
 
 ## Clés d'API
 
-Deux fonctions nécessitent une clé, à saisir dans l'onglet **Profil**. Elles
-restent sur l'appareil.
+Une seule fonction nécessite une clé, à saisir dans l'onglet **Profil**. Elle
+reste sur l'appareil.
 
 | Service | Usage | Obtention |
 |---|---|---|
 | NASA APOD | Image du jour | https://api.nasa.gov |
-| Mistral AI | Guide objet, plan de soirée, assistant | https://console.mistral.ai |
 
-Sans clé, le reste de l'application fonctionne normalement : seules les
-fonctions concernées affichent un message explicite.
+Sans clé, le reste de l'application fonctionne normalement : seule l'image du
+jour affiche un message explicite.
 
 Les autres services — Open-Météo, GFZ Potsdam, NOAA SWPC, The Space Devs et
 CDS Strasbourg — sont gratuits et ne demandent aucune clé.
@@ -227,7 +228,6 @@ et son indice de Bortle sont déterminés sur l'appareil.
 | Image du jour | NASA APOD |
 | Lancements | The Space Devs |
 | Imagerie du ciel | CDS Strasbourg (hips2fits, Aladin Lite) |
-| Intelligence artificielle | Mistral AI |
 
 Échelle de pollution lumineuse d'après Bortle J. (2001), *Sky & Telescope* ;
 magnitude limite visuelle d'après Schaefer B. (1990) ; éphémérides d'après

@@ -1,4 +1,4 @@
-name: Application Android CielScore
+name: Application Android SkyScore
 
 on:
   push:
@@ -95,13 +95,13 @@ jobs:
       - name: Publication de l'APK de debogage
         uses: actions/upload-artifact@v4
         with:
-          name: cielscore-debug-apk
+          name: skyscore-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
 
       - name: Publication de l'APK de release
         uses: actions/upload-artifact@v4
         with:
-          name: cielscore-release-apk
+          name: skyscore-release-apk
           path: android/app/build/outputs/apk/release/*.apk
 
       # Une Release donne un lien de telechargement direct et permanent, sans
@@ -115,11 +115,11 @@ jobs:
           set -euo pipefail
           VERSION=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' android/app/build.gradle.kts)
           APK=$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)
-          NAME="cielscore-$VERSION.apk"
+          NAME="skyscore-$VERSION.apk"
           cp "$APK" "$NAME"
 
           {
-            echo "Application Android CielScore, version $VERSION."
+            echo "Application Android SkyScore, version $VERSION."
             echo
             echo "**Telechargez \`$NAME\` ci-dessous**, puis ouvrez le fichier sur"
             echo "votre telephone. Android demandera d'autoriser l'installation depuis"
@@ -142,7 +142,7 @@ jobs:
           # La Release est recreee a chaque construction : le lien reste identique.
           gh release delete apk-latest --yes --cleanup-tag 2>/dev/null || true
           gh release create apk-latest "$NAME" \
-            --title "CielScore $VERSION — derniere construction" \
+            --title "SkyScore $VERSION — derniere construction" \
             --notes-file notes.md \
             --prerelease \
             --target "$GITHUB_SHA"

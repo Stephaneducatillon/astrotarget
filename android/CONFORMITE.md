@@ -1,9 +1,14 @@
-# Conformité à la documentation CielScore
+# Conformité à la documentation
 
 Ce document recense, point par point, ce que l'application Android reprend de
-la documentation CielScore, et **tout ce qui s'en écarte**. Rien n'est laissé
+la documentation de référence, et **tout ce qui s'en écarte**. Rien n'est laissé
 implicite : chaque écart est soit une décision validée, soit une zone que le
 document ne couvre pas.
+
+> **L'application s'appelle SkyScore depuis la version 1.0.0.** Les documents de
+> référence cités ci-dessous sont antérieurs et portent le nom d'origine,
+> *CielScore* : leurs titres sont reproduits tels quels, une citation ne se
+> réécrivant pas. Partout ailleurs, « SkyScore » désigne l'application.
 
 Deux documents font référence :
 
@@ -22,7 +27,7 @@ testeurs.
 
 | Section | Élément | Où c'est implémenté |
 |---|---|---|
-| 2.1 → 2.8 | Les onglets et leur accès public / connecté (voir 3.4 pour Équipement) | `ui/screens/`, `MainActivity.kt` |
+| 2.1 → 2.8 | Les onglets et leur accès public / connecté (voir 3.4 et 3.6 pour les deux retraits) | `ui/screens/`, `MainActivity.kt` |
 | 3.2 | Les trois vues du panneau latéral | `ui/components/ObjectSheet.kt` |
 | 3.3 | Règles d'affichage de la carte (alt > 2°, > 0°, > 5°, Lune > 2°) | `ui/components/SkyMapView.kt` |
 | 3.4 | Projection azimutale équidistante | `astro/SkyProjection.kt` |
@@ -40,7 +45,7 @@ testeurs.
 | 7.1 → 7.5 | Phases, couleurs, nuits d'été ; le score de nuit est celui des règles v2.0 | `astro/Twilight.kt` |
 | 8.1 | Messier 110, Caldwell 109, NGC/IC 13 308, 6 corps | `assets/`, `tools/build_catalogs.py` |
 | 8.1 | 34 869 communes françaises, Bortle automatique France entière | `assets/communes_bortle.csv`, `catalog/CommuneIndex.kt` |
-| 8.2 | Les 8 interfaces externes | `data/net/` |
+| 8.2 | Les interfaces externes, hors Mistral (voir 3.6) | `data/net/` |
 | 8.4 | Stratégie de repli service par service | `data/net/`, `model/SkyConditions` |
 | 9.1 | PBKDF2-SHA256, 260 000 itérations, sel 16 octets, comparaison à temps constant | `data/auth/PasswordHasher.kt` |
 | 9.2 | Tables `users` et `observations`, index | `data/db/Entities.kt` |
@@ -62,7 +67,9 @@ total. Le tableau de validation de la page 6 des règles v2.0 est reproduit à
 | Architecture | Application Android native (Kotlin + Jetpack Compose), calculs embarqués. Aucune dépendance au code Python. |
 | Périmètre | Les onglets du document **et** la carte du ciel interactive. |
 | Lieu et Bortle | Fichier `communes_bortle.csv` embarqué : recherche et rattachement GPS hors ligne, indice de Bortle ajustable. |
-| Comptes | Compte et carnet 100 % locaux (Room), clés d'API saisies dans le Profil. |
+| Comptes | Compte et carnet 100 % locaux (Room), clé d'API saisie dans le Profil. |
+| Fonctions IA | **Retirées en version 1.0** : l'application ne dépend plus de Mistral (voir 3.6). |
+| Nom | L'application s'appelle **SkyScore** depuis la version 1.0.0. |
 | Smart télescopes | Les **7 modèles détaillés** au tableau 5.9, plus les 2 Seestar Pro ajoutés ensuite (voir 3.5). |
 | Carte du ciel | Figures de constellations **complètes** (358 étoiles, 239 segments) plutôt que les 174 / 113 du §3.3. |
 | Objets sans dimensions | Consultables dans l'Explorer, exclus du Top du Dashboard. |
@@ -132,7 +139,7 @@ Le §3.3 annonce 174 étoiles et 113 segments sans fournir les données.
 |---|---|
 | §1.2 Gradio 6.18 / Python 3.13 | Kotlin + Jetpack Compose, `minSdk` 26 |
 | §1.2 Astropy + PyEphem + NumPy | Moteur d'éphémérides Kotlin embarqué (Meeus ch. 25, 45, 47 ; éléments képlériens JPL 1800–2050) |
-| §1.2 auth.py + SQLite | Room, base locale `cielscore.db` |
+| §1.2 auth.py + SQLite | Room, base locale `skyscore.db` |
 | §9.3 Restauration de la base depuis un dépôt distant | Sauvegarde Android (`backup_rules.xml`) ; aucune base distante |
 | §1.2 Hébergement Hugging Face Spaces | APK construit par GitHub Actions |
 | §8.2 API Géo en ligne | Inutile : les communes sont embarquées, la recherche est hors ligne |
@@ -150,7 +157,8 @@ Le §2.5 décrit un onglet **Équipement** (oculaires, astrophotographie, smart
 télescopes). Il a été **retiré à votre demande**, faute d'utilité au quotidien,
 avec l'intention de le rétablir plus tard.
 
-L'application compte donc **7 onglets** au lieu de 8. Rien d'autre n'est
+Cumulé au retrait de l'Assistant IA (§ 3.6), l'application compte **6 onglets**
+au lieu de 8. Rien d'autre n'est
 affecté : les formules des §5.7 et §5.8 (grossissement, champ réel, pupille de
 sortie, F/D effectif, échantillonnage, bornes de Shannon) restent implémentées
 dans `scoring/Formulas.kt` et couvertes par les tests, et les smart télescopes
@@ -161,11 +169,14 @@ Pour le rétablir, l'écran est intact dans l'historique Git :
 ```bash
 git log --oneline --diff-filter=D -- '*EquipmentScreen.kt'   # trouver le commit
 git show <commit>^:android/app/src/main/java/com/cielscore/app/ui/screens/EquipmentScreen.kt \
-  > android/app/src/main/java/com/cielscore/app/ui/screens/EquipmentScreen.kt
+  > android/app/src/main/java/com/skyscore/app/ui/screens/EquipmentScreen.kt
 ```
 
-Il reste ensuite à réintroduire l'entrée `EQUIPMENT` dans l'énumération
-`AppTab` de `MainActivity.kt` et sa branche dans le `when`.
+Le chemin source garde volontairement l'ancien nom de paquet : c'est celui
+qu'avait le fichier dans l'historique, avant le renommage en SkyScore. Il reste
+ensuite à réintroduire l'entrée `EQUIPMENT` dans l'énumération `AppTab` de
+`MainActivity.kt`, sa branche dans le `when`, et à corriger la déclaration
+`package` du fichier récupéré.
 
 ---
 
@@ -195,6 +206,36 @@ incertaine, héritée de la première version : les dimensions du capteur du
 **Vespera II**, non vérifiées, et dont la référence est laissée vide dans le
 code plutôt que devinée.
 
+
+---
+
+### 3.6 Fonctions d'intelligence artificielle retirées — version 1.0
+
+Toutes les fonctions reposant sur l'API **Mistral** ont été retirées à votre
+demande pour cette première version, jugée trop lourde avec elles. Trois usages
+disparaissent :
+
+| Usage | Emplacement | Devenu |
+|---|---|---|
+| Assistant conversationnel (§2.7) | Onglet **Assistant IA** | Onglet supprimé |
+| Plan de soirée (§2.4) | Onglet Sessions | Remplacé par une **feuille de route** : les cibles du dernier calcul, exportables en PDF |
+| Guide d'observation (§2.2) | Fiche objet | Carte supprimée |
+
+Ce qui disparaît avec eux : `data/net/MistralApi.kt`, `ui/screens/AssistantScreen.kt`,
+la clé d'API Mistral du Profil et son stockage local.
+
+**Ce qui est conservé, et pourquoi.** L'export PDF dépendait du texte généré par
+l'IA, mais son tableau des cibles, lui, est entièrement calculé : plutôt que de
+le supprimer avec le reste, il devient une feuille de route de la soirée —
+conditions du site, puis tableau des cibles. Retirer l'IA ne devait pas coûter
+la possibilité d'emporter sa liste sur le terrain.
+
+La clé **NASA APOD reste** : elle sert l'image du jour de l'onglet Informations,
+qui n'a rien d'une fonction d'IA. Le Profil ne demande donc plus qu'une seule
+clé.
+
+L'application ne dialogue plus avec aucun service d'IA ; la règle
+`valider_top_ia` du § 4.5, qui lui était destinée, reste néanmoins implémentée.
 
 ---
 
@@ -314,8 +355,9 @@ continue du coucher du Soleil à la nuit noire. Voir `Twilight.nightScore`.
 
 ### 4.5 Validation déterministe (`valider_top_ia`)
 
-Un garde-fou, plus sévère que les filtres éliminatoires, appliqué **avant
-d'envoyer les cibles à l'assistant IA** — il ne retire rien du Top affiché :
+Un garde-fou, plus sévère que les filtres éliminatoires, prévu pour filtrer les
+cibles **avant de les soumettre à l'assistant IA** — il ne retire rien du Top
+affiché :
 
 | Motif de rejet | Seuil |
 |---|---|
@@ -325,9 +367,11 @@ d'envoyer les cibles à l'assistant IA** — il ne retire rien du Top affiché :
 | Éblouissement lunaire | séparation < 30° **et** phase > 60 % |
 | Fond de ciel trop lumineux | SB > sb_limite + 3,5 (hors amas) |
 
-Si aucune cible ne passe cette validation, le Top complet est transmis malgré
-tout, plutôt que de laisser l'assistant sans contexte. Voir
-`ScoringEngine.aiVetoes` et `validatedTargets`.
+La règle **reste implémentée et testée** (`ScoringEngine.aiVetoes` et
+`validatedTargets`) bien que son consommateur, l'assistant, ait été retiré en
+version 1.0 (§ 3.6) : elle appartient aux règles de scoring, et la retirer
+aurait créé un écart avec le document de référence. Elle sera rebranchée le
+jour où l'assistant reviendra.
 
 ### 4.6 Conséquence corrigée : les amas avec nébulosité (`Cl+N`)
 

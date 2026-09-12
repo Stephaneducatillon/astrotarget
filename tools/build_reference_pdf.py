@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Genere le document de reference des formules et regles de scoring CielScore.
+"""Genere le document de reference des formules et regles de scoring SkyScore.
 
 Le contenu est repris des sources de l'application (Formulas.kt, ScoringEngine.kt,
 Twilight.kt, SkyObject.kt) : c'est un miroir du code, pas une reformulation. Toute
@@ -7,7 +7,7 @@ evolution du moteur de calcul doit donc etre reportee ici, puis le document
 regenere.
 
 Usage :  pip install reportlab && python3 tools/build_reference_pdf.py
-Sortie :  docs/CielScore_Formules_et_Regles.pdf
+Sortie :  docs/SkyScore_Formules_et_Regles.pdf
 """
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -19,7 +19,7 @@ from reportlab.platypus import (
     KeepTogether, PageBreak,
 )
 
-OUT = "docs/CielScore_Formules_et_Regles.pdf"
+OUT = "docs/SkyScore_Formules_et_Regles.pdf"
 
 ENCRE      = colors.HexColor("#1B2430")
 ENCRE_DOUX = colors.HexColor("#55606E")
@@ -118,7 +118,7 @@ def encadre(titre, texte, couleur=ACCENT):
 S = []
 A = S.append
 
-A(Paragraph("CielScore", TITRE))
+A(Paragraph("SkyScore", TITRE))
 A(Paragraph("Formules et regles de scoring &mdash; reference d'implementation", SOUS_TITRE))
 hr = Table([[""]], colWidths=[LARGEUR], rowHeights=[2])
 hr.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), ACCENT)]))
@@ -127,7 +127,7 @@ A(Spacer(1, 8))
 
 A(Paragraph(
     "Ce document decrit le moteur de calcul <b>tel qu'il est reellement code</b> dans "
-    "l'application Android CielScore. Il est etabli a partir des sources "
+    "l'application Android SkyScore. Il est etabli a partir des sources "
     "(<font face='Courier'>Formulas.kt</font>, <font face='Courier'>ScoringEngine.kt</font>, "
     "<font face='Courier'>Twilight.kt</font>) et non d'une specification : lorsque le code "
     "et un document de reference divergent, c'est le comportement decrit ici qui est celui "
@@ -142,11 +142,12 @@ A(Paragraph(
 A(Spacer(1, 4))
 A(tableau(
     ["", ""],
-    [["Version de l'application", "0.7.0"],
+    [["Version de l'application", "1.0.0"],
      ["Regles de scoring", "v2.0 &mdash; 09/09/2026"],
-     ["Implementation", "<font face='Courier'>com.cielscore.app.scoring</font>, "
-                       "<font face='Courier'>com.cielscore.app.astro</font>"],
-     ["Verification", "70 tests unitaires, dont 32 de conformite documentaire"]],
+     ["Implementation", "<font face='Courier'>com.skyscore.app.scoring</font>, "
+                       "<font face='Courier'>com.skyscore.app.astro</font>"],
+     ["Verification", "70 tests unitaires, dont 32 de conformite documentaire"],
+     ["Nom d'origine", "CielScore, jusqu'a la version 0.7.0"]],
     [46 * mm, LARGEUR - 46 * mm],
     [CELL_G, CELL]))
 
@@ -541,14 +542,14 @@ def decor(canvas, doc):
     canvas.saveState()
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(ENCRE_DOUX)
-    canvas.drawString(18 * mm, 12 * mm, "CielScore — Formules et regles de scoring")
+    canvas.drawString(18 * mm, 12 * mm, "SkyScore — Formules et regles de scoring")
     canvas.drawRightString(A4[0] - 18 * mm, 12 * mm, "Page %d" % doc.page)
     canvas.setStrokeColor(FILET)
     canvas.setLineWidth(0.5)
     canvas.line(18 * mm, 15.5 * mm, A4[0] - 18 * mm, 15.5 * mm)
     if doc.page > 1:
         canvas.setFont("Helvetica", 7.5)
-        canvas.drawString(18 * mm, A4[1] - 13 * mm, "Version 0.7.0  ·  regles v2.0")
+        canvas.drawString(18 * mm, A4[1] - 13 * mm, "Version 1.0.0  ·  regles v2.0")
         canvas.line(18 * mm, A4[1] - 15.5 * mm, A4[0] - 18 * mm, A4[1] - 15.5 * mm)
     canvas.restoreState()
 
@@ -556,8 +557,8 @@ def decor(canvas, doc):
 doc = BaseDocTemplate(OUT, pagesize=A4,
                       leftMargin=18 * mm, rightMargin=18 * mm,
                       topMargin=20 * mm, bottomMargin=20 * mm,
-                      title="CielScore - Formules et regles de scoring",
-                      author="CielScore", subject="Moteur de scoring, version 0.7.0")
+                      title="SkyScore - Formules et regles de scoring",
+                      author="SkyScore", subject="Moteur de scoring, version 1.0.0")
 frame = Frame(18 * mm, 20 * mm, LARGEUR, A4[1] - 40 * mm, id="corps")
 doc.addPageTemplates([PageTemplate(id="std", frames=[frame], onPage=decor)])
 doc.build(S)

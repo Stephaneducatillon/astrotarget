@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CielScore"
+rootProject.name = "SkyScore"
 include(":app")

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# CielScore — execution des tests de conformite du moteur de calcul SANS SDK Android.
+# SkyScore — execution des tests de conformite du moteur de calcul SANS SDK Android.
 #
 # Le coeur de l'application (ephemerides, crepuscules, formules, moteur de score)
 # est du Kotlin pur : il se compile et se teste avec le seul compilateur Kotlin,
@@ -12,9 +12,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SRC="$ROOT/android/app/src/main/java/com/cielscore/app"
-TEST="$ROOT/android/app/src/test/java/com/cielscore/app"
-WORK="${CIELSCORE_WORK:-$ROOT/.cielscore-core-tests}"
+SRC="$ROOT/android/app/src/main/java/com/skyscore/app"
+TEST="$ROOT/android/app/src/test/java/com/skyscore/app"
+WORK="${SKYSCORE_WORK:-$ROOT/.skyscore-core-tests}"
 LIB="$WORK/lib"
 
 KOTLIN_VERSION=2.0.21
@@ -77,9 +77,9 @@ kotlinc -cp "$RUNTIME_CP:$WORK/classes" -d "$WORK/test-classes" \
 echo "Execution"
 java -Dfile.encoding=UTF-8 -cp "$RUNTIME_CP:$WORK/classes:$WORK/test-classes" \
   org.junit.runner.JUnitCore \
-  com.cielscore.app.DocumentationConformanceTest \
-  com.cielscore.app.CommuneIndexTest \
-  com.cielscore.app.SessionInstantTest \
-  com.cielscore.app.SmartTelescopeCatalogTest \
-  com.cielscore.app.ApiUrlsTest \
-  com.cielscore.app.ApiKeyTest
+  com.skyscore.app.DocumentationConformanceTest \
+  com.skyscore.app.CommuneIndexTest \
+  com.skyscore.app.SessionInstantTest \
+  com.skyscore.app.SmartTelescopeCatalogTest \
+  com.skyscore.app.ApiUrlsTest \
+  com.skyscore.app.ApiKeyTest

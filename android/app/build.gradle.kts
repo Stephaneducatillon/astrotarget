@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "com.cielscore.app"
+    namespace = "com.skyscore.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.cielscore.app"
+        applicationId = "com.skyscore.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.7.0"
+        versionCode = 3
+        versionName = "1.0.0"
     }
 
     /**
@@ -28,7 +28,7 @@ android {
      *     publication : la cle privee ne quitte jamais le coffre de secrets.
      *
      *  2. Sinon, l'APK est signe avec la cle de TEST versionnee dans le depot,
-     *     keystore/cielscore-test.jks. Ses identifiants sont publics, exactement
+     *     keystore/skyscore-test.jks. Ses identifiants sont publics, exactement
      *     comme ceux du debug.keystore fourni avec le SDK Android : elle sert a
      *     produire un APK installable et surtout MISE A JOUR d'une version a
      *     l'autre, jamais a publier l'application.
@@ -42,10 +42,10 @@ android {
                 keyAlias = System.getenv("RELEASE_KEY_ALIAS")
                 keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
             } else {
-                storeFile = rootProject.file("keystore/cielscore-test.jks")
-                storePassword = "cielscore"
-                keyAlias = "cielscore-test"
-                keyPassword = "cielscore"
+                storeFile = rootProject.file("keystore/skyscore-test.jks")
+                storePassword = "skyscore"
+                keyAlias = "skyscore-test"
+                keyPassword = "skyscore"
             }
             enableV1Signing = true
             enableV2Signing = true

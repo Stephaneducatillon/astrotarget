@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CielScore — generation du fond d'etoiles et des figures de constellations
+SkyScore — generation du fond d'etoiles et des figures de constellations
 utilises par la Carte du ciel interactive (documentation, section 3.3).
 
 La section 3.3 decrit 174 etoiles, 31 figures et 113 segments. Les figures

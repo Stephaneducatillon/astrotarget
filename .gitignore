@@ -16,4 +16,4 @@ __pycache__/
 venv/
 
 # Tests hors SDK Android
-.cielscore-core-tests/
+.skyscore-core-tests/

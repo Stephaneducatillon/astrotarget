@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CielScore — validation du fichier des communes embarque.
+SkyScore — validation du fichier des communes embarque.
 
 Contrairement aux catalogues d'objets, communes_bortle.csv n'est pas genere :
 c'est une donnee source, livree telle quelle dans les assets (section 8.1).
