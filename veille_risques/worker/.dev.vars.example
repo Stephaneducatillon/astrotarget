@@ -1,0 +1,6 @@
+# Copier en .dev.vars pour `wrangler dev`. NE JAMAIS COMMITER .dev.vars.
+MF_API_KEY=
+RTE_CLIENT_ID=
+RTE_CLIENT_SECRET=
+NTFY_TOPIC=
+ADMIN_TOKEN=

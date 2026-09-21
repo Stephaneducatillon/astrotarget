@@ -8,3 +8,9 @@ venv/
 dist/
 build/
 .DS_Store
+
+# Secrets locaux Cloudflare (veille_risques)
+.dev.vars
+veille_risques/worker/.wrangler/
+# Couches personnelles : jamais dans l'historique git
+veille_risques/pwa/couches-privees.json

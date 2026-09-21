@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veille</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f1720">
+<style>
+:root{
+  --bg:#f6f7f9; --surface:#fff; --border:#dfe3e8; --text:#11181c; --muted:#5c6b73;
+  --vert:#1b7f4b; --orange:#b45309; --rouge:#b3261e; --gris:#6b7280;
+  --vert-bg:#e6f4ec; --orange-bg:#fdf1e0; --rouge-bg:#fdeceb; --gris-bg:#eef0f2;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1720; --surface:#17212b; --border:#2a3a47; --text:#e6edf3; --muted:#9bb0bf;
+    --vert:#5ec98d; --orange:#f0b45e; --rouge:#ff8a80; --gris:#9aa5b1;
+    --vert-bg:#12301f; --orange-bg:#3a2a12; --rouge-bg:#3a1c1a; --gris-bg:#1e2a34;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1720; --surface:#17212b; --border:#2a3a47; --text:#e6edf3; --muted:#9bb0bf;
+  --vert:#5ec98d; --orange:#f0b45e; --rouge:#ff8a80; --gris:#9aa5b1;
+  --vert-bg:#12301f; --orange-bg:#3a2a12; --rouge-bg:#3a1c1a; --gris-bg:#1e2a34;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding:0 16px env(safe-area-inset-bottom);
+}
+.wrap{max-width:640px;margin:0 auto;padding-bottom:32px}
+header{display:flex;align-items:baseline;justify-content:space-between;padding:16px 0 8px}
+h1{font-size:1.05rem;margin:0;letter-spacing:.02em;text-transform:uppercase;color:var(--muted)}
+#horloge{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Banniere de niveau : c'est la premiere chose qu'on doit lire. */
+#banniere{
+  border-radius:14px;padding:20px 18px;margin:8px 0 4px;
+  border:1px solid var(--border);background:var(--surface);
+}
+#banniere.vert{background:var(--vert-bg);border-color:var(--vert)}
+#banniere.orange{background:var(--orange-bg);border-color:var(--orange)}
+#banniere.rouge{background:var(--rouge-bg);border-color:var(--rouge)}
+#niveau{font-size:2rem;font-weight:700;letter-spacing:.04em;margin:0}
+#niveau.vert{color:var(--vert)} #niveau.orange{color:var(--orange)} #niveau.rouge{color:var(--rouge)}
+#causes{margin:6px 0 0;color:var(--text)}
+#checklist{margin:12px 0 0;padding:12px;border-radius:10px;background:var(--surface);
+  border:1px dashed var(--border);font-size:.92rem}
+
+/* Bandeau de confiance : sans lui, un ecran vert peut vouloir dire "rien ne
+   marche". C'est le point le plus important de l'interface. */
+#confiance{
+  display:none;margin:10px 0;padding:10px 12px;border-radius:10px;
+  background:var(--gris-bg);border:1px solid var(--border);
+  font-size:.88rem;color:var(--text);
+}
+#confiance.actif{display:block}
+#confiance b{color:var(--orange)}
+
+nav{display:flex;gap:6px;margin:18px 0 10px}
+nav button{
+  flex:1;padding:9px 8px;border-radius:9px;cursor:pointer;font:inherit;font-size:.9rem;
+  border:1px solid var(--border);background:var(--surface);color:var(--muted);
+}
+nav button[aria-selected="true"]{color:var(--text);border-color:var(--muted);font-weight:600}
+section[hidden]{display:none}
+
+.carte{
+  background:var(--surface);border:1px solid var(--border);border-left-width:4px;
+  border-radius:11px;padding:13px 14px;margin-bottom:9px;
+}
+.carte.vert{border-left-color:var(--vert)}
+.carte.orange{border-left-color:var(--orange)}
+.carte.rouge{border-left-color:var(--rouge)}
+.carte.inconnu{border-left-color:var(--gris)}
+.carte h3{margin:0;font-size:.97rem;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.etiquette{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.etiquette.vert{color:var(--vert)} .etiquette.orange{color:var(--orange)}
+.etiquette.rouge{color:var(--rouge)} .etiquette.inconnu{color:var(--gris)}
+.carte p{margin:5px 0 0;font-size:.89rem;color:var(--muted)}
+.age{font-variant-numeric:tabular-nums}
+.age.perimee{color:var(--orange);font-weight:600}
+.note{font-style:italic}
+
+ul.liens{list-style:none;padding:0;margin:0}
+ul.liens li{margin-bottom:8px}
+ul.liens a{
+  display:block;padding:12px 14px;border-radius:10px;text-decoration:none;
+  background:var(--surface);border:1px solid var(--border);color:var(--text);
+}
+ul.liens small{display:block;color:var(--muted);font-size:.8rem}
+.hors-ligne{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:9px}
+.hors-ligne h3{margin:0 0 6px;font-size:.95rem}
+.hors-ligne ol{margin:0;padding-left:20px;font-size:.9rem}
+footer{margin-top:22px;font-size:.76rem;color:var(--muted);text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Veille — Douaisis</h1>
+    <span id="horloge">…</span>
+  </header>
+
+  <div id="banniere">
+    <p id="niveau">…</p>
+    <p id="causes"></p>
+    <div id="checklist" hidden></div>
+  </div>
+
+  <div id="confiance"></div>
+
+  <nav role="tablist">
+    <button role="tab" id="t-etat"  aria-selected="true"  aria-controls="p-etat">État</button>
+    <button role="tab" id="t-src"   aria-selected="false" aria-controls="p-src">Sources</button>
+    <button role="tab" id="t-hors"  aria-selected="false" aria-controls="p-hors">Hors ligne</button>
+  </nav>
+
+  <section id="p-etat"  role="tabpanel" aria-labelledby="t-etat"></section>
+  <section id="p-src"   role="tabpanel" aria-labelledby="t-src" hidden></section>
+  <section id="p-hors"  role="tabpanel" aria-labelledby="t-hors" hidden>
+    <div class="hors-ligne">
+      <h3>Si le réseau tombe</h3>
+      <ol>
+        <li>FR-Alert arrive par diffusion cellulaire : indépendant de cette application.</li>
+        <li>Radio FM — ici Nord, franceinfo. Poste à piles dans le sac de départ.</li>
+        <li>Cartes hors ligne : OsmAnd / Organic Maps, Nord téléchargé, traces GPX importées.</li>
+        <li>Plan familial papier : cette application ne fonctionne pas sans électricité.</li>
+      </ol>
+    </div>
+    <div class="hors-ligne">
+      <h3>Rappels</h3>
+      <ol>
+        <li>Test des sirènes : premier mercredi du mois, à midi.</li>
+        <li>Ecowatt prévient jusqu'à 4 jours à l'avance — décaler les usages avant la pointe.</li>
+      </ol>
+    </div>
+    <ul class="liens" id="liens-hors"></ul>
+  </section>
+
+  <footer>
+    Données : Météo-France, RTE, Hub'Eau, Vigicrues, IGN, OpenStreetMap (ODbL).<br>
+    Usage strictement personnel.
+  </footer>
+</div>
+<script src="app.js" type="module"></script>
+</body>
+</html>

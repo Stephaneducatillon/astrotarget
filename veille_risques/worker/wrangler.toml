@@ -1,0 +1,38 @@
+name = "veille-risques"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# Phase 1 : deux crons seulement.
+#   */15 -> sources de niveau A (vigilance, ecowatt, scarpe, vigicrues)
+#   5h30 UTC -> maintenance (purge D1, rapport de sante)
+# Le plan gratuit en autorise 3 : le troisieme est reserve a la phase 2.
+[triggers]
+crons = ["*/15 * * * *", "30 5 * * *"]
+
+[[kv_namespaces]]
+binding = "KV"
+id = "REMPLACER_PAR_ID_KV"          # wrangler kv namespace create KV
+
+[[d1_databases]]
+binding = "DB"
+database_name = "veille"
+database_id = "REMPLACER_PAR_ID_D1"  # wrangler d1 create veille
+
+[vars]
+# Valeurs non secretes. Les secrets passent par `wrangler secret put`.
+MF_VIGILANCE_BASE = "https://public-api.meteofrance.fr/public/DPVigilance/v1"
+RTE_TOKEN_URL     = "https://digital.iservices.rte-france.com/token/oauth/"
+RTE_ECOWATT_URL   = "https://digital.iservices.rte-france.com/open_api/ecowatt/v5/signals"
+HUBEAU_BASE       = "https://hubeau.eaufrance.fr/api/v2/hydrometrie"
+VIGICRUES_BASE    = "https://www.vigicrues.gouv.fr/services/1"
+NTFY_BASE         = "https://ntfy.sh"
+# Origine de la PWA autorisee a lire l API. A renseigner apres le deploiement
+# Pages. Laisser vide interdit toute lecture depuis un navigateur.
+ALLOWED_ORIGIN    = "https://veille.pages.dev"
+
+# Secrets a definir (wrangler secret put <NOM>) :
+#   MF_API_KEY        cle du portail Meteo-France (duree 0 = illimitee)
+#   RTE_CLIENT_ID     identifiant de l'application RTE
+#   RTE_CLIENT_SECRET secret de l'application RTE
+#   NTFY_TOPIC        nom de sujet aleatoire >= 32 caracteres
+#   ADMIN_TOKEN       jeton pour /admin/* et pour lire les couches privees
