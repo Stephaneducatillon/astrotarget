@@ -33,7 +33,7 @@ disponibles), D1, KV, Pages.
 
 ## Ce que le code garantit
 
-Les choix listés ci-dessous sont **couverts par les tests** (`npm test`, 53 cas) :
+Les choix listés ci-dessous sont **couverts par les tests** (`npm test`, 64 cas) :
 
 - **Une vigilance orange de 12 h produit 2 notifications, pas 48.** Machine à
   états : on notifie les transitions, montée immédiate, descente confirmée sur
