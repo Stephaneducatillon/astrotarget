@@ -221,6 +221,7 @@ class PlanetInfo:
     circumpolar: bool = False
     never_up: bool = False
     sun_alt: float | None = None
+    reduced_precision: bool = False
 
 
 @dataclass
@@ -230,6 +231,7 @@ class Snapshot:
     site: Site | None
     info: PlanetInfo
     moons: list = field(default_factory=list)
+    unavailable: list = field(default_factory=list)   # satellites sans position valable
 
 
 # ─── Calcul principal ────────────────────────────────────────────────────────
@@ -257,23 +259,51 @@ def _pole_in_sky(planet: Planet, dt: datetime, basis):
     return np.array([np.dot(p, e), np.dot(p, n), np.dot(p, w)])
 
 
+# Les tables internes de satellites de PyEphem s'arrêtent début 2040 : au-delà, les
+# positions deviennent aberrantes (2040), nulles (Uranus), ou passent sur une théorie
+# de secours moins précise (Jupiter et Saturne, à partir de 2041).
+REDUCED_PRECISION_YEAR = 2041
+
+
+def pyephem_covers(planet_key: str, when: datetime) -> bool:
+    """Période où PyEphem fournit des positions de satellites exploitables."""
+    if when.year < 2040:
+        return True
+    return when.year >= REDUCED_PRECISION_YEAR and planet_key in ("Jupiter", "Saturn")
+
+
+def position_valid(sat) -> bool:
+    """Position plausible : entre 0,5 et 80 rayons du centre de la planète."""
+    r = math.sqrt(sat.x ** 2 + sat.y ** 2 + sat.z ** 2)
+    return math.isfinite(r) and 0.5 < r < 80
+
+
 def moon_flags(planet: Planet, obs: ephem.Observer, body, dt: datetime):
     """Indicateurs de phénomènes pour chaque satellite, à un instant donné.
 
-    Retourne un dict nom → (transit, occultation, éclipse, ombre, position de l'ombre).
-    ``body`` doit déjà être calculé pour ``obs``.
+    Retourne un dict nom → (transit, occultation, éclipse, ombre, position de l'ombre),
+    ou None si la position n'est pas disponible. ``body`` doit déjà être calculé pour ``obs``.
+
+    Éclipse : calcul géométrique (satellite dans l'ombre de l'ellipsoïde). L'indicateur
+    « éclairé par le Soleil » de PyEphem entre dans l'ombre plusieurs minutes trop tard
+    (Io, 11 octobre 2026 : 20:12 au lieu de 20:04, pour une durée de 2 h 10 au lieu des
+    2 h 17 attendues d'un passage central).
     """
     basis = sky_basis(float(body.a_ra), float(body.a_dec))
     sun_dir = _sun_direction(obs, body, basis)
     pole = _pole_in_sky(planet, dt, basis)
     to_earth = np.array([0.0, 0.0, 1.0])
+    covered = pyephem_covers(planet.key, dt)
     out = {}
     for m in planet.moons:
         sat = m.cls()
         sat.compute(obs)
+        if not covered or not position_valid(sat):
+            out[m.name] = None
+            continue
         pos = np.array([sat.x, -sat.y, sat.z])
         occulted = not bool(sat.earth_visible)
-        eclipsed = not bool(sat.sun_visible)
+        eclipsed = ray_ellipsoid(pos, sun_dir, pole, planet.flattening) is not None
         transit = (sat.z > 0 and not occulted
                    and ray_ellipsoid(pos, -to_earth, pole, planet.flattening) is not None)
         shadow = None
@@ -348,12 +378,16 @@ def compute(planet: Planet, when: datetime, site: Site | None = None) -> Snapsho
         b3.compute(o3)
         info.transit_alt = float(b3.alt) / DEG
 
+    info.reduced_precision = when.year >= REDUCED_PRECISION_YEAR and planet.key in ("Jupiter", "Saturn")
     snap = Snapshot(planet=planet, when=when, site=site, info=info)
 
     flags = moon_flags(planet, obs, body, when)
     for m in planet.moons:
         sat = m.cls()
         sat.compute(obs)
+        if flags[m.name] is None:
+            snap.unavailable.append(m.name)
+            continue
         east_r, north_r = float(sat.x), -float(sat.y)
         east_as, north_as = east_r * radius, north_r * radius
         ra_mj, dec_mj = offset_to_radec(ra_j, dec_j, east_as * ARCSEC, north_as * ARCSEC)

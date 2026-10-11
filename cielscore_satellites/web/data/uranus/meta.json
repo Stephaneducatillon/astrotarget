@@ -1,0 +1,161 @@
+{
+ "planet": "Uranus",
+ "name": "Uranus",
+ "years": [
+  2025,
+  2026,
+  2027,
+  2028,
+  2029,
+  2030,
+  2031,
+  2032,
+  2033,
+  2034,
+  2035,
+  2036,
+  2037,
+  2038,
+  2039,
+  2040,
+  2041,
+  2042,
+  2043,
+  2044,
+  2045,
+  2046,
+  2047,
+  2048,
+  2049,
+  2050,
+  2051,
+  2052,
+  2053,
+  2054,
+  2055,
+  2056,
+  2057,
+  2058,
+  2059,
+  2060
+ ],
+ "time": "jours UT depuis le 1er janvier 00:00 UT de l'année",
+ "source": "PyEphem 4.2.1",
+ "cml_rate_rad_per_day": [
+  15.322245503258218,
+  15.18907688133105
+ ],
+ "unavailable": {
+  "Miranda": [
+   [
+    "2040-01-01",
+    "2060-12-31"
+   ]
+  ],
+  "Ariel": [
+   [
+    "2040-01-01",
+    "2060-12-31"
+   ]
+  ],
+  "Umbriel": [
+   [
+    "2040-01-01",
+    "2060-12-31"
+   ]
+  ],
+  "Titania": [
+   [
+    "2040-01-01",
+    "2060-12-31"
+   ]
+  ],
+  "Oberon": [
+   [
+    "2040-01-01",
+    "2060-12-31"
+   ]
+  ]
+ },
+ "reduced_precision_from": null,
+ "series": [
+  {
+   "name": "planet",
+   "type": "f64",
+   "comps": [
+    "ra",
+    "dec",
+    "gra",
+    "gdec",
+    "radius"
+   ],
+   "seg": 4,
+   "deg": 12
+  },
+  {
+   "name": "Miranda",
+   "label": "Miranda",
+   "h_mag": 3.6,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 8
+  },
+  {
+   "name": "Ariel",
+   "label": "Ariel",
+   "h_mag": 1.45,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 6
+  },
+  {
+   "name": "Umbriel",
+   "label": "Umbriel",
+   "h_mag": 2.1,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 5
+  },
+  {
+   "name": "Titania",
+   "label": "Titania",
+   "h_mag": 1.02,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  },
+  {
+   "name": "Oberon",
+   "label": "Obéron",
+   "h_mag": 1.23,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  }
+ ]
+}

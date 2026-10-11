@@ -1,0 +1,14 @@
+{
+  "name": "cielscore-satellites",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CielScore Satellites — site statique : quel satellite se trouve où autour de Jupiter, Saturne ou Uranus.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/satellites.test.mjs",
+    "start": "python3 -m http.server 8000",
+    "tables": "python3 tools/build_tables.py",
+    "fixtures": "python3 tools/make_fixtures.py"
+  }
+}

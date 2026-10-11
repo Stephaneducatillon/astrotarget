@@ -92,12 +92,26 @@ def test_titan_iapetus_outside_c2pu_frame():
 
 
 @pytest.mark.parametrize("planet", list(data.PLANETS.values()))
-@pytest.mark.parametrize("year", [2025, 2040, 2060])
+@pytest.mark.parametrize("year", [2025, 2032, 2039])
 def test_all_planets_compute_over_period(planet, year):
     s = engine.compute(planet, datetime(year, 6, 1, tzinfo=timezone.utc), None)
     assert len(s.moons) == len(planet.moons)
     assert all(m.alt is None for m in s.moons)
     assert all(math.isfinite(m.east_arcsec) for m in s.moons)
+    assert not s.info.reduced_precision
+
+
+def test_pyephem_limit_2040():
+    """Tables PyEphem : aberrantes en 2040, nulles pour Uranus ensuite → non disponibles."""
+    for planet in data.PLANETS.values():
+        s = engine.compute(planet, datetime(2040, 6, 1, tzinfo=timezone.utc), None)
+        assert not s.moons and len(s.unavailable) == len(planet.moons)
+    u = engine.compute(data.URANUS, datetime(2050, 6, 1, tzinfo=timezone.utc), None)
+    assert len(u.unavailable) == 5
+    j = engine.compute(data.JUPITER, datetime(2050, 6, 1, tzinfo=timezone.utc), None)
+    assert len(j.moons) == 4 and j.info.reduced_precision
+    start = datetime(2040, 6, 1, tzinfo=timezone.utc)
+    assert phenomena.find_phenomena(data.SATURN, start, start.replace(day=2), None) == []
 
 
 def test_seventeen_moons():
@@ -121,10 +135,16 @@ def _event(events, moon, kind):
     return next(e for e in events if e.moon == moon and e.kind == kind)
 
 
-def test_io_eclipse_start(night_events):
+def test_io_eclipse(night_events):
+    """Entrée dans l'ombre géométrique à 20:04 (PyEphem : 20:12, trop tard), sortie 22:22.
+
+    Passage central (équinoxe de Jupiter en décembre 2026) : durée attendue
+    2 × 71 492 km / 17,33 km/s ≈ 2 h 17 min 30 s.
+    """
     e = _event(night_events, "Io", "eclipse")
-    target = datetime(2026, 10, 11, 20, 13, tzinfo=timezone.utc)
-    assert abs((e.start - target).total_seconds()) < 60
+    assert abs((e.start - datetime(2026, 10, 11, 20, 4, 10, tzinfo=timezone.utc)).total_seconds()) < 60
+    assert abs((e.end - datetime(2026, 10, 11, 22, 22, 20, tzinfo=timezone.utc)).total_seconds()) < 60
+    assert 2.25 * 3600 < (e.end - e.start).total_seconds() < 2.35 * 3600
     assert e.start_observable is False   # Jupiter se lève à 00:42 UT
 
 

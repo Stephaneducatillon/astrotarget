@@ -196,6 +196,12 @@ if not (data.YEAR_MIN <= when.year <= data.YEAR_MAX):
 
 snap = engine.compute(planet, when, site)
 info = snap.info
+if snap.unavailable:
+    st.warning("Position non disponible pour : " + ", ".join(snap.unavailable)
+               + " (les tables de satellites de PyEphem s'arrêtent début 2040).")
+if info.reduced_precision:
+    st.warning("Après 2040, PyEphem utilise une théorie de secours : précision réduite "
+               "(quelques secondes d'arc).")
 
 if site is not None and info.alt is not None and info.alt < 0:
     st.info(f"{planet.name} est sous l'horizon ({info.alt:.1f}°) à cet instant.")

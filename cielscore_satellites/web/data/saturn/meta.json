@@ -1,0 +1,218 @@
+{
+ "planet": "Saturn",
+ "name": "Saturne",
+ "years": [
+  2025,
+  2026,
+  2027,
+  2028,
+  2029,
+  2030,
+  2031,
+  2032,
+  2033,
+  2034,
+  2035,
+  2036,
+  2037,
+  2038,
+  2039,
+  2040,
+  2041,
+  2042,
+  2043,
+  2044,
+  2045,
+  2046,
+  2047,
+  2048,
+  2049,
+  2050,
+  2051,
+  2052,
+  2053,
+  2054,
+  2055,
+  2056,
+  2057,
+  2058,
+  2059,
+  2060
+ ],
+ "time": "jours UT depuis le 1er janvier 00:00 UT de l'année",
+ "source": "PyEphem 4.2.1",
+ "cml_rate_rad_per_day": [
+  15.322245503258218,
+  15.18907688133105
+ ],
+ "unavailable": {
+  "Mimas": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Enceladus": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Tethys": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Dione": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Rhea": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Titan": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Hyperion": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Iapetus": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ]
+ },
+ "reduced_precision_from": "2041-01-01",
+ "series": [
+  {
+   "name": "planet",
+   "type": "f64",
+   "comps": [
+    "ra",
+    "dec",
+    "gra",
+    "gdec",
+    "radius"
+   ],
+   "seg": 4,
+   "deg": 12
+  },
+  {
+   "name": "Mimas",
+   "label": "Mimas",
+   "h_mag": 3.3,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 11
+  },
+  {
+   "name": "Enceladus",
+   "label": "Encelade",
+   "h_mag": 2.2,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 8
+  },
+  {
+   "name": "Tethys",
+   "label": "Téthys",
+   "h_mag": 0.7,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 7
+  },
+  {
+   "name": "Dione",
+   "label": "Dioné",
+   "h_mag": 0.8,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 6
+  },
+  {
+   "name": "Rhea",
+   "label": "Rhéa",
+   "h_mag": 0.1,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 5
+  },
+  {
+   "name": "Titan",
+   "label": "Titan",
+   "h_mag": -1.2,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  },
+  {
+   "name": "Hyperion",
+   "label": "Hypérion",
+   "h_mag": 4.6,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  },
+  {
+   "name": "Iapetus",
+   "label": "Japet",
+   "h_mag": 1.6,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  }
+ ]
+}

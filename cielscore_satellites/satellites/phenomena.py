@@ -49,7 +49,7 @@ def _flags_at(planet: Planet, site: Site | None, when: datetime):
     body = planet.cls()
     body.compute(obs)
     raw = moon_flags(planet, obs, body, when)
-    return {name: dict(zip(("transit", "occultation", "eclipse", "shadow"), v[:4]))
+    return {name: (None if v is None else dict(zip(("transit", "occultation", "eclipse", "shadow"), v[:4])))
             for name, v in raw.items()}
 
 
@@ -57,7 +57,10 @@ def _refine(planet, site, moon, kind, t0, t1, v0, tol_s=1.0):
     """Bissection de l'instant où l'indicateur ``kind`` change, entre t0 et t1."""
     while (t1 - t0).total_seconds() > tol_s:
         tm = t0 + (t1 - t0) / 2
-        vm = _flags_at(planet, site, tm)[moon][kind]
+        fm = _flags_at(planet, site, tm)[moon]
+        if fm is None:
+            break
+        vm = fm[kind]
         if vm == v0:
             t0 = tm
         else:
@@ -86,6 +89,8 @@ def find_phenomena(planet: Planet, start: datetime, end: datetime, site: Site | 
     f_prev = _flags_at(planet, site, t_prev)
     open_: dict = {}
     for name in names:
+        if f_prev[name] is None:
+            continue
         for kind, _ in KINDS:
             if f_prev[name][kind]:
                 open_[(name, kind)] = Phenomenon(name, kind, labels[kind], None, None)
@@ -96,6 +101,8 @@ def find_phenomena(planet: Planet, start: datetime, end: datetime, site: Site | 
         t = min(t + step, end)
         f = _flags_at(planet, site, t)
         for name in names:
+            if f_prev[name] is None or f[name] is None:
+                continue
             for kind, _ in KINDS:
                 v0, v1 = f_prev[name][kind], f[name][kind]
                 if v0 == v1:

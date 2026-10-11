@@ -1,0 +1,12 @@
+{
+  "name": "CielScore Satellites",
+  "short_name": "Satellites",
+  "description": "Quel satellite se trouve où autour de Jupiter, Saturne ou Uranus.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0f1729",
+  "lang": "fr",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -1,0 +1,144 @@
+{
+ "planet": "Jupiter",
+ "name": "Jupiter",
+ "years": [
+  2025,
+  2026,
+  2027,
+  2028,
+  2029,
+  2030,
+  2031,
+  2032,
+  2033,
+  2034,
+  2035,
+  2036,
+  2037,
+  2038,
+  2039,
+  2040,
+  2041,
+  2042,
+  2043,
+  2044,
+  2045,
+  2046,
+  2047,
+  2048,
+  2049,
+  2050,
+  2051,
+  2052,
+  2053,
+  2054,
+  2055,
+  2056,
+  2057,
+  2058,
+  2059,
+  2060
+ ],
+ "time": "jours UT depuis le 1er janvier 00:00 UT de l'année",
+ "source": "PyEphem 4.2.1",
+ "cml_rate_rad_per_day": [
+  15.322245503258218,
+  15.18907688133105
+ ],
+ "unavailable": {
+  "Io": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Europa": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Ganymede": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ],
+  "Callisto": [
+   [
+    "2040-01-01",
+    "2040-12-31"
+   ]
+  ]
+ },
+ "reduced_precision_from": "2041-01-01",
+ "series": [
+  {
+   "name": "planet",
+   "type": "f64",
+   "comps": [
+    "ra",
+    "dec",
+    "gra",
+    "gdec",
+    "radius",
+    "cml1",
+    "cml2"
+   ],
+   "seg": 4,
+   "deg": 12
+  },
+  {
+   "name": "Io",
+   "label": "Io",
+   "h_mag": -1.68,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 7
+  },
+  {
+   "name": "Europa",
+   "label": "Europe",
+   "h_mag": -1.41,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 6
+  },
+  {
+   "name": "Ganymede",
+   "label": "Ganymède",
+   "h_mag": -2.09,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  },
+  {
+   "name": "Callisto",
+   "label": "Callisto",
+   "h_mag": -1.05,
+   "type": "f32",
+   "comps": [
+    "x",
+    "y",
+    "z"
+   ],
+   "seg": 1,
+   "deg": 4
+  }
+ ]
+}

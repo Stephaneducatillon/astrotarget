@@ -11,6 +11,9 @@ license: mit
 
 # 🪐 CielScore Satellites
 
+> Deux versions : l'application **Python / Streamlit** décrite ici, et le **site statique
+> JavaScript** (sans serveur, hors ligne) dans [`web/`](web/README.md).
+
 **Quel satellite se trouve où autour d'une planète**, à la seconde près. Application
 gratuite, publique, sans compte, signée CielScore.
 
@@ -69,13 +72,13 @@ Lancée en local, une photo chargée ne quitte pas l'ordinateur. Le dossier peut
 ## Tests et validation
 
 ```bash
-pytest                                   # 35 tests automatiques
+pytest                                   # 36 tests automatiques
 python scripts/validate_horizons.py      # comparaison avec JPL Horizons (accès Internet)
 ```
 
 Les tests reprennent les exemples calculés du cahier des charges (Cantin, nuit du 11 au
 12 octobre 2026 : écarts des galiléens, hauteurs, lever de Jupiter à 00:42 UT, éclipse
-d'Io à 20:13, occultation 21:09 → 23:27, Titan et Japet hors du cadre C2PU), vérifient
+d'Io à 20:04, occultation 21:09 → 23:27, Titan et Japet hors du cadre C2PU), vérifient
 la cohérence des conventions (satellites alignés sur l'équateur de Jupiter, inclinaison
 des anneaux), les passages et ombres sur une semaine, les exports, et le calage photo
 sur une image synthétique (rotation, miroir).
@@ -89,9 +92,17 @@ l'écart planète-satellite calculé avec celui de JPL Horizons (cible : < 0,1�
   rayons équatoriaux, dans le repère du ciel. Les AD/Déc des satellites sont recalculées
   par projection gnomonique depuis ces écarts : PyEphem ajoute l'écart est-ouest à l'AD
   sans le diviser par cos(δ), ce qui décale l'AD de quelques secondes d'arc.
-- Occultations et éclipses : indicateurs « visible depuis la Terre » / « éclairé par le
-  Soleil » de PyEphem. Passages et ombres : calcul géométrique sur l'ellipsoïde de la
-  planète (aplatissement pck00011, pôle IAU), direction du Soleil vue de la planète.
+- Occultations : indicateur « visible depuis la Terre » de PyEphem. Éclipses, passages
+  et ombres : calcul géométrique sur l'ellipsoïde de la planète (aplatissement pck00011,
+  pôle IAU), direction du Soleil vue de la planète. L'indicateur « éclairé par le
+  Soleil » de PyEphem entre dans l'ombre ~8 min trop tard (Io, 11 octobre 2026 : 20:12
+  au lieu de 20:04) ; l'heure 20:13 du cahier des charges venait de lui.
+- **Limite de PyEphem** : ses tables internes de satellites s'arrêtent début 2040. En
+  2040, les positions sont aberrantes ; ensuite, Uranus n'a plus de données et Jupiter
+  et Saturne passent sur une théorie de secours moins précise. L'application affiche
+  « position non disponible » (toute l'année 2040, et Uranus à partir de 2040) et
+  signale la précision réduite à partir de 2041. Les fichiers du JPL (V2) lèveront
+  cette limite.
 - Heures des phénomènes : balayage à la minute puis bissection à la seconde.
 - La précision de PyEphem doit encore être mesurée contre Horizons ; les tables issues
   des fichiers SPICE du JPL (V2) visent < 0,1″.

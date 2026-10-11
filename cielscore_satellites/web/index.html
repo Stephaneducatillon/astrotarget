@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CielScore Satellites</title>
+  <meta name="description" content="Quel satellite se trouve où autour de Jupiter, Saturne ou Uranus, à la seconde près. Gratuit, sans compte, fonctionne hors ligne.">
+  <meta name="theme-color" content="#0f1729">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true">🪐</span> CielScore <strong>Satellites</strong></div>
+  <label class="switch" title="Mode nuit (rouge)"><input type="checkbox" id="night"> <span>Mode nuit</span></label>
+</header>
+
+<main class="layout">
+  <aside class="panel" id="panel">
+    <form id="form" autocomplete="off" onsubmit="return false">
+      <fieldset>
+        <legend>Planète</legend>
+        <div class="seg" id="planet-seg" role="radiogroup">
+          <label><input type="radio" name="planet" value="Saturn" checked><span>Saturne</span></label>
+          <label><input type="radio" name="planet" value="Jupiter"><span>Jupiter</span></label>
+          <label><input type="radio" name="planet" value="Uranus"><span>Uranus</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Date et heure</legend>
+        <label class="switch small"><input type="checkbox" id="input-ut" checked> <span>Saisie en temps universel (UT)</span></label>
+        <div class="row2">
+          <label>Date <input type="date" id="date" min="2025-01-01" max="2060-12-31" required></label>
+          <label>Heure <input type="time" id="time" step="1" required></label>
+        </div>
+        <div class="steps">
+          <button type="button" data-step="-1440">−1 j</button>
+          <button type="button" data-step="-60">−1 h</button>
+          <button type="button" data-step="-10">−10 min</button>
+          <button type="button" id="now" class="primary">Maintenant</button>
+          <button type="button" data-step="10">+10 min</button>
+          <button type="button" data-step="60">+1 h</button>
+          <button type="button" data-step="1440">+1 j</button>
+        </div>
+        <label>Fuseau horaire (affichage) <select id="tz"></select></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Lieu <small>(facultatif)</small></legend>
+        <select id="site"></select>
+        <div class="row3" id="custom-site" hidden>
+          <label>Latitude <input type="number" id="lat" step="0.0001" min="-90" max="90" value="45"></label>
+          <label>Longitude E+ <input type="number" id="lon" step="0.0001" min="-180" max="180" value="5"></label>
+          <label>Altitude m <input type="number" id="elev" step="1" value="200"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vue</legend>
+        <label>Orientation de l'image <select id="orient"></select></label>
+        <div id="free-rot" hidden>
+          <label>Rotation <output id="rot-out">0°</output><input type="range" id="rot" min="-180" max="180" value="0"></label>
+          <label class="switch small"><input type="checkbox" id="free-mirror"> <span>Miroir gauche-droite</span></label>
+        </div>
+        <label>Instrument <select id="inst"></select></label>
+        <div class="row2" id="custom-inst" hidden>
+          <label>Focale mm <input type="number" id="focal" value="13000" min="100"></label>
+          <label>Pixel µm <input type="number" id="pix" value="3.76" step="0.01" min="0.5"></label>
+          <label>Capteur L mm <input type="number" id="sw" value="23.5" step="0.1"></label>
+          <label>Capteur H mm <input type="number" id="sh" value="15.7" step="0.1"></label>
+        </div>
+        <label id="frame-angle-wrap">Angle du cadre <output id="fa-out">0°</output><input type="range" id="frame-angle" min="-90" max="90" value="0"></label>
+        <label>Étendue du schéma
+          <select id="zoom">
+            <option value="all">Tous les satellites</option>
+            <option value="field">Champ de l'instrument</option>
+            <option value="radii">En rayons planétaires</option>
+          </select>
+        </label>
+        <label id="radii-wrap" hidden>Rayons <output id="radii-out">12</output><input type="range" id="radii" min="2" max="80" value="12"></label>
+        <label>Magnitude limite <output id="mag-out">18</output><input type="range" id="mag" min="5" max="20" step="0.5" value="18"></label>
+      </fieldset>
+
+      <details>
+        <summary>Critères « observable »</summary>
+        <label>Hauteur minimale de la planète <output id="minalt-out">0°</output><input type="range" id="minalt" min="-5" max="30" value="0"></label>
+        <label>Hauteur maximale du Soleil <output id="maxsun-out">−0,8°</output><input type="range" id="maxsun" min="-18" max="0" step="0.1" value="-0.8"></label>
+        <p class="hint">−0,8° : Soleil couché · −6° : fin du crépuscule civil · −12° : nautique.</p>
+      </details>
+    </form>
+  </aside>
+
+  <section class="results" id="results">
+    <div class="headline">
+      <h1 id="title">Satellites</h1>
+      <p id="subtitle" class="muted"></p>
+      <div id="alerts"></div>
+    </div>
+
+    <section class="card" id="table-card">
+      <div class="card-head">
+        <h2>Tableau des satellites</h2>
+        <label class="switch small"><input type="checkbox" id="detail"> <span>Toutes les coordonnées</span></label>
+      </div>
+      <div class="table-wrap"><table id="moons"></table></div>
+      <p id="hidden-note" class="muted small"></p>
+    </section>
+
+    <section class="card" id="schema-card">
+      <h2>Schéma</h2>
+      <div id="schema" class="schema"></div>
+      <label class="slider">Curseur de temps <output id="offset-out">+0 min</output>
+        <input type="range" id="offset" min="-720" max="720" step="5" value="0">
+      </label>
+      <p id="frame-note" class="muted small"></p>
+    </section>
+
+    <section class="card">
+      <h2>Infos planète</h2>
+      <div id="planet-info"></div>
+    </section>
+
+    <section class="card">
+      <h2>Phénomènes de la nuit</h2>
+      <p id="ph-note" class="muted small"></p>
+      <div class="table-wrap"><table id="phenomena"></table></div>
+    </section>
+
+    <section class="card no-print">
+      <h2>Exports</h2>
+      <div class="buttons">
+        <button type="button" id="dl-csv">CSV des coordonnées</button>
+        <button type="button" id="dl-ph">CSV des phénomènes</button>
+        <button type="button" id="dl-png">Schéma PNG</button>
+        <button type="button" id="dl-pdf">PDF (impression)</button>
+      </div>
+    </section>
+
+    <section class="card no-print" id="photo-card">
+      <h2>Identifier les satellites sur une photo <small>(option)</small></h2>
+      <p class="muted small">FITS, TIFF, PNG ou JPEG. La photo reste dans le navigateur et n'est jamais envoyée sur un serveur.</p>
+      <input type="file" id="photo-file" accept=".fits,.fit,.fts,.tif,.tiff,.png,.jpg,.jpeg">
+      <div id="photo-ui" hidden>
+        <p id="photo-date"></p>
+        <div id="photo-cal">
+          <p><strong>Calage :</strong> cliquez sur le centre de la planète, puis sur un satellite reconnu.</p>
+          <div class="row3">
+            <fieldset class="inline">
+              <legend>Le prochain clic place…</legend>
+              <label><input type="radio" name="click" value="center" checked> le centre de la planète</label>
+              <label><input type="radio" name="click" value="ref"> le satellite de référence</label>
+            </fieldset>
+            <label>Satellite de référence <select id="ref-moon"></select></label>
+            <div>
+              <label class="switch small"><input type="checkbox" id="photo-mirror"> <span>Image inversée (miroir)</span></label>
+              <button type="button" id="detect-center">Détecter le centre</button>
+            </div>
+          </div>
+          <div class="row4">
+            <label>Centre x <input type="number" id="cx" step="0.1"></label>
+            <label>Centre y <input type="number" id="cy" step="0.1"></label>
+            <label>Réf. x <input type="number" id="rx" step="0.1"></label>
+            <label>Réf. y <input type="number" id="ry" step="0.1"></label>
+          </div>
+        </div>
+        <label class="switch small" id="wcs-wrap" hidden><input type="checkbox" id="use-wcs" checked> <span>Utiliser la solution astrométrique (WCS) du FITS</span></label>
+        <p id="cal-result"></p>
+        <div class="photo-wrap"><canvas id="photo-canvas"></canvas></div>
+        <div class="table-wrap"><table id="photo-table"></table></div>
+        <div class="buttons">
+          <button type="button" id="dl-photo">Photo annotée (PNG)</button>
+          <button type="button" id="dl-photo-csv">Coordonnées (CSV)</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="muted small">
+      <p><strong>CielScore Satellites</strong> — calculs CielScore. Positions des 17 grands satellites de Jupiter,
+        Saturne et Uranus, géocentriques, indépendantes de la météo. Tables précalculées (polynômes de Tchebychev),
+        Soleil et horizon avec <a href="https://github.com/cosinekitty/astronomy">Astronomy Engine</a> (MIT).
+        Site gratuit, public, sans compte ; aucune donnée personnelle collectée.</p>
+      <p id="source-note"></p>
+    </footer>
+  </section>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
