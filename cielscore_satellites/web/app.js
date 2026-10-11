@@ -504,6 +504,18 @@ $('dl-photo-csv').addEventListener('click', () => download(`cielscore_photo_${st
 
 // ─── Démarrage ──────────────────────────────────────────────────────────────
 
+// Page intégrée dans un cadre (aperçu) : téléchargements et impression y sont bloqués.
+let embedded = false;
+try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+if (embedded) {
+  for (const id of ['dl-csv', 'dl-ph', 'dl-png', 'dl-pdf', 'dl-photo', 'dl-photo-csv']) $(id).hidden = true;
+  const note = document.createElement('p');
+  note.className = 'muted small';
+  note.textContent = 'Version de test : les exports (CSV, PNG, PDF) sont désactivés dans cet aperçu. '
+    + 'Ils fonctionnent sur le site publié ou en local.';
+  $('dl-csv').parentElement.after(note);
+}
+
 update();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(() => { /* hors ligne indisponible */ });
