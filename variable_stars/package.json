@@ -1,0 +1,81 @@
+{
+  "name": "astrovar",
+  "productName": "AstroVar",
+  "version": "1.0.0",
+  "description": "Étoiles variables visibles depuis un lieu et à un moment donné, courbes de lumière et rapports AAVSO",
+  "main": "electron/main.js",
+  "author": "Stephane Ducatillon",
+  "license": "MIT",
+  "scripts": {
+    "vendor": "node scripts/vendor.js",
+    "start": "electron .",
+    "serve": "node scripts/serve.js",
+    "dist": "electron-builder --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "android:sync": "cap sync android",
+    "android:apk": "cap sync android && cd android && ./gradlew assembleDebug",
+    "test": "node scripts/test.js"
+  },
+  "build": {
+    "appId": "fr.astrotarget.astrovar",
+    "productName": "AstroVar",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**",
+      "www/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "resources/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Science",
+      "icon": "resources/icon.png",
+      "maintainer": "Stephane Ducatillon"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.education",
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": null
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.3",
+    "@capacitor/browser": "^6.0.6",
+    "@capacitor/core": "^6.2.3",
+    "@capacitor/filesystem": "^6.0.4",
+    "@capacitor/geolocation": "^6.1.1",
+    "@capacitor/share": "^6.0.4",
+    "chart.js": "^4.4.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.3",
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "homepage": "https://github.com/Stephaneducatillon/astrotarget",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stephaneducatillon/astrotarget.git"
+  }
+}
