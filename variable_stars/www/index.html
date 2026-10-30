@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: capacitor: https:; img-src 'self' data: blob: https:; connect-src 'self' https:">
+  <title>AstroVar</title>
+  <link rel="icon" href="icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true">✦</span> AstroVar <small>étoiles variables</small></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" class="tab active" data-tab="sky">Ciel</button>
+      <button role="tab" class="tab" data-tab="curves">Courbes</button>
+      <button role="tab" class="tab" data-tab="aavso">Rapport AAVSO</button>
+    </nav>
+    <button id="btn-theme" class="btn small" title="Thème : auto / clair / sombre / nuit (rouge)">Thème auto</button>
+  </header>
+
+  <main>
+    <!-- ═══ ONGLET CIEL ═══ -->
+    <section id="tab-sky" class="tabpanel active">
+      <details id="sky-form" class="card collapsible" open>
+      <summary id="sky-form-summary">Lieu, moment et filtres</summary>
+      <div class="grid-form">
+        <fieldset>
+          <legend>Lieu</legend>
+          <div class="row">
+            <label>Nom <input id="loc-name" type="text" placeholder="Ex. Paris"></label>
+            <button id="btn-search-place" class="btn small" title="Rechercher les coordonnées du lieu (internet requis)">Chercher</button>
+            <button id="btn-geoloc" class="btn small" title="Utiliser la position de l'appareil">📍 Ma position</button>
+          </div>
+          <div class="row">
+            <label>Latitude (°) <input id="loc-lat" type="number" step="0.0001" min="-90" max="90"></label>
+            <label>Longitude (° E+) <input id="loc-lon" type="number" step="0.0001" min="-180" max="180"></label>
+            <label>Altitude (m) <input id="loc-elev" type="number" step="1"></label>
+          </div>
+          <div id="place-results" class="place-results"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Moment</legend>
+          <div class="row">
+            <label>Date et heure locales <input id="obs-datetime" type="datetime-local" step="60"></label>
+            <button id="btn-now" class="btn small">Maintenant</button>
+          </div>
+          <div class="row">
+            <label>Visibilité
+              <select id="f-mode">
+                <option value="instant">à l'instant choisi</option>
+                <option value="night">pendant la nuit (soleil &lt; −12°)</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Filtres</legend>
+          <div class="row">
+            <label>Hauteur min (°) <input id="f-alt" type="number" value="20" min="-10" max="89"></label>
+            <label>Mag. max ≤ <input id="f-mag" type="number" value="10" step="0.5"></label>
+            <label>Amplitude ≥ <input id="f-amp" type="number" value="0" step="0.1" min="0"></label>
+          </div>
+          <div class="row">
+            <label>Type <select id="f-type"><option value="">Tous</option></select></label>
+            <label>Constellation <select id="f-con"><option value="">Toutes</option></select></label>
+            <label>Recherche <input id="f-search" type="search" placeholder="R Leo, Mira, EA…"></label>
+          </div>
+          <div class="row">
+            <label class="check"><input id="f-program" type="checkbox"> Mon programme uniquement</label>
+            <label>Tri
+              <select id="f-sort">
+                <option value="alt">Hauteur</option>
+                <option value="max">Magnitude</option>
+                <option value="amp">Amplitude</option>
+                <option value="name">Nom</option>
+                <option value="transit">Culmination</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      </details>
+
+      <div id="sky-summary" class="card summary"></div>
+
+      <div class="card">
+        <div class="list-head">
+          <h2 id="list-count">Étoiles variables</h2>
+          <div class="actions">
+            <button id="btn-export-list" class="btn small">Exporter la liste (CSV)</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="star-table" class="data">
+            <thead><tr>
+              <th></th><th>Étoile</th><th>Type</th><th>Const.</th><th>Mag. (max–min)</th><th>Période (j)</th>
+              <th>Phase</th><th>Hauteur</th><th>Azimut</th><th>Culmination</th><th>AD / Déc (J2000)</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button id="btn-more" class="btn small more" hidden>Afficher plus</button>
+      </div>
+    </section>
+
+    <!-- ═══ ONGLET COURBES ═══ -->
+    <section id="tab-curves" class="tabpanel">
+      <div class="card">
+        <h2>Importer des mesures</h2>
+        <p class="hint">Fichier CSV, TXT, XLS ou XLSX (vos mesures, ou un fichier AAVSO déjà rempli). La première ligne doit contenir les noms de colonnes.</p>
+        <div class="row">
+          <label id="curve-drop" class="dropzone" for="curve-file">
+            <b>Choisir un fichier</b> ou le glisser ici
+            <input id="curve-file" type="file">
+          </label>
+          <select id="curve-sheet" hidden></select>
+          <button id="btn-curve-sample" class="btn small" type="button" hidden>Charger l'exemple (R Leo)</button>
+        </div>
+        <details id="curve-paste-box" open>
+          <summary>Ou coller le contenu du fichier (si le choix de fichier ne s'ouvre pas)</summary>
+          <p class="hint">Ouvrez le CSV dans un éditeur de texte ou un tableur, sélectionnez tout, copiez, puis collez ici. Un collage depuis Excel (colonnes séparées par des tabulations) fonctionne aussi.</p>
+          <textarea id="curve-paste" rows="6" spellcheck="false" placeholder="Date;Etoile;Magnitude;Erreur;Filtre&#10;24/01/2025 20:24;R Leo;9,107;0,01;V"></textarea>
+          <button id="btn-curve-paste" class="btn small" type="button">Lire le texte collé</button>
+        </details>
+        <div id="curve-mapping" class="mapping" hidden>
+          <div class="row">
+            <label>Date / JD <select data-map="date"></select></label>
+            <label>Magnitude <select data-map="mag"></select></label>
+            <label>Erreur <select data-map="err"></select></label>
+            <label>Filtre <select data-map="filter"></select></label>
+            <label>Étoile <select data-map="name"></select></label>
+          </div>
+          <div class="row">
+            <label>Format de date
+              <select id="curve-datefmt">
+                <option value="auto">Automatique</option>
+                <option value="jd">Jour julien (JD/HJD/BJD)</option>
+                <option value="rjd">JD réduit (JD − 2400000)</option>
+                <option value="mjd">MJD (JD − 2400000.5)</option>
+                <option value="date">Date calendaire (UTC)</option>
+                <option value="excel">Date Excel (numéro de série)</option>
+              </select>
+            </label>
+            <label>Étoile affichée <select id="curve-star"></select></label>
+            <label>Nom (si absent du fichier) <input id="curve-defname" type="text" placeholder="R Leo"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="curve-card" hidden>
+        <div class="list-head">
+          <h2 id="curve-title">Courbe de lumière</h2>
+          <div class="actions">
+            <label>Axe X
+              <select id="curve-x">
+                <option value="date">Date</option>
+                <option value="jd">JD</option>
+                <option value="phase">Phase (repliée)</option>
+              </select>
+            </label>
+            <label id="curve-period-wrap" hidden>Période (j) <input id="curve-period" type="number" step="any"></label>
+            <label id="curve-epoch-wrap" hidden>Époque (JD) <input id="curve-epoch" type="number" step="any"></label>
+            <button id="btn-curve-png" class="btn small">Exporter PNG</button>
+            <button id="btn-curve-to-aavso" class="btn small primary">Envoyer vers le rapport AAVSO →</button>
+          </div>
+        </div>
+        <div id="curve-legend" class="legend"></div>
+        <div class="chart-box"><canvas id="curve-chart"></canvas></div>
+        <p id="curve-stats" class="hint"></p>
+        <details>
+          <summary>Tableau des mesures</summary>
+          <div class="table-wrap"><table id="curve-table" class="data"><thead></thead><tbody></tbody></table></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ═══ ONGLET AAVSO ═══ -->
+    <section id="tab-aavso" class="tabpanel">
+      <div class="card grid-form">
+        <fieldset>
+          <legend>En-tête du rapport</legend>
+          <div class="row">
+            <label>Code observateur (OBSCODE) <input id="a-obscode" type="text" maxlength="6" placeholder="XXXX" style="text-transform:uppercase"></label>
+            <label>Format
+              <select id="a-type">
+                <option value="EXTENDED">Étendu (CCD/DSLR/PEP)</option>
+                <option value="VISUAL">Visuel</option>
+              </select>
+            </label>
+            <label id="a-obstype-wrap">OBSTYPE
+              <select id="a-obstype">
+                <option>CCD</option><option>DSLR</option><option>PEP</option><option>CMOS</option><option>PHOTOGRAPHIC</option>
+              </select>
+            </label>
+            <label>Type de date
+              <select id="a-datetype"><option>JD</option><option>HJD</option><option>EXCEL</option></select>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Compléter</legend>
+          <div class="row">
+            <label class="file-btn btn small">Ouvrir un fichier AAVSO existant
+              <input id="a-open" type="file" hidden>
+            </label>
+            <button id="btn-a-add" class="btn small">+ Ligne</button>
+            <button id="btn-a-airmass" class="btn small" title="Calcule la masse d'air à partir du lieu de l'onglet Ciel">Calculer les masses d'air</button>
+            <button id="btn-a-clear" class="btn small danger">Vider</button>
+          </div>
+          <p class="hint">Valeurs manquantes : <code>na</code>. Les lignes importées depuis l'onglet Courbes s'ajoutent ici ; les doublons (même étoile, date et filtre) sont ignorés.</p>
+        </fieldset>
+      </div>
+
+      <div class="card">
+        <div class="list-head">
+          <h2 id="a-count">Observations</h2>
+          <div class="actions">
+            <button id="btn-a-save" class="btn small">Enregistrer le fichier</button>
+            <button id="btn-a-submit" class="btn small primary">Transmettre à l'AAVSO (WebObs)</button>
+          </div>
+        </div>
+        <div id="a-errors" class="errors" hidden></div>
+        <div class="table-wrap"><table id="a-table" class="data edit"><thead></thead><tbody></tbody></table></div>
+        <details>
+          <summary>Aperçu du fichier</summary>
+          <pre id="a-preview" class="preview"></pre>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- Fiche étoile -->
+  <dialog id="star-dialog">
+    <form method="dialog" class="dialog-head">
+      <h2 id="sd-title"></h2>
+      <button class="btn small" aria-label="Fermer">✕</button>
+    </form>
+    <div id="sd-body"></div>
+    <div class="chart-box small"><canvas id="sd-chart"></canvas></div>
+    <div class="row actions">
+      <button id="sd-program" class="btn small"></button>
+      <a id="sd-vsx" class="btn small" target="_blank" rel="noopener">Fiche VSX</a>
+      <a id="sd-vsp" class="btn small" target="_blank" rel="noopener">Carte AAVSO (VSP)</a>
+      <a id="sd-lcg" class="btn small" target="_blank" rel="noopener">Courbe AAVSO (LCG)</a>
+    </div>
+  </dialog>
+
+  <!-- Question / information (remplace confirm() et alert(), indisponibles dans certaines vues) -->
+  <dialog id="ask-dialog">
+    <p id="ask-text" class="ask-text"></p>
+    <div id="ask-buttons" class="row actions"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="lib/chart.umd.min.js"></script>
+  <script src="lib/xlsx.full.min.js"></script>
+  <script src="data/gcvs.js"></script>
+  <script src="js/platform.js"></script>
+  <script src="js/astro.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/sky.js"></script>
+  <script src="js/curves.js"></script>
+  <script src="js/aavso.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
