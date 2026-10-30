@@ -332,6 +332,12 @@
       const f = e.dataTransfer && e.dataTransfer.files[0];
       if (f) onFile({ target: { files: [f] } });
     });
+    // Coller directement sur l'onglet (hors champ de saisie) charge aussi les données
+    document.addEventListener('paste', (e) => {
+      if (!$('tab-curves').classList.contains('active') || e.target.closest('input, textarea')) return;
+      const text = e.clipboardData && e.clipboardData.getData('text');
+      if (text && text.includes('\n')) { $('curve-paste').value = text; onFile({ target: { files: [new File([text], 'texte_colle.csv')] } }); }
+    });
     $('btn-curve-paste').onclick = () => {
       const text = $('curve-paste').value;
       if (!text.trim()) { app.toast('Collez d\'abord le contenu du fichier CSV'); return; }

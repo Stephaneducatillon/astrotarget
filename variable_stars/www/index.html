@@ -117,8 +117,9 @@
           <select id="curve-sheet" hidden></select>
           <button id="btn-curve-sample" class="btn small" type="button" hidden>Charger l'exemple (R Leo)</button>
         </div>
-        <details id="curve-paste-box">
-          <summary>Ou coller le contenu du fichier</summary>
+        <details id="curve-paste-box" open>
+          <summary>Ou coller le contenu du fichier (si le choix de fichier ne s'ouvre pas)</summary>
+          <p class="hint">Ouvrez le CSV dans un éditeur de texte ou un tableur, sélectionnez tout, copiez, puis collez ici. Un collage depuis Excel (colonnes séparées par des tabulations) fonctionne aussi.</p>
           <textarea id="curve-paste" rows="6" spellcheck="false" placeholder="Date;Etoile;Magnitude;Erreur;Filtre&#10;24/01/2025 20:24;R Leo;9,107;0,01;V"></textarea>
           <button id="btn-curve-paste" class="btn small" type="button">Lire le texte collé</button>
         </details>
