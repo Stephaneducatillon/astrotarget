@@ -110,10 +110,18 @@
         <h2>Importer des mesures</h2>
         <p class="hint">Fichier CSV, TXT, XLS ou XLSX (vos mesures, ou un fichier AAVSO déjà rempli). La première ligne doit contenir les noms de colonnes.</p>
         <div class="row">
-          <input id="curve-file" type="file" accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          <label id="curve-drop" class="dropzone" for="curve-file">
+            <b>Choisir un fichier</b> ou le glisser ici
+            <input id="curve-file" type="file">
+          </label>
           <select id="curve-sheet" hidden></select>
           <button id="btn-curve-sample" class="btn small" type="button" hidden>Charger l'exemple (R Leo)</button>
         </div>
+        <details id="curve-paste-box">
+          <summary>Ou coller le contenu du fichier</summary>
+          <textarea id="curve-paste" rows="6" spellcheck="false" placeholder="Date;Etoile;Magnitude;Erreur;Filtre&#10;24/01/2025 20:24;R Leo;9,107;0,01;V"></textarea>
+          <button id="btn-curve-paste" class="btn small" type="button">Lire le texte collé</button>
+        </details>
         <div id="curve-mapping" class="mapping" hidden>
           <div class="row">
             <label>Date / JD <select data-map="date"></select></label>
@@ -193,7 +201,7 @@
           <legend>Compléter</legend>
           <div class="row">
             <label class="file-btn btn small">Ouvrir un fichier AAVSO existant
-              <input id="a-open" type="file" accept=".txt,.csv,.tsv" hidden>
+              <input id="a-open" type="file" hidden>
             </label>
             <button id="btn-a-add" class="btn small">+ Ligne</button>
             <button id="btn-a-airmass" class="btn small" title="Calcule la masse d'air à partir du lieu de l'onglet Ciel">Calculer les masses d'air</button>

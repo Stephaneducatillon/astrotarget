@@ -123,6 +123,11 @@ table.edit .del { border: 0; background: none; color: var(--danger); cursor: poi
 
 details.collapsible > summary { margin: 0; font-weight: 600; color: var(--text); }
 details.collapsible[open] > summary { margin-bottom: 10px; }
+.dropzone { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px; border: 2px dashed var(--border); border-radius: 10px; font-size: 14px; color: var(--text-2); cursor: pointer; }
+.dropzone b { color: var(--accent); }
+.dropzone.over { border-color: var(--accent); background: var(--surface-2); }
+.dropzone input[type="file"] { font-size: 13px; max-width: 100%; }
+textarea { font: 13px/1.4 ui-monospace, "Cascadia Mono", Menlo, monospace; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; width: 100%; margin-bottom: 6px; }
 .place-results { display: flex; flex-direction: column; gap: 2px; }
 .place-results button { text-align: left; border: 0; background: var(--surface-2); color: var(--text); border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 13px; }
 

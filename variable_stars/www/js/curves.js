@@ -324,6 +324,19 @@
   function init(appRef) {
     app = appRef;
     $('curve-file').addEventListener('change', onFile);
+    const drop = $('curve-drop');
+    ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, () => drop.classList.remove('over')));
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer && e.dataTransfer.files[0];
+      if (f) onFile({ target: { files: [f] } });
+    });
+    $('btn-curve-paste').onclick = () => {
+      const text = $('curve-paste').value;
+      if (!text.trim()) { app.toast('Collez d\'abord le contenu du fichier CSV'); return; }
+      onFile({ target: { files: [new File([text], 'texte_colle.csv')] } });
+    };
     // Exemple embarqué (page de démonstration) : mesures fictives de R Leo
     if (window.ASTROVAR_SAMPLE_CSV) {
       $('btn-curve-sample').hidden = false;
