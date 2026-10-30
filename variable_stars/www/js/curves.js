@@ -324,6 +324,11 @@
   function init(appRef) {
     app = appRef;
     $('curve-file').addEventListener('change', onFile);
+    // Exemple embarqué (page de démonstration) : mesures fictives de R Leo
+    if (window.ASTROVAR_SAMPLE_CSV) {
+      $('btn-curve-sample').hidden = false;
+      $('btn-curve-sample').onclick = () => onFile({ target: { files: [new File([window.ASTROVAR_SAMPLE_CSV], 'exemple_R_Leo.csv')] } });
+    }
     $('curve-sheet').addEventListener('change', () => { table = sheetTable($('curve-sheet').value); buildMapping(); });
     $('curve-mapping').addEventListener('change', (e) => { if (e.target.id === 'curve-star') showStar(); else rebuild(); });
     $('curve-defname').addEventListener('input', rebuild);
@@ -338,7 +343,7 @@
       ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#fff';
       ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(src, 0, 0);
       const name = ($('curve-star').value || 'courbe').replace(/\W+/g, '_');
-      Platform.saveFile(`courbe_${name}.png`, { base64: cv.toDataURL('image/png').split(',')[1] }, 'image/png').then(() => app.toast('Image enregistrée'));
+      Platform.saveFile(`courbe_${name}.png`, { base64: cv.toDataURL('image/png').split(',')[1] }, 'image/png').then((r) => r && app.toast('Image enregistrée'));
     };
     $('btn-curve-to-aavso').onclick = () => {
       if (!current.length) return;

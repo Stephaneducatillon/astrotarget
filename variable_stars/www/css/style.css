@@ -143,6 +143,9 @@ dialog::backdrop { background: rgb(0 0 0 / 0.5); }
 .kv dt { color: var(--text-2); }
 .kv dd { margin: 0; font-variant-numeric: tabular-nums; }
 
+a.btn { text-decoration: none; display: inline-block; }
+.ask-text { white-space: pre-line; margin: 0 0 12px; max-width: 60ch; }
+#ask-dialog { width: min(520px, calc(100vw - 32px)); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--surface); padding: 8px 14px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: calc(100vw - 32px); }
 .toast.show { opacity: 1; }
 

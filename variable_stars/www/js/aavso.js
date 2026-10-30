@@ -140,10 +140,11 @@
       box.hidden = false;
       box.innerHTML = `<b>${errs.length} problème(s) à corriger :</b><br>` + errs.slice(0, 50).map((e) => e.replace(/</g, '&lt;')).join('<br>') + (errs.length > 50 ? '<br>…' : '');
       if (strict) return null;
-      if (!confirm('Le fichier contient des erreurs qui seront refusées par l\'AAVSO. Enregistrer quand même ?')) return null;
+      const go = await app.ask(`Le fichier contient ${errs.length} erreur(s) qui seront refusées par l'AAVSO (détail au-dessus du tableau).`, [['cancel', 'Corriger d\'abord'], ['save', 'Enregistrer quand même']]);
+      if (go !== 'save') return null;
     }
     const name = fileName();
-    await Platform.saveFile(name, buildFile(), 'text/plain;charset=utf-8');
+    if (!(await Platform.saveFile(name, buildFile(), 'text/plain;charset=utf-8'))) return null;
     app.toast('Fichier enregistré : ' + name);
     return name;
   }
@@ -151,17 +152,21 @@
   async function submit() {
     const name = await save(true);
     if (!name) { app.toast('Corrigez les erreurs avant la transmission'); return; }
-    alert(`Le fichier « ${name} » a été enregistré.\n\nLa page WebObs de l'AAVSO va s'ouvrir :\n1. connectez-vous avec votre compte AAVSO ;\n2. choisissez le fichier « ${name} » ;\n3. cliquez sur « Submit ».\n\nL'AAVSO ne propose pas d'API publique de dépôt : l'envoi final se fait donc sur leur site, avec vos identifiants.`);
-    Platform.openExternal(WEBOBS_URL);
+    await app.ask(`Le fichier « ${name} » est enregistré.\n\nSur la page WebObs de l'AAVSO :\n1. connectez-vous avec votre compte AAVSO ;\n2. choisissez le fichier « ${name} » ;\n3. cliquez sur « Submit ».\n\nL'AAVSO ne propose pas d'API publique de dépôt : l'envoi final se fait sur son site, avec vos identifiants.`,
+      [['open', 'Ouvrir WebObs', WEBOBS_URL], ['close', 'Fermer']]);
   }
 
   function openExisting(e) {
     const file = e.target.files[0];
     if (!file) return;
-    file.text().then((text) => {
+    file.text().then(async (text) => {
       const a = Curves.parseAavsoText(text);
       if (!a.params.TYPE) { app.toast('Ce fichier n\'est pas au format AAVSO (#TYPE= absent)'); return; }
-      if (obs.length && !confirm(`Ajouter les ${a.rows.length} lignes du fichier aux ${obs.length} observations déjà présentes ?\n(Annuler = remplacer)`)) obs = [];
+      if (obs.length) {
+        const how = await app.ask(`Le rapport contient déjà ${obs.length} observation(s). Que faire des ${a.rows.length} lignes de « ${file.name} » ?`, [['add', 'Les ajouter'], ['replace', 'Remplacer le rapport'], ['cancel', 'Annuler']]);
+        if (how !== 'add' && how !== 'replace') return;
+        if (how === 'replace') obs = [];
+      }
       const type = a.visual ? 'VISUAL' : 'EXTENDED';
       $('a-type').value = type;
       if (a.params.OBSCODE) $('a-obscode').value = a.params.OBSCODE;
@@ -221,7 +226,9 @@
       obs.push({ NAME: last.NAME || '', DATE: Astro.jdFromDate(new Date()).toFixed(5), MAG: '', MERR: 'na', FILT: last.FILT || 'V', TRANS: 'NO', MTYPE: 'STD', CNAME: last.CNAME || 'na', CMAG: 'na', KNAME: last.KNAME || 'na', KMAG: 'na', AMASS: 'na', GROUP: 'na', CHART: last.CHART || 'na', NOTES: 'na', COMMENTCODE: 'na', COMP1: last.COMP1 || 'na', COMP2: last.COMP2 || 'na' });
       persist(); render();
     };
-    $('btn-a-clear').onclick = () => { if (obs.length && confirm('Supprimer toutes les observations du rapport ?')) { obs = []; persist(); render(); } };
+    $('btn-a-clear').onclick = async () => {
+      if (obs.length && (await app.ask(`Supprimer les ${obs.length} observations du rapport ?`, [['clear', 'Supprimer'], ['cancel', 'Annuler']])) === 'clear') { obs = []; persist(); render(); }
+    };
     $('btn-a-airmass').onclick = computeAirmass;
     $('btn-a-save').onclick = () => save(false);
     $('btn-a-submit').onclick = submit;

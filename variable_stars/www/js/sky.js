@@ -184,6 +184,10 @@
       <dt>Lune</dt><dd>à ${Astro.separation(p.ra, p.dec, m.ra, m.dec).toFixed(0)}°, éclairée à ${Math.round(m.illum * 100)} %</dd>
     </dl>`;
     $('sd-program').textContent = program.has(s.name) ? '★ Retirer du programme' : '☆ Ajouter à mon programme';
+    const nm = encodeURIComponent(s.name);
+    $('sd-vsx').href = 'https://www.aavso.org/vsx/index.php?view=results.get&ident=' + nm;
+    $('sd-vsp').href = 'https://apps.aavso.org/vsp/?star=' + nm;
+    $('sd-lcg').href = 'https://www.aavso.org/LCGv2/index.htm?ident=' + nm;
     $('star-dialog').showModal();
     drawAltitude(s, p, loc);
   }
@@ -305,10 +309,6 @@
       if (tr) openStar(stars[+tr.dataset.i]);
     });
     $('sd-program').onclick = () => { toggleProgram(dialogStar.name); $('sd-program').textContent = program.has(dialogStar.name) ? '★ Retirer du programme' : '☆ Ajouter à mon programme'; renderTable(); };
-    const nm = () => encodeURIComponent(dialogStar.name);
-    $('sd-vsx').onclick = () => Platform.openExternal('https://www.aavso.org/vsx/index.php?view=results.get&ident=' + nm());
-    $('sd-vsp').onclick = () => Platform.openExternal('https://apps.aavso.org/vsp/?star=' + nm());
-    $('sd-lcg').onclick = () => Platform.openExternal('https://www.aavso.org/LCGv2/index.htm?ident=' + nm());
     compute();
   }
 

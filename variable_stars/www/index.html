@@ -112,6 +112,7 @@
         <div class="row">
           <input id="curve-file" type="file" accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
           <select id="curve-sheet" hidden></select>
+          <button id="btn-curve-sample" class="btn small" type="button" hidden>Charger l'exemple (R Leo)</button>
         </div>
         <div id="curve-mapping" class="mapping" hidden>
           <div class="row">
@@ -230,10 +231,16 @@
     <div class="chart-box small"><canvas id="sd-chart"></canvas></div>
     <div class="row actions">
       <button id="sd-program" class="btn small"></button>
-      <button id="sd-vsx" class="btn small">Fiche VSX</button>
-      <button id="sd-vsp" class="btn small">Carte AAVSO (VSP)</button>
-      <button id="sd-lcg" class="btn small">Courbe AAVSO (LCG)</button>
+      <a id="sd-vsx" class="btn small" target="_blank" rel="noopener">Fiche VSX</a>
+      <a id="sd-vsp" class="btn small" target="_blank" rel="noopener">Carte AAVSO (VSP)</a>
+      <a id="sd-lcg" class="btn small" target="_blank" rel="noopener">Courbe AAVSO (LCG)</a>
     </div>
+  </dialog>
+
+  <!-- Question / information (remplace confirm() et alert(), indisponibles dans certaines vues) -->
+  <dialog id="ask-dialog">
+    <p id="ask-text" class="ask-text"></p>
+    <div id="ask-buttons" class="row actions"></div>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

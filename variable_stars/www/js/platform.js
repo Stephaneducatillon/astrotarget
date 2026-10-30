@@ -13,7 +13,15 @@
   }
 
   // content : chaîne de texte, ou { base64 } pour un contenu binaire (ex. PNG)
+  // Renvoie le nom du fichier enregistré, ou null si l'utilisateur a refusé.
   async function saveFile(filename, content, mime) {
+    const runtime = window.claude && typeof window.claude.use === 'function' ? await window.claude.use('downloads') : null;
+    if (runtime) {
+      const data = typeof content === 'string'
+        ? content
+        : new Blob([Uint8Array.from(atob(content.base64), (c) => c.charCodeAt(0))], { type: mime || 'application/octet-stream' });
+      try { await runtime.save({ filename, data }); return filename; } catch (e) { return null; }
+    }
     const fs = plugin('Filesystem');
     if (fs) {
       const data = typeof content === 'string' ? toBase64(content) : content.base64;

@@ -12,8 +12,31 @@
       t.textContent = msg; t.classList.add('show');
       clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
     },
+    // Boîte de dialogue asynchrone. buttons : [[valeur, libellé, href?], …] ; résout la valeur choisie (null si fermée).
+    ask(text, buttons) {
+      return new Promise((resolve) => {
+        const dlg = $('ask-dialog'), box = $('ask-buttons');
+        $('ask-text').textContent = text;
+        box.innerHTML = '';
+        buttons.forEach(([value, label, href], i) => {
+          const b = document.createElement(href ? 'a' : 'button');
+          b.className = 'btn small' + (i === 0 ? ' primary' : '');
+          b.textContent = label;
+          if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button';
+          b.addEventListener('click', () => { dlg.close(); resolve(value); });
+          box.appendChild(b);
+        });
+        dlg.onclose = () => resolve(null);
+        dlg.showModal();
+      });
+    },
     showTab(name) {
-      document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+      // Application Android : les liens externes s'ouvrent dans le navigateur du système
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[target="_blank"]');
+      if (a && Platform.isNative) { e.preventDefault(); Platform.openExternal(a.href); }
+    });
+    document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
       document.querySelectorAll('.tabpanel').forEach((p) => p.classList.toggle('active', p.id === 'tab-' + name));
       Platform.store.set('tab', name);
     },
