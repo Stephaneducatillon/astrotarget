@@ -1,0 +1,721 @@
+<title>Radar ADS-B</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
+<style>
+/* Layout : carte aéronautique plein cadre à gauche, bande de strips (liste) à droite ; empilé sur téléphone. */
+:root {
+  --bg: #eef2f5; --panel: #ffffff; --panel-2: #f5f8fa; --line: #d3dce4;
+  --fg: #142232; --muted: #5a6b7c; --accent: #a8630a; --accent-fg: #ffffff;
+  --sea: #d9e6ef; --land: #f6f7f4; --coast: #9fb3c4; --border: #c2cfda; --grat: #c9d8e3;
+  --home: #a8630a; --plane-l: 40%; --plane-s: 85%; --ground: #8a97a3;
+  --ok: #1f8a4c; --warn: #b7791f; --crit: #c53030; --info: #2b6cb0;
+  --font-ui: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --side-w: 380px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1420; --panel: #0f1b29; --panel-2: #132233; --line: #22364b;
+  --fg: #dbe6f0; --muted: #8297ad; --accent: #f2b33d; --accent-fg: #1a1205;
+  --sea: #0a1726; --land: #142538; --coast: #34506d; --border: #26405a; --grat: #12253a;
+  --home: #f2b33d; --plane-l: 62%; --plane-s: 90%; --ground: #6c7e90;
+  --ok: #48bb78; --warn: #ecc94b; --crit: #fc6b6b; --info: #63b3ed; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1420; --panel: #0f1b29; --panel-2: #132233; --line: #22364b;
+  --fg: #dbe6f0; --muted: #8297ad; --accent: #f2b33d; --accent-fg: #1a1205;
+  --sea: #0a1726; --land: #142538; --coast: #34506d; --border: #26405a; --grat: #12253a;
+  --home: #f2b33d; --plane-l: 62%; --plane-s: 90%; --ground: #6c7e90;
+  --ok: #48bb78; --warn: #ecc94b; --crit: #fc6b6b; --info: #63b3ed; color-scheme: dark }
+
+*, *::before, *::after { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 var(--font-ui); overflow: hidden }
+button, input, select, textarea { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+.app { height: 100%; display: grid; grid-template-columns: 1fr var(--side-w); grid-template-rows: auto 1fr; }
+header.top {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0 }
+.brand h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase }
+.brand .sub { color: var(--muted); font-size: 12px; letter-spacing: .04em }
+.status { display: inline-flex; align-items: center; gap: 8px; padding: 3px 10px 3px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; white-space: nowrap; background: var(--panel-2) }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted) }
+.status[data-state="live"] .dot { background: var(--ok); animation: pulse 2s infinite }
+.status[data-state="sim"] .dot { background: var(--warn) }
+.status[data-state="err"] .dot { background: var(--crit) }
+.status[data-state="import"] .dot { background: var(--info) }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+.counts { margin-left: auto; display: flex; gap: 16px; font-family: var(--font-data); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums }
+.counts b { color: var(--fg); font-weight: 500 }
+
+.mapwrap { position: relative; min-width: 0; min-height: 0; background: var(--sea); overflow: hidden }
+#map { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; display: block }
+#map.drag { cursor: grabbing }
+.mapctl { position: absolute; top: 12px; right: calc(12px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 6px }
+.mapctl button { width: 34px; height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 6px; cursor: pointer; font-size: 16px; line-height: 1 }
+.mapctl button:hover { border-color: var(--accent) }
+.legend { position: absolute; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: 12px; background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px 4px; font-family: var(--font-data); font-size: 10px; color: var(--muted); width: 230px; max-width: calc(100% - 80px) }
+.legend .bar { height: 6px; border-radius: 3px; margin: 4px 0 2px }
+.legend .ticks { position: relative; height: 12px }
+.legend .ticks span { position: absolute; transform: translateX(-50%); font-variant-numeric: tabular-nums }
+.legend .ticks span:first-child { transform: none } .legend .ticks span:last-child { transform: translateX(-100%) }
+.scale { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: 12px; font-family: var(--font-data); font-size: 10px; color: var(--muted); text-align: right }
+.scale .rule { height: 6px; border: 1px solid var(--muted); border-top: 0; margin-top: 2px; margin-left: auto }
+.coords { position: absolute; left: calc(12px + env(safe-area-inset-left, 0px)); top: 12px; font-family: var(--font-data); font-size: 11px; color: var(--muted); background: color-mix(in srgb, var(--panel) 80%, transparent); padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums }
+
+aside.side { min-height: 0; display: flex; flex-direction: column; background: var(--panel); border-left: 1px solid var(--line) }
+.side-inner { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.tools { display: grid; gap: 8px; padding-block: 12px; border-bottom: 1px solid var(--line) }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.row > * { min-width: 0 }
+input[type="search"], input[type="text"], input[type="number"], select, textarea { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px }
+input[type="search"] { flex: 1 1 160px }
+select { padding-right: 4px }
+label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; cursor: pointer }
+.btn { border: 1px solid var(--line); background: var(--panel-2); border-radius: 6px; padding: 6px 10px; cursor: pointer }
+.btn:hover { border-color: var(--accent) }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600 }
+.lbl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+
+details.settings { border-bottom: 1px solid var(--line) }
+details.settings summary { cursor: pointer; padding-block: 10px; list-style: none; display: flex; justify-content: space-between; align-items: center }
+details.settings summary::-webkit-details-marker { display: none }
+details.settings summary::after { content: "▾"; color: var(--muted) }
+details.settings[open] summary::after { content: "▴" }
+.settings-body { display: grid; gap: 10px; padding-bottom: 12px }
+.field { display: grid; gap: 4px }
+.field input, .field select { width: 100% }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.hint { font-size: 12px; color: var(--muted); margin: 0 }
+textarea { width: 100%; min-height: 70px; font-family: var(--font-data); font-size: 11px; resize: vertical }
+
+.notice { margin-top: 12px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--warn) 55%, var(--line)); background: color-mix(in srgb, var(--warn) 10%, var(--panel)); border-radius: 6px; font-size: 13px; display: grid; gap: 8px }
+.notice p { margin: 0 }
+
+.detail { border-bottom: 1px solid var(--line); padding-block: 12px; display: grid; gap: 8px; background: var(--panel-2) }
+.detail .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap }
+.detail .cs { font-family: var(--font-data); font-size: 20px; font-weight: 500 }
+.detail .close { margin-left: auto; border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 18px }
+.kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px }
+.kv div { min-width: 0 } .kv dt { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.kv dd { margin: 0; font-family: var(--font-data); font-size: 13px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere }
+.links { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px }
+.links a { color: var(--accent) }
+
+.listhead { display: flex; justify-content: space-between; align-items: center; padding-block: 8px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line) }
+.list { flex: 1; overflow-y: auto; min-height: 0 }
+.list ul { list-style: none; margin: 0; padding: 0 }
+.strip { display: grid; grid-template-columns: 4px 1fr auto; gap: 0 10px; align-items: center; padding: 7px max(16px, env(safe-area-inset-right, 0px)) 7px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); cursor: pointer }
+.strip:hover { background: var(--panel-2) }
+.strip[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 14%, var(--panel)) }
+.strip .sw { width: 4px; align-self: stretch; border-radius: 2px }
+.strip .l1 { display: flex; gap: 8px; align-items: baseline; min-width: 0 }
+.strip .cs { font-family: var(--font-data); font-weight: 500; font-size: 14px }
+.strip .ty { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px }
+.strip .l2 { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.strip .r { text-align: right; font-family: var(--font-data); font-size: 12px; font-variant-numeric: tabular-nums; line-height: 1.35 }
+.strip .r .alt { font-size: 13px; color: var(--fg) }
+.strip .r .sub { color: var(--muted) }
+.pill { font-size: 10px; font-weight: 600; letter-spacing: .06em; padding: 1px 5px; border-radius: 3px; background: var(--crit); color: #fff }
+.empty { padding: 24px 16px; color: var(--muted); text-align: center }
+.more { padding: 10px 16px; font-size: 12px; color: var(--muted); text-align: center }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 52% 1fr }
+  aside.side { border-left: 0; border-top: 1px solid var(--line) }
+  .counts { margin-left: 0; width: 100%; justify-content: space-between }
+  .legend { width: 170px }
+  .coords, .scale { display: none }
+  aside.side { overflow-y: auto }
+  .list { flex: none; overflow: visible }
+}
+@media (prefers-reduced-motion: reduce) { .status .dot { animation: none !important } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><h1>Radar ADS-B</h1><span class="sub">trafic aérien en temps réel</span></div>
+    <span class="status" id="status" data-state="loading"><span class="dot"></span><span id="statusText">Connexion…</span></span>
+    <div class="counts">
+      <span>Dans la vue <b id="cntView">0</b></span>
+      <span>Reçus <b id="cntAll">0</b></span>
+      <span>MàJ <b id="lastUpd">—</b></span>
+    </div>
+  </header>
+
+  <div class="mapwrap">
+    <canvas id="map" aria-label="Carte du trafic aérien"></canvas>
+    <div class="coords" id="coords">—</div>
+    <div class="mapctl">
+      <button id="zin" title="Zoom avant" aria-label="Zoom avant">+</button>
+      <button id="zout" title="Zoom arrière" aria-label="Zoom arrière">−</button>
+      <button id="zhome" title="Recentrer sur ma position" aria-label="Recentrer">⌂</button>
+    </div>
+    <div class="legend" aria-label="Échelle d'altitude">
+      <div>Altitude (ft)</div>
+      <div class="bar" id="legendBar"></div>
+      <div class="ticks" id="legendTicks"></div>
+    </div>
+    <div class="scale" id="scale"><span id="scaleTxt"></span><div class="rule" id="scaleRule"></div></div>
+  </div>
+
+  <aside class="side">
+    <div class="side-inner tools">
+      <div class="row">
+        <input type="search" id="q" placeholder="Indicatif, immat., type, hex, squawk" aria-label="Rechercher">
+        <select id="sort" aria-label="Trier par">
+          <option value="dist">Distance</option>
+          <option value="alt">Altitude</option>
+          <option value="cs">Indicatif</option>
+          <option value="gs">Vitesse</option>
+        </select>
+      </div>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="hideGround"> Masquer les avions au sol</label>
+        <label class="chk"><input type="checkbox" id="labels" checked> Étiquettes</label>
+      </div>
+      <div id="notice" class="notice" hidden></div>
+    </div>
+
+    <details class="settings side-inner" id="settings">
+      <summary><span class="lbl">Source et réglages</span></summary>
+      <div class="settings-body">
+        <div class="field">
+          <label class="lbl" for="source">Source du flux</label>
+          <select id="source">
+            <option value="adsblol">adsb.lol (zone affichée, 250 NM max)</option>
+            <option value="airplaneslive">airplanes.live (zone affichée, 250 NM max)</option>
+            <option value="opensky">OpenSky Network (zone affichée ou monde entier)</option>
+            <option value="local">Récepteur local (dump1090 / readsb)</option>
+            <option value="demo">Simulation</option>
+          </select>
+        </div>
+        <div class="field" id="localField" hidden>
+          <label class="lbl" for="localUrl">URL aircraft.json</label>
+          <input type="text" id="localUrl" placeholder="http://raspberrypi.local/tar1090/data/aircraft.json">
+        </div>
+        <div class="field">
+          <label class="lbl" for="interval">Rafraîchissement</label>
+          <select id="interval">
+            <option value="5">Toutes les 5 s</option>
+            <option value="10">Toutes les 10 s</option>
+            <option value="30">Toutes les 30 s</option>
+            <option value="60">Toutes les 60 s</option>
+          </select>
+        </div>
+        <div>
+          <div class="lbl" style="margin-bottom:4px">Ma position (distances)</div>
+          <div class="grid2">
+            <input type="number" id="homeLat" step="0.0001" aria-label="Latitude" placeholder="Latitude">
+            <input type="number" id="homeLon" step="0.0001" aria-label="Longitude" placeholder="Longitude">
+          </div>
+          <div class="row" style="margin-top:6px"><button class="btn" id="homeFromMap">Utiliser le centre de la carte</button></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Importer un instantané</span>
+          <p class="hint">Fichier JSON au format readsb / dump1090 (<code>aircraft.json</code>, réponse adsb.lol ou airplanes.live) ou OpenSky (<code>states/all</code>).</p>
+          <input type="file" id="file" accept=".json,application/json" aria-label="Fichier JSON">
+          <textarea id="paste" placeholder="…ou collez le JSON ici" aria-label="JSON collé"></textarea>
+          <div class="row"><button class="btn" id="pasteLoad">Charger le JSON collé</button></div>
+        </div>
+      </div>
+    </details>
+
+    <section class="detail side-inner" id="detail" hidden aria-live="polite"></section>
+
+    <div class="listhead side-inner"><span id="listTitle">Avions dans la vue</span><span id="listSort"></span></div>
+    <div class="list" id="list"><ul id="ul"></ul></div>
+  </aside>
+</div>
+
+<script>
+"use strict";
+const MAP = /*MAPDATA*/null;
+
+/* ---------- utilitaires ---------- */
+const $ = id => document.getElementById(id);
+const PI = Math.PI, D2R = PI / 180;
+const fmt = (n, d = 0) => n == null || isNaN(n) ? "—" : n.toLocaleString("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d });
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mx = lon => (lon + 180) / 360;
+const my = lat => { lat = clamp(lat, -85.05, 85.05); return (1 - Math.log(Math.tan(PI / 4 + lat * D2R / 2)) / PI) / 2; };
+const lonOf = x => x * 360 - 180;
+const latOf = y => Math.atan(Math.sinh(PI * (1 - 2 * y))) / D2R;
+function distNM(lat1, lon1, lat2, lon2) {
+  const a = Math.sin((lat2 - lat1) * D2R / 2) ** 2 + Math.cos(lat1 * D2R) * Math.cos(lat2 * D2R) * Math.sin((lon2 - lon1) * D2R / 2) ** 2;
+  return 2 * 3440.065 * Math.asin(Math.sqrt(a));
+}
+function bearing(lat1, lon1, lat2, lon2) {
+  const y = Math.sin((lon2 - lon1) * D2R) * Math.cos(lat2 * D2R);
+  const x = Math.cos(lat1 * D2R) * Math.sin(lat2 * D2R) - Math.sin(lat1 * D2R) * Math.cos(lat2 * D2R) * Math.cos((lon2 - lon1) * D2R);
+  return (Math.atan2(y, x) / D2R + 360) % 360;
+}
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("adsbradar." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("adsbradar." + k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------- réglages ---------- */
+const S = Object.assign({ source: "adsblol", interval: 10, homeLat: 48.8566, homeLon: 2.3522, localUrl: "", hideGround: false, labels: true, sort: "dist" }, store.get("settings", {}));
+const saveS = () => store.set("settings", S);
+let effectiveSource = S.source; // peut basculer en "demo" ou "import" sans écraser le choix de l'utilisateur
+
+/* ---------- thème / couleurs ---------- */
+let C = {};
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ["sea", "land", "coast", "border", "grat", "home", "fg", "muted", "panel", "accent", "ground", "crit"]) C[k] = cs.getPropertyValue("--" + k).trim();
+  C.font = cs.getPropertyValue("--font-data").trim() || "monospace";
+  C.pl = cs.getPropertyValue("--plane-l").trim(); C.ps = cs.getPropertyValue("--plane-s").trim();
+  buildLegend(); dirty = true;
+}
+const ALT_MAX = 45000;
+function altHue(alt) { return 25 + clamp(alt / ALT_MAX, 0, 1) * 275; } // orange (bas) → magenta (haut)
+function altColor(a) {
+  if (a.ground) return C.ground;
+  if (a.alt == null) return C.muted;
+  return `hsl(${altHue(a.alt)} ${C.ps} ${C.pl})`;
+}
+function buildLegend() {
+  const stops = []; for (let i = 0; i <= 9; i++) stops.push(`hsl(${altHue(i * ALT_MAX / 9)} ${C.ps} ${C.pl}) ${i / 9 * 100}%`);
+  $("legendBar").style.background = `linear-gradient(90deg, ${stops.join(",")})`;
+  $("legendTicks").innerHTML = [0, 10000, 20000, 30000, 40000].map(v => `<span style="left:${v / ALT_MAX * 100}%">${v ? v / 1000 + "k" : "0"}</span>`).join("");
+}
+new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", readTheme);
+
+/* ---------- fond de carte ---------- */
+let landPath = null, borderPath = null;
+function buildBasemap() {
+  if (!MAP) return;
+  landPath = new Path2D(); borderPath = new Path2D();
+  for (const poly of MAP.land) for (const ring of poly) {
+    landPath.moveTo(mx(ring[0]), my(ring[1]));
+    for (let i = 2; i < ring.length; i += 2) landPath.lineTo(mx(ring[i]), my(ring[i + 1]));
+    landPath.closePath();
+  }
+  for (const line of MAP.borders) {
+    borderPath.moveTo(mx(line[0]), my(line[1]));
+    for (let i = 2; i < line.length; i += 2) borderPath.lineTo(mx(line[i]), my(line[i + 1]));
+  }
+}
+
+/* ---------- vue ---------- */
+const view = Object.assign({ cx: mx(S.homeLon), cy: my(S.homeLat), z: 7 }, store.get("view", {}));
+const canvas = $("map"), ctx = canvas.getContext("2d");
+let cw = 0, ch = 0, dpr = 1, dirty = true;
+const worldPx = () => 256 * 2 ** view.z;
+const toScreen = (lon, lat) => { const W = worldPx(); return [(mx(lon) - view.cx) * W + cw / 2, (my(lat) - view.cy) * W + ch / 2]; };
+const toGeo = (x, y) => { const W = worldPx(); return [lonOf(view.cx + (x - cw / 2) / W), latOf(view.cy + (y - ch / 2) / W)]; };
+function bounds() { const [w, n] = toGeo(0, 0), [e, s] = toGeo(cw, ch); return { w, e, n, s }; }
+function resize() {
+  const r = canvas.getBoundingClientRect(); dpr = window.devicePixelRatio || 1;
+  cw = r.width; ch = r.height; canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr); dirty = true; viewChanged();
+}
+new ResizeObserver(resize).observe(canvas);
+function setZoom(z, ax = cw / 2, ay = ch / 2) {
+  z = clamp(z, 2, 14); const W0 = worldPx();
+  const gx = view.cx + (ax - cw / 2) / W0, gy = view.cy + (ay - ch / 2) / W0;
+  view.z = z; const W1 = worldPx();
+  view.cx = gx - (ax - cw / 2) / W1; view.cy = gy - (ay - ch / 2) / W1; clampView(); dirty = true; viewChanged();
+}
+function clampView() { view.cx = clamp(view.cx, 0, 1); view.cy = clamp(view.cy, my(85), my(-85)); }
+
+/* ---------- avions ---------- */
+const planes = new Map();   // hex -> avion
+let selected = null, lastFetch = 0, fetchTimer = null, fetchRegion = null, inFlight = false;
+
+function upsert(list, srcTime) {
+  const now = Date.now(), seenNow = new Set();
+  for (const p of list) {
+    if (p.lat == null || p.lon == null || !p.hex) continue;
+    seenNow.add(p.hex);
+    const old = planes.get(p.hex);
+    const a = old || { hex: p.hex, trail: [] };
+    Object.assign(a, p); a.recv = now;
+    if (!a.trail.length || distNM(a.trail[a.trail.length - 1][1], a.trail[a.trail.length - 1][0], p.lat, p.lon) > 0.3) {
+      a.trail.push([p.lon, p.lat]); if (a.trail.length > 120) a.trail.shift();
+    }
+    planes.set(p.hex, a);
+  }
+  if (effectiveSource !== "import") for (const [h, a] of planes) if (!seenNow.has(h) && now - a.recv > 60000) planes.delete(h);
+  if (selected && !planes.has(selected)) selected = null;
+  $("lastUpd").textContent = new Date(srcTime || now).toLocaleTimeString("fr-FR");
+  dirty = true; renderList();
+}
+
+/* position extrapolée à partir de la vitesse sol et de la route */
+function posNow(a, now) {
+  if (a.noExtrap || a.ground || !a.gs || a.track == null || a.t == null) return [a.lon, a.lat];
+  const dt = clamp((now - a.t) / 1000, 0, 60), d = a.gs * dt / 3600 / 60; // degrés d'arc
+  const lat = a.lat + d * Math.cos(a.track * D2R);
+  const lon = a.lon + d * Math.sin(a.track * D2R) / Math.max(0.05, Math.cos(a.lat * D2R));
+  return [lon, lat];
+}
+
+/* ---------- normalisation des formats ---------- */
+function fromReadsb(j) {
+  let now = j.now ?? Date.now(); if (now < 1e11) now *= 1000;
+  const arr = j.ac || j.aircraft || [];
+  return { time: now, list: arr.map(r => {
+    const ground = r.alt_baro === "ground";
+    const seen = r.seen_pos ?? r.seen ?? 0;
+    return {
+      hex: (r.hex || "").replace("~", "").toLowerCase(), flight: (r.flight || "").trim(), reg: r.r || "", type: r.t || "",
+      desc: r.desc || "", owner: r.ownOp || "", lat: r.lat ?? r.lastPosition?.lat, lon: r.lon ?? r.lastPosition?.lon,
+      alt: ground ? 0 : (typeof r.alt_baro === "number" ? r.alt_baro : r.alt_geom ?? null), ground,
+      gs: r.gs ?? null, track: r.track ?? r.true_heading ?? null, vr: r.baro_rate ?? r.geom_rate ?? null,
+      squawk: r.squawk || "", cat: r.category || "", emergency: r.emergency && r.emergency !== "none" ? r.emergency : "",
+      t: now - seen * 1000
+    };
+  }) };
+}
+function fromOpenSky(j) {
+  const now = (j.time || Date.now() / 1000) * 1000;
+  return { time: now, list: (j.states || []).map(s => ({
+    hex: (s[0] || "").toLowerCase(), flight: (s[1] || "").trim(), reg: "", type: "", desc: "", owner: s[2] || "",
+    lat: s[6], lon: s[5], alt: s[8] ? 0 : (s[7] != null ? Math.round(s[7] * 3.28084) : null), ground: !!s[8],
+    gs: s[9] != null ? s[9] * 1.94384 : null, track: s[10], vr: s[11] != null ? Math.round(s[11] * 196.85) : null,
+    squawk: s[14] || "", cat: "", emergency: "", t: (s[3] || s[4] || now / 1000) * 1000
+  })) };
+}
+function parseAny(j) {
+  if (Array.isArray(j?.states)) return fromOpenSky(j);
+  if (Array.isArray(j?.ac) || Array.isArray(j?.aircraft)) return fromReadsb(j);
+  throw new Error("Format non reconnu : il faut un champ « ac », « aircraft » ou « states ».");
+}
+
+/* ---------- récupération du flux ---------- */
+function viewRadiusNM() {
+  const [lon, lat] = toGeo(cw / 2, ch / 2), [lon2, lat2] = toGeo(0, 0);
+  return clamp(Math.ceil(distNM(lat, lon, lat2, lon2)), 5, 250);
+}
+function liveUrl(src) {
+  const [lon, lat] = toGeo(cw / 2, ch / 2);
+  const la = lat.toFixed(4), lo = (((lon + 540) % 360) - 180).toFixed(4), r = viewRadiusNM();
+  fetchRegion = { lat, lon, r };
+  if (src === "adsblol") return `https://api.adsb.lol/v2/lat/${la}/lon/${lo}/dist/${r}`;
+  if (src === "airplaneslive") return `https://api.airplanes.live/v2/point/${la}/${lo}/${r}`;
+  if (src === "opensky") {
+    if (view.z < 4.5) { fetchRegion = null; return "https://opensky-network.org/api/states/all"; }
+    const b = bounds();
+    return `https://opensky-network.org/api/states/all?lamin=${b.s.toFixed(3)}&lomin=${b.w.toFixed(3)}&lamax=${b.n.toFixed(3)}&lomax=${b.e.toFixed(3)}`;
+  }
+  if (src === "local") { fetchRegion = null; return S.localUrl; }
+}
+const SRC_NAME = { adsblol: "adsb.lol", airplaneslive: "airplanes.live", opensky: "OpenSky", local: "récepteur local", demo: "simulation", import: "fichier importé" };
+
+async function tick() {
+  clearTimeout(fetchTimer);
+  if (effectiveSource === "import") return;
+  if (effectiveSource === "demo") { simStep(); schedule(); return; }
+  if (inFlight) return;
+  const url = liveUrl(effectiveSource);
+  if (!url) { setStatus("err", "Indiquez l'URL du récepteur local"); return; }
+  inFlight = true; lastFetch = Date.now();
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 15000);
+    const res = await fetch(url, { signal: ctl.signal, cache: "no-store" }); clearTimeout(to);
+    if (res.status === 429) throw Object.assign(new Error("Limite de requêtes atteinte : allongez l'intervalle."), { soft: true });
+    if (!res.ok) throw new Error(`Le serveur a répondu ${res.status}.`);
+    const { time, list } = parseAny(await res.json());
+    upsert(list, time);
+    hideNotice();
+    setStatus("live", `En direct · ${SRC_NAME[effectiveSource]}`);
+  } catch (e) {
+    if (e.soft) setStatus("err", e.message);
+    else liveFailed(e);
+  } finally { inFlight = false; schedule(); }
+}
+function schedule() { clearTimeout(fetchTimer); if (effectiveSource !== "import") fetchTimer = setTimeout(tick, (effectiveSource === "demo" ? 1 : S.interval) * 1000); }
+
+function liveFailed(e) {
+  const blocked = e instanceof TypeError || e.name === "AbortError";
+  const why = blocked
+    ? "Le navigateur n'a pas pu joindre le serveur ADS-B. Sur claude.ai, la page tourne dans un bac à sable qui interdit toute requête réseau externe ; ailleurs, vérifiez la connexion ou le CORS du récepteur."
+    : esc(e.message);
+  showNotice(`<p><strong>Flux réel indisponible (${esc(SRC_NAME[S.source])}).</strong> ${why}</p>
+    <p>Affichage d'une <strong>simulation</strong> en attendant. Pour le flux réel, ouvrez la version autonome <code>adsb_radar/index.html</code> dans votre navigateur, ou importez un fichier <code>aircraft.json</code> dans « Source et réglages ».</p>
+    <div class="row"><button class="btn" id="retryLive">Réessayer le flux réel</button></div>`);
+  $("retryLive").onclick = () => { effectiveSource = S.source; planes.clear(); setStatus("loading", "Connexion…"); tick(); };
+  startDemo(true);
+}
+function showNotice(html) { const n = $("notice"); n.innerHTML = html; n.hidden = false; }
+function hideNotice() { $("notice").hidden = true; }
+function setStatus(state, text) { $("status").dataset.state = state; $("statusText").textContent = text; }
+
+/* re-téléchargement quand on se déplace hors de la zone déjà couverte */
+let vcTimer = null;
+function viewChanged() {
+  clearTimeout(vcTimer);
+  vcTimer = setTimeout(() => {
+    store.set("view", view); renderList(); updateScale();
+    if (effectiveSource === "demo" || effectiveSource === "import") return;
+    const [lon, lat] = toGeo(cw / 2, ch / 2), r = viewRadiusNM();
+    const need = !fetchRegion ? effectiveSource === "opensky" && view.z >= 4.5
+      : distNM(lat, lon, fetchRegion.lat, fetchRegion.lon) + r > fetchRegion.r * 1.05 || r < fetchRegion.r * 0.4;
+    if (need && Date.now() - lastFetch > 2000) tick();
+  }, 400);
+}
+
+/* ---------- simulation (clairement signalée) ---------- */
+const AIRLINES = [["AFR", "F-G", ["A320", "A321", "A20N", "A359", "B77W", "A318"]], ["EZY", "G-E", ["A320", "A20N", "A319"]], ["RYR", "EI-", ["B738", "B38M"]],
+  ["DLH", "D-A", ["A320", "A321", "A359"]], ["BAW", "G-E", ["A320", "A35K"]], ["KLM", "PH-", ["B738", "E190"]], ["TVF", "F-H", ["B738"]],
+  ["VLG", "EC-", ["A320", "A321"]], ["SWR", "HB-", ["BCS3", "A320"]], ["IBE", "EC-", ["A320", "A333"]], ["UAE", "A6-", ["A388", "B77W"]], ["HOP", "F-H", ["E190", "CRJ9"]]];
+let simOn = false;
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function spawn(home) {
+  const [code, pfx, types] = AIRLINES[Math.floor(Math.random() * AIRLINES.length)];
+  const ang = rnd(0, 2 * PI), dist = rnd(5, 200) / 60;
+  const lat = home.lat + dist * Math.cos(ang), lon = home.lon + dist * Math.sin(ang) / Math.cos(home.lat * D2R);
+  const cruise = Math.random() < 0.65, alt = cruise ? Math.round(rnd(280, 400)) * 100 : Math.round(rnd(20, 240)) * 100;
+  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; const r3 = () => L[Math.floor(Math.random() * 26)];
+  return {
+    hex: Math.floor(rnd(0x300000, 0x4fffff)).toString(16), flight: code + Math.floor(rnd(10, 9999)), reg: pfx + r3() + r3() + r3(),
+    type: types[Math.floor(Math.random() * types.length)], desc: "", owner: "", lat, lon, alt, ground: false,
+    gs: Math.round(cruise ? rnd(420, 500) : 180 + alt / 100), track: Math.round(rnd(0, 360)), vr: cruise ? 0 : Math.round(rnd(-18, 22)) * 100,
+    squawk: String(Math.floor(rnd(1000, 7477))).replace(/[89]/g, "1"), cat: "A3", emergency: "", t: Date.now(), sim: true
+  };
+}
+function startDemo(fallback) {
+  effectiveSource = "demo"; planes.clear(); simOn = true;
+  const home = { lat: latOf(view.cy), lon: lonOf(view.cx) };
+  const list = Array.from({ length: 140 }, () => spawn(home));
+  upsert(list, Date.now());
+  setStatus("sim", fallback ? "Simulation · flux réel bloqué" : "Simulation");
+  schedule();
+}
+function simStep() {
+  const now = Date.now(), home = { lat: latOf(view.cy), lon: lonOf(view.cx) }, list = [];
+  for (const a of planes.values()) {
+    const [lon, lat] = posNow(a, now);
+    const p = { ...a, lat, lon, t: now };
+    if (p.vr) { p.alt = clamp(p.alt + p.vr * (now - a.t) / 60000, 1500, 41000); if (p.alt >= 41000 || p.alt <= 1500) p.vr = 0; }
+    if (Math.random() < 0.01) p.track = (p.track + rnd(-20, 20) + 360) % 360;
+    if (distNM(lat, lon, home.lat, home.lon) > 230) Object.assign(p, spawn(home), { hex: a.hex });
+    list.push(p);
+  }
+  upsert(list, now);
+}
+
+/* ---------- dessin ---------- */
+function draw() {
+  requestAnimationFrame(draw);
+  const now = Date.now();
+  if (!dirty && now - (draw.last || 0) < 200) return; // extrapolation à ~5 im/s, redessin immédiat sur interaction
+  draw.last = now; dirty = false;
+  const W = worldPx();
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.sea; ctx.fillRect(0, 0, cw, ch);
+  const ox = cw / 2 - view.cx * W, oy = ch / 2 - view.cy * W;
+  if (landPath) {
+    ctx.save(); ctx.setTransform(dpr * W, 0, 0, dpr * W, dpr * ox, dpr * oy);
+    ctx.fillStyle = C.land; ctx.fill(landPath, "evenodd");
+    ctx.lineWidth = 1 / W; ctx.strokeStyle = C.coast; ctx.stroke(landPath);
+    ctx.strokeStyle = C.border; ctx.setLineDash([3 / W, 3 / W]); ctx.stroke(borderPath); ctx.setLineDash([]);
+    ctx.restore();
+  }
+  drawGraticule();
+  drawHome();
+
+  const showLabels = S.labels && (view.z >= 9 || visibleCount < (cw < 600 ? 35 : 80));
+  ctx.font = `500 10px ${C.font}`;
+  let sel = null;
+  for (const a of planes.values()) {
+    if (S.hideGround && a.ground) continue;
+    const [lon, lat] = posNow(a, now); const [x, y] = toScreen(lon, lat);
+    a.sx = x; a.sy = y;
+    if (x < -20 || y < -20 || x > cw + 20 || y > ch + 20) continue;
+    if (a.hex === selected) { sel = a; continue; }
+    drawPlane(a, x, y, false, showLabels);
+  }
+  if (sel) {
+    ctx.beginPath(); sel.trail.forEach(([lo, la], i) => { const [x, y] = toScreen(lo, la); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.lineTo(sel.sx, sel.sy); ctx.strokeStyle = altColor(sel); ctx.lineWidth = 2; ctx.globalAlpha = .7; ctx.stroke(); ctx.globalAlpha = 1;
+    drawPlane(sel, sel.sx, sel.sy, true, true);
+  }
+}
+function drawPlane(a, x, y, isSel, label) {
+  const col = isEmergency(a) ? C.crit : altColor(a);
+  ctx.save(); ctx.translate(x, y);
+  if (isSel) { ctx.beginPath(); ctx.arc(0, 0, 13, 0, 2 * PI); ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.stroke(); }
+  if (a.ground) { ctx.fillStyle = col; ctx.fillRect(-2.5, -2.5, 5, 5); }
+  else {
+    ctx.rotate((a.track || 0) * D2R); const s = isSel ? 1.4 : 1;
+    ctx.beginPath(); ctx.moveTo(0, -8 * s); ctx.lineTo(5.5 * s, 6 * s); ctx.lineTo(0, 3 * s); ctx.lineTo(-5.5 * s, 6 * s); ctx.closePath();
+    ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = C.sea; ctx.stroke();
+  }
+  ctx.restore();
+  if (label) {
+    const t = a.flight || a.reg || a.hex.toUpperCase();
+    ctx.fillStyle = isSel ? C.fg : C.muted; ctx.fillText(t, x + 9, y - 6);
+    if (isSel || view.z >= 9) ctx.fillText(a.ground ? "SOL" : a.alt != null ? "FL" + String(Math.round(a.alt / 100)).padStart(3, "0") : "", x + 9, y + 6);
+  }
+}
+function drawGraticule() {
+  const b = bounds(), span = b.e - b.w;
+  const step = span > 120 ? 30 : span > 40 ? 10 : span > 12 ? 5 : span > 4 ? 1 : 0.5;
+  ctx.strokeStyle = C.grat; ctx.lineWidth = 1; ctx.beginPath();
+  for (let lo = Math.ceil(b.w / step) * step; lo <= b.e; lo += step) { const [x] = toScreen(lo, 0); ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, ch); }
+  for (let la = Math.ceil(b.s / step) * step; la <= b.n; la += step) { const [, y] = toScreen(0, la); ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(cw, Math.round(y) + .5); }
+  ctx.stroke();
+}
+function drawHome() {
+  const [x, y] = toScreen(S.homeLon, S.homeLat); const nmPx = pxPerNM();
+  ctx.strokeStyle = C.home; ctx.lineWidth = 1; ctx.globalAlpha = .45; ctx.setLineDash([2, 4]);
+  for (const r of [25, 50, 100, 150, 200]) { const R = r * nmPx; if (R < 20 || R > Math.max(cw, ch) * 2) continue; ctx.beginPath(); ctx.arc(x, y, R, 0, 2 * PI); ctx.stroke();
+    ctx.fillStyle = C.home; ctx.font = `10px ${C.font}`; ctx.fillText(r + " NM", x + 4, y - R - 3); }
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.moveTo(x - 6, y); ctx.lineTo(x + 6, y); ctx.moveTo(x, y - 6); ctx.lineTo(x, y + 6); ctx.strokeStyle = C.home; ctx.lineWidth = 2; ctx.stroke();
+}
+function pxPerNM() { const lat = latOf(view.cy); return worldPx() / (360 * 60 * Math.cos(lat * D2R)); }
+function updateScale() {
+  const p = pxPerNM(); let nm = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000, 2000].find(v => v * p > 70) || 2000;
+  $("scaleRule").style.width = Math.round(nm * p) + "px"; $("scaleTxt").textContent = `${nm} NM · ${fmt(nm * 1.852)} km`;
+}
+const isEmergency = a => ["7500", "7600", "7700"].includes(a.squawk) || !!a.emergency;
+const SQK = { "7500": "DÉTOURNEMENT", "7600": "PANNE RADIO", "7700": "URGENCE" };
+
+/* ---------- liste latérale ---------- */
+let visibleCount = 0, listTimer = null;
+function inView(a) { return a.sx >= 0 && a.sy >= 0 && a.sx <= cw && a.sy <= ch; }
+function renderList() { clearTimeout(listTimer); listTimer = setTimeout(renderListNow, 60); }
+function renderListNow() {
+  const q = $("q").value.trim().toLowerCase(), now = Date.now();
+  const rows = [];
+  for (const a of planes.values()) {
+    const [lon, lat] = posNow(a, now); const [x, y] = toScreen(lon, lat); a.sx = x; a.sy = y; a.clat = lat; a.clon = lon;
+    if (!inView(a) || (S.hideGround && a.ground)) continue;
+    a.dist = distNM(S.homeLat, S.homeLon, lat, lon);
+    if (q && ![a.flight, a.reg, a.hex, a.type, a.squawk, a.owner].some(v => (v || "").toLowerCase().includes(q))) continue;
+    rows.push(a);
+  }
+  visibleCount = rows.length;
+  const key = S.sort;
+  rows.sort((a, b) => isEmergency(b) - isEmergency(a) || (
+    key === "alt" ? (b.alt ?? -1) - (a.alt ?? -1) : key === "cs" ? (a.flight || "~").localeCompare(b.flight || "~") : key === "gs" ? (b.gs ?? 0) - (a.gs ?? 0) : a.dist - b.dist));
+  $("cntView").textContent = fmt(rows.length); $("cntAll").textContent = fmt(planes.size);
+  $("listSort").textContent = { dist: "par distance", alt: "par altitude", cs: "par indicatif", gs: "par vitesse" }[key];
+  const MAX = 400, shown = rows.slice(0, MAX);
+  $("ul").innerHTML = shown.length ? shown.map(a => {
+    const vr = a.vr > 300 ? "↑" : a.vr < -300 ? "↓" : "";
+    return `<li class="strip" data-hex="${esc(a.hex)}" aria-selected="${a.hex === selected}" tabindex="0">
+      <span class="sw" style="background:${isEmergency(a) ? C.crit : altColor(a)}"></span>
+      <div style="min-width:0"><div class="l1"><span class="cs">${esc(a.flight || a.reg || a.hex.toUpperCase())}</span>${a.type ? `<span class="ty">${esc(a.type)}</span>` : ""}${isEmergency(a) ? `<span class="pill">${esc(SQK[a.squawk] || a.emergency.toUpperCase())}</span>` : ""}</div>
+      <div class="l2">${esc([a.reg, a.owner, a.hex.toUpperCase()].filter(Boolean).join(" · "))}</div></div>
+      <div class="r"><div class="alt">${a.ground ? "au sol" : a.alt != null ? fmt(a.alt) + " ft " + vr : "—"}</div><div class="sub">${fmt(a.gs)} kt · ${fmt(a.dist, a.dist < 10 ? 1 : 0)} NM</div></div></li>`;
+  }).join("") + (rows.length > MAX ? `<li class="more">${MAX} premiers affichés sur ${fmt(rows.length)} : zoomez ou filtrez.</li>` : "")
+    : `<li class="empty">Aucun avion dans la zone affichée.<br>Dézoomez ou déplacez la carte.</li>`;
+  renderDetail();
+}
+$("ul").addEventListener("click", e => { const li = e.target.closest(".strip"); if (li) select(li.dataset.hex, true); });
+$("ul").addEventListener("keydown", e => { if (e.key === "Enter") { const li = e.target.closest(".strip"); if (li) select(li.dataset.hex, true); } });
+
+function select(hex, pan) {
+  selected = hex; const a = planes.get(hex);
+  if (a && pan && !inView(a)) { view.cx = mx(a.clon ?? a.lon); view.cy = my(a.clat ?? a.lat); viewChanged(); }
+  dirty = true; renderList();
+}
+function renderDetail() {
+  const box = $("detail"), a = selected && planes.get(selected);
+  if (!a) { box.hidden = true; return; }
+  const now = Date.now(), [lon, lat] = posNow(a, now), d = distNM(S.homeLat, S.homeLon, lat, lon), brg = bearing(S.homeLat, S.homeLon, lat, lon);
+  const age = a.t ? Math.max(0, Math.round((now - a.t) / 1000)) : null;
+  box.hidden = false;
+  box.innerHTML = `<div class="head"><span class="cs">${esc(a.flight || a.reg || a.hex.toUpperCase())}</span>
+      <span class="lbl">${esc([a.type, a.reg].filter(Boolean).join(" · ") || "type inconnu")}</span>
+      ${isEmergency(a) ? `<span class="pill">${esc(SQK[a.squawk] || a.emergency.toUpperCase())}</span>` : ""}
+      <button class="close" id="closeDetail" aria-label="Fermer la fiche">×</button></div>
+    ${a.desc || a.owner ? `<div class="hint">${esc([a.desc, a.owner].filter(Boolean).join(" · "))}</div>` : ""}
+    <dl class="kv">
+      <div><dt>Altitude</dt><dd>${a.ground ? "au sol" : a.alt != null ? fmt(a.alt) + " ft" : "—"}</dd></div>
+      <div><dt>Vario</dt><dd>${a.vr != null ? (a.vr > 0 ? "+" : "") + fmt(a.vr) + " ft/min" : "—"}</dd></div>
+      <div><dt>Vitesse sol</dt><dd>${fmt(a.gs)} kt</dd></div>
+      <div><dt>Route</dt><dd>${a.track != null ? fmt(a.track) + "°" : "—"}</dd></div>
+      <div><dt>Squawk</dt><dd>${esc(a.squawk || "—")}</dd></div>
+      <div><dt>ICAO 24</dt><dd>${esc(a.hex.toUpperCase())}</dd></div>
+      <div><dt>Distance</dt><dd>${fmt(d, 1)} NM</dd></div>
+      <div><dt>Relèvement</dt><dd>${fmt(brg)}°</dd></div>
+      <div><dt>Dernier msg</dt><dd>${age != null ? "il y a " + age + " s" : "—"}</dd></div>
+      <div style="grid-column:1/-1"><dt>Position</dt><dd>${lat.toFixed(4)}°, ${lon.toFixed(4)}°</dd></div>
+    </dl>
+    ${a.sim ? `<p class="hint">Avion simulé, à titre d'exemple.</p>` : `<div class="links">
+      <a href="https://globe.adsb.lol/?icao=${encodeURIComponent(a.hex)}" target="_blank" rel="noopener">globe.adsb.lol ↗</a>
+      <a href="https://globe.adsbexchange.com/?icao=${encodeURIComponent(a.hex)}" target="_blank" rel="noopener">ADS-B Exchange ↗</a>
+      ${a.flight ? `<a href="https://www.flightradar24.com/${encodeURIComponent(a.flight)}" target="_blank" rel="noopener">Flightradar24 ↗</a>` : ""}</div>`}`;
+  $("closeDetail").onclick = () => { selected = null; dirty = true; renderList(); };
+}
+
+/* ---------- interactions carte ---------- */
+const ptrs = new Map(); let pinch = null, moved = false;
+canvas.addEventListener("pointerdown", e => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.offsetX, y: e.offsetY }); moved = false;
+  if (ptrs.size === 2) { const [p, q] = [...ptrs.values()]; pinch = { d: Math.hypot(p.x - q.x, p.y - q.y), z: view.z }; } canvas.classList.add("drag"); });
+canvas.addEventListener("pointermove", e => {
+  const [lon, lat] = toGeo(e.offsetX, e.offsetY); $("coords").textContent = `${lat.toFixed(3)}°  ${lon.toFixed(3)}°`;
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  if (ptrs.size === 1) { const dx = e.offsetX - p.x, dy = e.offsetY - p.y; if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    view.cx -= dx / worldPx(); view.cy -= dy / worldPx(); clampView(); dirty = true; viewChanged(); }
+  p.x = e.offsetX; p.y = e.offsetY;
+  if (ptrs.size === 2 && pinch) { const [a, b] = [...ptrs.values()]; moved = true;
+    setZoom(pinch.z + Math.log2(Math.hypot(a.x - b.x, a.y - b.y) / pinch.d), (a.x + b.x) / 2, (a.y + b.y) / 2); }
+});
+const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) canvas.classList.remove("drag"); };
+canvas.addEventListener("pointerup", e => { up(e); if (!moved) pick(e.offsetX, e.offsetY); });
+canvas.addEventListener("pointercancel", up);
+canvas.addEventListener("wheel", e => { e.preventDefault(); setZoom(view.z - e.deltaY * (e.deltaMode ? 0.05 : 0.0022), e.offsetX, e.offsetY); }, { passive: false });
+canvas.addEventListener("dblclick", e => setZoom(view.z + 1, e.offsetX, e.offsetY));
+function pick(x, y) {
+  let best = null, bd = 14;
+  for (const a of planes.values()) { if (S.hideGround && a.ground) continue; const d = Math.hypot(a.sx - x, a.sy - y); if (d < bd) { bd = d; best = a; } }
+  selected = best ? best.hex : null; dirty = true; renderList();
+}
+$("zin").onclick = () => setZoom(view.z + 1); $("zout").onclick = () => setZoom(view.z - 1);
+$("zhome").onclick = () => { view.cx = mx(S.homeLon); view.cy = my(S.homeLat); view.z = Math.max(view.z, 7); dirty = true; viewChanged(); };
+
+/* ---------- contrôles ---------- */
+function bindSettings() {
+  $("source").value = S.source; $("interval").value = String(S.interval); $("homeLat").value = S.homeLat; $("homeLon").value = S.homeLon;
+  $("localUrl").value = S.localUrl; $("hideGround").checked = S.hideGround; $("labels").checked = S.labels; $("sort").value = S.sort;
+  $("localField").hidden = S.source !== "local";
+  $("source").onchange = e => { S.source = e.target.value; saveS(); $("localField").hidden = S.source !== "local"; switchSource(); };
+  $("interval").onchange = e => { S.interval = +e.target.value; saveS(); schedule(); };
+  $("localUrl").onchange = e => { S.localUrl = e.target.value.trim(); saveS(); if (S.source === "local") switchSource(); };
+  const home = () => { const la = parseFloat($("homeLat").value), lo = parseFloat($("homeLon").value);
+    if (Math.abs(la) <= 90 && Math.abs(lo) <= 180) { S.homeLat = la; S.homeLon = lo; saveS(); dirty = true; renderList(); } };
+  $("homeLat").onchange = home; $("homeLon").onchange = home;
+  $("homeFromMap").onclick = () => { $("homeLat").value = latOf(view.cy).toFixed(4); $("homeLon").value = lonOf(view.cx).toFixed(4); home(); };
+  $("hideGround").onchange = e => { S.hideGround = e.target.checked; saveS(); dirty = true; renderList(); };
+  $("labels").onchange = e => { S.labels = e.target.checked; saveS(); dirty = true; };
+  $("sort").onchange = e => { S.sort = e.target.value; saveS(); renderList(); };
+  $("q").oninput = renderList;
+  $("file").onchange = async e => { const f = e.target.files[0]; if (f) loadImport(await f.text(), f.name); };
+  $("pasteLoad").onclick = () => loadImport($("paste").value, "JSON collé");
+}
+function switchSource() {
+  hideNotice(); planes.clear(); selected = null; fetchRegion = null; renderList();
+  effectiveSource = S.source;
+  if (S.source === "demo") startDemo(false); else { setStatus("loading", "Connexion…"); tick(); }
+}
+function loadImport(text, name) {
+  try {
+    const { time, list } = parseAny(JSON.parse(text));
+    clearTimeout(fetchTimer); effectiveSource = "import"; planes.clear(); selected = null; hideNotice();
+    upsert(list.map(p => ({ ...p, noExtrap: true })), time);
+    setStatus("import", `Instantané · ${name}`);
+    const pts = list.filter(p => p.lat != null);
+    if (pts.length) { const la = pts.reduce((s, p) => s + p.lat, 0) / pts.length, lo = pts.reduce((s, p) => s + p.lon, 0) / pts.length;
+      view.cx = mx(lo); view.cy = my(la); dirty = true; viewChanged(); }
+  } catch (e) { showNotice(`<p><strong>Import impossible.</strong> ${esc(e.message)}</p>`); }
+}
+
+/* ---------- démarrage ---------- */
+readTheme(); buildBasemap(); bindSettings(); resize(); updateScale();
+requestAnimationFrame(draw);
+setInterval(renderList, 3000); // la liste suit l'extrapolation
+if (S.source === "demo") startDemo(false); else tick();
+</script>
