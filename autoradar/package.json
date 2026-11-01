@@ -1,0 +1,22 @@
+{
+  "name": "autoradar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AutoRadar — moteur de recherche d'annonces auto d'occasion (FR, BE, NL, DE, IT, PT) pour Android",
+  "type": "module",
+  "scripts": {
+    "serve": "npx --yes http-server www -p 8080 -c-1",
+    "test": "node --test tests/*.test.mjs",
+    "android:add": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:build": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/core": "^8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0"
+  }
+}

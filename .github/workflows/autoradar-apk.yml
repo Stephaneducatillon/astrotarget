@@ -1,0 +1,65 @@
+name: AutoRadar - APK Android
+
+on:
+  push:
+    paths:
+      - 'autoradar/**'
+      - '.github/workflows/autoradar-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: autoradar
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: autoradar/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Générer le projet Android
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Compiler l'APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../AutoRadar.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoRadar-apk
+          path: autoradar/AutoRadar.apk
+
+      - name: Publier l'APK (release « autoradar-latest »)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: autoradar-latest
+          name: AutoRadar (dernière version)
+          prerelease: true
+          files: autoradar/AutoRadar.apk
+          body: |
+            APK Android d'AutoRadar, compilée automatiquement depuis la branche ${{ github.ref_name }} (commit ${{ github.sha }}).
+            Téléchargez AutoRadar.apk sur votre téléphone puis ouvrez-le (autorisez l'installation depuis des sources inconnues).

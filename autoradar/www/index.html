@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d91">
+  <title>AutoRadar</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">◎</span> Auto<b>Radar</b></div>
+    <div class="tagline">Annonces auto d'occasion · 6 pays</div>
+  </header>
+
+  <main>
+    <!-- ========== RECHERCHE ========== -->
+    <section id="view-search" class="view active">
+      <form id="search-form" class="card form" autocomplete="off">
+        <div class="field">
+          <label>Pays</label>
+          <div id="country-chips" class="chips"></div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="make">Marque</label>
+            <input id="make" name="make" list="make-list" placeholder="Toutes">
+            <datalist id="make-list"></datalist>
+          </div>
+          <div class="field">
+            <label for="model">Modèle</label>
+            <input id="model" name="model" list="model-list" placeholder="Tous">
+            <datalist id="model-list"></datalist>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="priceMin">Prix min (€)</label>
+            <input id="priceMin" name="priceMin" type="number" inputmode="numeric" min="0" step="500">
+          </div>
+          <div class="field">
+            <label for="priceMax">Prix max (€)</label>
+            <input id="priceMax" name="priceMax" type="number" inputmode="numeric" min="0" step="500">
+          </div>
+        </div>
+
+        <details class="more">
+          <summary>Plus de critères</summary>
+          <div class="row">
+            <div class="field">
+              <label for="yearMin">Année min</label>
+              <input id="yearMin" name="yearMin" type="number" inputmode="numeric" min="1950" max="2030">
+            </div>
+            <div class="field">
+              <label for="yearMax">Année max</label>
+              <input id="yearMax" name="yearMax" type="number" inputmode="numeric" min="1950" max="2030">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="kmMax">Kilométrage max</label>
+              <input id="kmMax" name="kmMax" type="number" inputmode="numeric" min="0" step="5000">
+            </div>
+            <div class="field">
+              <label for="fuel">Énergie</label>
+              <select id="fuel" name="fuel">
+                <option value="">Toutes</option>
+                <option>Essence</option><option>Diesel</option><option>Hybride</option>
+                <option>Hybride rechargeable</option><option>Électrique</option><option>GPL</option><option>GNV</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="gearbox">Boîte</label>
+              <select id="gearbox" name="gearbox">
+                <option value="">Toutes</option>
+                <option>Manuelle</option><option>Automatique</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="keywords">Mots-clés (titre)</label>
+              <input id="keywords" name="keywords" placeholder="ex : GTI, cuir…">
+            </div>
+          </div>
+        </details>
+
+        <div class="row">
+          <div class="field">
+            <label for="sort">Trier par</label>
+            <select id="sort" name="sort">
+              <option value="relevance">Pertinence</option>
+              <option value="price_asc">Prix croissant</option>
+              <option value="price_desc">Prix décroissant</option>
+              <option value="year_desc">Plus récentes</option>
+              <option value="km_asc">Kilométrage croissant</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn primary big">🔍 Rechercher</button>
+      </form>
+
+      <div id="results-head" class="results-head hidden">
+        <div id="status-line" class="status-line"></div>
+        <div id="channel-status" class="channel-status"></div>
+        <button id="save-search" class="btn ghost small">☆ Enregistrer cette recherche</button>
+      </div>
+      <div id="results" class="results"></div>
+      <div id="loader" class="loader hidden"><span class="spinner"></span> Recherche en cours…</div>
+      <button id="load-more" class="btn secondary big hidden">Afficher plus d'annonces</button>
+    </section>
+
+    <!-- ========== FAVORIS ========== -->
+    <section id="view-favorites" class="view">
+      <h2>Mes favoris</h2>
+      <div id="favorites" class="results"></div>
+    </section>
+
+    <!-- ========== RECHERCHES ENREGISTRÉES ========== -->
+    <section id="view-saved" class="view">
+      <h2>Recherches enregistrées</h2>
+      <div id="saved" class="saved-list"></div>
+    </section>
+
+    <!-- ========== RÉGLAGES ========== -->
+    <section id="view-settings" class="view">
+      <h2>Réglages</h2>
+      <div class="card">
+        <label class="switch">
+          <input type="checkbox" id="demo-mode">
+          <span>Mode démonstration (annonces fictives)</span>
+        </label>
+        <p class="hint">Activé automatiquement dans un navigateur web, où les sites d'annonces ne sont pas accessibles. Dans l'application Android, les vraies annonces sont chargées.</p>
+      </div>
+      <div class="card">
+        <h3>Sources</h3>
+        <ul class="sources">
+          <li>🇫🇷 France · AutoScout24.fr</li>
+          <li>🇧🇪 Belgique · AutoScout24.be</li>
+          <li>🇳🇱 Pays-Bas · AutoScout24.nl</li>
+          <li>🇩🇪 Allemagne · AutoScout24.de</li>
+          <li>🇮🇹 Italie · AutoScout24.it</li>
+          <li>🇵🇹 Portugal · Standvirtual.com</li>
+        </ul>
+        <p class="hint">AutoRadar est un moteur de recherche : chaque annonce s'ouvre sur le site d'origine, où se trouvent les coordonnées du vendeur.</p>
+      </div>
+      <div class="card">
+        <button id="clear-data" class="btn ghost">Effacer favoris et recherches</button>
+      </div>
+      <p class="hint center">AutoRadar v1.0</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-view="search" class="active"><span>🔍</span>Recherche</button>
+    <button data-view="favorites"><span>♥</span>Favoris</button>
+    <button data-view="saved"><span>☆</span>Recherches</button>
+    <button data-view="settings"><span>⚙</span>Réglages</button>
+  </nav>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
